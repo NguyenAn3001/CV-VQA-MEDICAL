@@ -24,8 +24,16 @@ The project is structured modularly, separating machine learning logic from the 
 2.  **Create and activate a virtual environment:**
     ```bash
     python3 -m venv venv
-    source venv/bin/activate
     ```
+    
+    *   **On Linux/macOS:**
+        ```bash
+        source venv/bin/activate
+        ```
+    *   **On Windows:**
+        ```cmd
+        venv\Scripts\activate
+        ```
 
 3.  **Install dependencies:**
     ```bash
@@ -47,10 +55,16 @@ The project is structured modularly, separating machine learning logic from the 
 
 To start the FastAPI server, use `uvicorn`:
 
-```bash
-source venv/bin/activate
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-```
+*   **On Linux/macOS:**
+    ```bash
+    source venv/bin/activate
+    uvicorn app.main:app --host 0.0.0.0 --port 8000
+    ```
+*   **On Windows:**
+    ```cmd
+    venv\Scripts\activate
+    uvicorn app.main:app --host 0.0.0.0 --port 8000
+    ```
 
 The API documentation (Swagger UI) will be available at `http://localhost:8000/docs`.
 
