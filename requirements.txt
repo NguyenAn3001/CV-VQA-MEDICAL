@@ -1,0 +1,13 @@
+fastapi==0.110.0
+uvicorn==0.27.1
+gunicorn==21.2.0
+python-multipart==0.0.9
+pydantic==2.6.3
+pydantic-settings==2.2.1
+torch==2.2.1
+torchvision==0.17.1
+transformers==4.38.2
+Pillow==10.2.0
+prometheus-fastapi-instrumentator==7.0.0
+onnx
+onnxruntime

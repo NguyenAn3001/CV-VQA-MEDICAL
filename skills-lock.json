@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "nlp-natural-language-processing": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "nlp-natural-language-processing/SKILL.md",
+      "computedHash": "c71bf8d1310a5acce56c0ece0f0ae0b4c36c5dc905d2a02ac941187064fe6626"
+    },
+    "senior-ml-engineer": {
+      "source": "ovachiever/droid-tings",
+      "sourceType": "github",
+      "skillPath": "skills/senior-ml-engineer/SKILL.md",
+      "computedHash": "ffbb008afe56a957fbe981b2bff7c1860013acc67910e8763ab261e4f0f5adb8"
+    }
+  }
+}
