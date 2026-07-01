@@ -7,7 +7,7 @@ from app.core.config import settings
 from app.core.logger import logger
 from app.api.routes import router as predict_router
 from app.api.health import router as health_router
-from app.ml.inference import vqa_pipeline
+from app.ml.inference import ai_pipeline
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -15,8 +15,8 @@ async def lifespan(app: FastAPI):
     logger.info("Starting up FastAPI Server...")
     try:
         # Load heavy deep learning models into RAM/VRAM ONLY ONCE here.
-        vqa_pipeline.load_models()
-        logger.info("Successfully loaded VQA models.")
+        ai_pipeline.load_models()
+        logger.info("Successfully loaded ML models.")
     except Exception as e:
         logger.error(f"CRITICAL ERROR: Failed to load ML Models during startup: {str(e)}")
         # In a real cluster, you might want to exit(1) here if models are absolutely required.
@@ -48,7 +48,7 @@ app.add_middleware(
 
 # Include API Routers
 app.include_router(health_router, tags=["Health"])
-app.include_router(predict_router, prefix=settings.API_V1_STR, tags=["VQA Inference"])
+app.include_router(predict_router, prefix=settings.API_V1_STR, tags=["Medical AI Inference"])
 
 if __name__ == "__main__":
     import uvicorn

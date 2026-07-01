@@ -2,13 +2,13 @@ import pytest
 from PIL import Image
 import io
 
-from app.ml.inference import vqa_pipeline
+from app.ml.inference import ai_pipeline
 
-def test_vqa_pipeline_singleton():
-    """Test that VQAPipeline is a singleton."""
-    pipeline1 = vqa_pipeline
-    from app.ml.inference import VQAPipeline
-    pipeline2 = VQAPipeline()
+def test_ai_pipeline_singleton():
+    """Test that MedicalAIPipeline is a singleton."""
+    pipeline1 = ai_pipeline
+    from app.ml.inference import MedicalAIPipeline
+    pipeline2 = MedicalAIPipeline()
     assert pipeline1 is pipeline2
 
 def test_mocked_inference_english(mock_vqa_pipeline, test_image_path):
@@ -50,3 +50,12 @@ def test_mocked_inference_chinese(mock_vqa_pipeline, test_image_path):
     # Test Yes/No
     res = mock_vqa_pipeline.predict(img, "图片中包含脾脏吗?")
     assert res["answer"] == "不包含"
+
+def test_mocked_captioning(mock_vqa_pipeline, test_image_path):
+    """Test the mocked image captioning logic."""
+    img = Image.open(test_image_path)
+    res = mock_vqa_pipeline.generate_caption(img)
+    
+    assert "caption" in res
+    assert res["caption"] == "This is a generated medical caption."
+    assert "inference_time_ms" in res

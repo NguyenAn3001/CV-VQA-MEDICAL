@@ -1,5 +1,5 @@
 from fastapi import APIRouter, status
-from app.ml.inference import vqa_pipeline
+from app.ml.inference import ai_pipeline
 from app.core.config import settings
 import torch
 
@@ -13,11 +13,13 @@ def health_check():
 @router.get("/ready", status_code=status.HTTP_200_OK)
 def readiness_check():
     """Checks if the heavy ML models have finished loading."""
-    if vqa_pipeline.is_ready():
+    if ai_pipeline.is_ready():
         device_info = "cuda" if torch.cuda.is_available() else "cpu"
         return {
             "status": "ready", 
             "models_loaded": True, 
+            "vqa_enabled": ai_pipeline.vqa_model is not None,
+            "captioning_enabled": ai_pipeline.caption_model is not None,
             "device": device_info
         }
     else:

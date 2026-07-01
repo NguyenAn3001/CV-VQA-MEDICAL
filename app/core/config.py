@@ -9,8 +9,10 @@ class Settings(BaseSettings):
     
     # Model Configuration
     MODEL_PATH: str = "models/best_vit_pubmedbert_slake.pth"
+    CAPTIONING_MODEL_PATH: str = "models/best_captioning_roco_v6_fulldata.pth"
     VIT_MODEL_NAME: str = "google/vit-base-patch16-224"
     BERT_MODEL_NAME: str = "microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract"
+    GPT2_MODEL_NAME: str = "gpt2"
     
     # Inference Settings
     DEVICE: str = "cuda" # cuda or cpu

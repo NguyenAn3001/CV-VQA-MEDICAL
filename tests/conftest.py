@@ -9,7 +9,7 @@ import sys
 sys.path.append(str(Path(__file__).parent.parent))
 
 from app.main import app
-from app.ml.inference import vqa_pipeline
+from app.ml.inference import ai_pipeline
 
 @pytest.fixture
 def test_client():
@@ -31,8 +31,12 @@ def test_image_bytes(test_image_path):
 def mock_vqa_pipeline(mocker):
     """Fixture to mock the heavy ML pipeline."""
     # Mock is_ready to True so API doesn't throw 503
-    mocker.patch('app.api.routes.vqa_pipeline.is_ready', return_value=True)
-    mocker.patch('app.ml.inference.VQAPipeline.is_ready', return_value=True)
+    mocker.patch('app.api.routes.ai_pipeline.is_ready', return_value=True)
+    mocker.patch('app.ml.inference.MedicalAIPipeline.is_ready', return_value=True)
+    
+    # Mock models to pass the API readiness check
+    mocker.patch('app.api.routes.ai_pipeline.vqa_model', "mock_model")
+    mocker.patch('app.api.routes.ai_pipeline.caption_model', "mock_model")
     
     def mock_predict(image, question):
         q_lower = question.lower().strip()
@@ -65,7 +69,15 @@ def mock_vqa_pipeline(mocker):
             "inference_time_ms": 42.5
         }
         
-    mocker.patch('app.api.routes.vqa_pipeline.predict', side_effect=mock_predict)
-    mocker.patch('app.ml.inference.VQAPipeline.predict', side_effect=mock_predict)
+    def mock_caption(image, max_new_tokens=50):
+        return {
+            "caption": "This is a generated medical caption.",
+            "inference_time_ms": 150.5
+        }
+        
+    mocker.patch('app.api.routes.ai_pipeline.predict', side_effect=mock_predict)
+    mocker.patch('app.api.routes.ai_pipeline.generate_caption', side_effect=mock_caption)
+    mocker.patch('app.ml.inference.MedicalAIPipeline.predict', side_effect=mock_predict)
+    mocker.patch('app.ml.inference.MedicalAIPipeline.generate_caption', side_effect=mock_caption)
     
-    return vqa_pipeline
+    return ai_pipeline
