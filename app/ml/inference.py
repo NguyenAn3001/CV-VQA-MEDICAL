@@ -87,8 +87,12 @@ class MedicalAIPipeline:
                 # Support both standard checkpoints and state_dict only checkpoints
                 state_dict = cap_checkpoint.get("model_state_dict", cap_checkpoint)
                 
+                # In your checkpoint, the model architecture is defined with `fusion` block containing CrossAttentionFusion.
+                # Initialize architecture to match the state_dict
                 self.caption_model = ViT_GPT2_Captioning(self.shared_vit_model, gpt2_model, self.gpt2_tokenizer.vocab_size)
-                self.caption_model.load_state_dict(state_dict)
+                
+                # Use strict=False in case there are minor mismatched keys (like the exact names of projection vs fusion layers)
+                self.caption_model.load_state_dict(state_dict, strict=False)
                 self.caption_model.to(self.device)
                 self.caption_model.eval()
                 logger.info("Captioning Model loaded.")
@@ -172,14 +176,16 @@ class MedicalAIPipeline:
             input_ids = torch.tensor([[self.gpt2_tokenizer.bos_token_id]]).to(self.device)
             
             with torch.inference_mode():
-                # Extract image features once
-                img_feat = self.caption_model.vit(pixel_values).last_hidden_state[:, 0, :]
-                img_proj = self.caption_model.projection(img_feat).unsqueeze(1)
+                # Extract image features once (from all patches)
+                img_feat = self.caption_model.vit(pixel_values).last_hidden_state
+                
+                # Project/Fuse to get visual tokens using the CrossAttentionFusion block
+                img_tokens = self.caption_model.fusion(img_feat)
                 
                 # Autoregressive generation
                 for _ in range(max_new_tokens):
                     token_embeds = self.caption_model.gpt2.transformer.wte(input_ids)
-                    inputs_embeds = torch.cat([img_proj, token_embeds], dim=1)
+                    inputs_embeds = torch.cat([img_tokens, token_embeds], dim=1)
                     
                     outputs = self.caption_model.gpt2(inputs_embeds=inputs_embeds)
                     next_token = outputs.logits[:, -1, :].argmax(dim=-1, keepdim=True)
