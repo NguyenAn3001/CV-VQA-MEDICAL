@@ -1,6 +1,11 @@
 # CV-VQA-MEDICAL
 
-This project is a FastAPI-based backend for a Visual Question Answering (VQA) system. It combines a Vision Transformer (ViT) and PubMedBERT to answer questions about medical images.
+This project is a FastAPI-based backend for a dual-purpose Medical Artificial Intelligence system. It provides both **Visual Question Answering (VQA)** and **Medical Image Captioning**.
+
+- **VQA:** Combines a Vision Transformer (ViT) and PubMedBERT to answer complex medical questions about an image.
+- **Image Captioning:** Combines a Vision Transformer (ViT) and GPT-2 via Cross-Attention Fusion to autonomously generate detailed radiological descriptions of an image.
+
+*Note: Both pipelines share the exact same ViT backbone in RAM/VRAM to heavily optimize memory usage.*
 
 ## Architecture
 
@@ -49,7 +54,9 @@ The project is structured modularly, separating machine learning logic from the 
     *(Optional)* Edit the `.env` file to customize settings like the device (CPU/CUDA) or model paths.
 
 5.  **Download Model Weights:**
-    Place the required model weights (e.g., `best_vit_pubmedbert_slake.pth`) into the `models/` directory.
+    Place the required model weights into the `models/` directory:
+    - VQA Weights: `best_vit_pubmedbert_slake.pth`
+    - Captioning Weights: `best_captioning_roco_v6_fulldata.pth`
 
 ## Running the Application
 
@@ -89,6 +96,8 @@ coverage report -m
 
 ## Endpoints
 
--   `GET /health`: Health check endpoint.
--   `POST /api/v1/predict`: Accepts an image and a question, returns the predicted answer.
+-   `GET /health`: Basic health check endpoint.
+-   `GET /ready`: Readiness probe to verify all heavy ML models are fully loaded into memory.
+-   `POST /api/v1/predict`: (VQA) Accepts a medical image and a question, returns the predicted text answer.
+-   `POST /api/v1/caption`: (Captioning) Accepts a medical image and returns an autoregressively generated radiological description.
 -   `GET /metrics`: Prometheus metrics endpoint.
