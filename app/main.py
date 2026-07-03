@@ -6,7 +6,7 @@ import uvicorn
 
 from app.core.config import settings
 from app.core.logger import logger
-from app.api.routes import router as predict_router
+from app.api.predictions import router as predict_router
 from app.api.health import router as health_router
 
 # New Imports
