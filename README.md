@@ -1,103 +1,101 @@
-# CV-VQA-MEDICAL
+# Medical VQA & Chatbot System 🏥🤖
 
-This project is a FastAPI-based backend for a dual-purpose Medical Artificial Intelligence system. It provides both **Visual Question Answering (VQA)** and **Medical Image Captioning**.
+An advanced, production-ready AI Medical Visual Question Answering (VQA) and Image Captioning system. This project combines a **Vision Transformer (ViT)** with **PubMedBERT** to analyze medical images (X-rays, CT scans, MRIs) and answer complex medical questions. It features a robust FastAPI backend, a Streamlit frontend, and a highly scalable infrastructure.
 
-- **VQA:** Combines a Vision Transformer (ViT) and PubMedBERT to answer complex medical questions about an image.
-- **Image Captioning:** Combines a Vision Transformer (ViT) and GPT-2 via Cross-Attention Fusion to autonomously generate detailed radiological descriptions of an image.
+## ✨ Key Features
 
-*Note: Both pipelines share the exact same ViT backbone in RAM/VRAM to heavily optimize memory usage.*
+* **Medical AI Pipeline**: Integrates ViT and PubMedBERT for high-accuracy medical image analysis and captioning.
+* **Conversational AI Chatbot**: ChatGPT-style interface with SSE (Server-Sent Events) streaming. Uses an LLM Orchestrator with tool-calling capabilities to seamlessly answer questions about uploaded medical images.
+* **Robust Authentication & RBAC**: Secure JWT-based authentication (Access & Refresh tokens). Includes comprehensive role-based access control (Admin/User) and token blacklisting via Redis upon logout.
+* **High-Performance Caching**: Redis-backed caching for VQA and captioning inference results (using SHA-256 image/question hashing) to minimize redundant GPU/CPU compute.
+* **Reliable Storage**: MinIO (S3-compatible) integration for secure image uploads and presigned URL generation for frontend rendering.
+* **Clean Architecture**: Follows SOLID principles with a strict separation of concerns (API Routers -> Services -> DB/ML Models).
+* **Production Ready**: Includes Rate Limiting, Prometheus Metrics (`/metrics`), Docker Compose for infrastructure, and comprehensive Pytest coverage.
 
-## Architecture
+## 🛠️ Tech Stack
 
-The project is structured modularly, separating machine learning logic from the API routing:
+* **Backend**: Python 3.12, FastAPI, SQLAlchemy, Alembic, Pydantic, Uvicorn
+* **Machine Learning**: PyTorch, Transformers (HuggingFace), Pillow
+* **Infrastructure**: PostgreSQL, Redis, MinIO, Docker Compose
+* **Frontend**: Streamlit (isolated virtual environment)
+* **Testing**: Pytest, pytest-asyncio, pytest-mock
 
-- `app/main.py`: The FastAPI application entry point. It handles loading models into RAM/VRAM exactly once at startup via lifespan events.
-- `app/api/`: Contains API routes (e.g., `POST /predict`).
-- `app/core/`: Application configuration, including device selection and model paths.
-- `app/schemas/`: Pydantic models for request and response validation.
-- `app/ml/`: The core machine learning components, including the architecture definition and inference pipeline.
-- `models/`: Directory for storing model weights (ignored by git, except for `.gitkeep`).
+## 📂 Project Structure
 
-## Setup and Installation
-
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/NguyenAn3001/CV-VQA-MEDICAL.git
-    cd CV-VQA-MEDICAL
-    ```
-
-2.  **Create and activate a virtual environment:**
-    ```bash
-    python3 -m venv venv
-    ```
-    
-    *   **On Linux/macOS:**
-        ```bash
-        source venv/bin/activate
-        ```
-    *   **On Windows:**
-        ```cmd
-        venv\Scripts\activate
-        ```
-
-3.  **Install dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    pip install "numpy<2" # Required for ONNX compatibility
-    ```
-
-4.  **Configure Environment Variables:**
-    Copy the example environment file and rename it to `.env`:
-    ```bash
-    cp .env.example .env
-    ```
-    *(Optional)* Edit the `.env` file to customize settings like the device (CPU/CUDA) or model paths.
-
-5.  **Download Model Weights:**
-    Place the required model weights into the `models/` directory:
-    - VQA Weights: `best_vit_pubmedbert_slake.pth`
-    - Captioning Weights: `best_captioning_roco_v6_fulldata.pth`
-
-## Running the Application
-
-To start the FastAPI server, use `uvicorn`:
-
-*   **On Linux/macOS:**
-    ```bash
-    source venv/bin/activate
-    uvicorn app.main:app --host 0.0.0.0 --port 8000
-    ```
-*   **On Windows:**
-    ```cmd
-    venv\Scripts\activate
-    uvicorn app.main:app --host 0.0.0.0 --port 8000
-    ```
-
-The API documentation (Swagger UI) will be available at `http://localhost:8000/docs`.
-
-## Testing
-
-This project uses `pytest` for unit and integration testing. Tests are designed to verify the VQA pipeline against specific medical image questions.
-
-To run the test suite:
-
-```bash
-source venv/bin/activate
-pytest tests/ -v
+```text
+.
+├── app/
+│   ├── api/          # API Controllers / Routing (auth, chat, predictions, users)
+│   ├── core/         # Configuration, Security, Logger, Redis connection
+│   ├── db/           # SQLAlchemy Models, Database Session, Alembic Migrations
+│   ├── llm/          # OpenAI-Compatible LLM Wrappers & Prompts
+│   ├── middleware/   # Rate Limiting, CORS
+│   ├── ml/           # ViT + PubMedBERT Architecture & Inference Pipeline
+│   ├── schemas/      # Pydantic validation schemas
+│   ├── services/     # Business Logic (Auth, Chat, Prediction, Users, MinIO)
+│   └── utils/        # Image processing utilities
+├── frontend/         # Streamlit UI Application
+├── models/           # Local directory for downloaded PyTorch weights (.pth)
+├── tests/            # Unit & Integration tests
+├── docker-compose.yml# Infrastructure configuration
+└── README.md
 ```
 
-To run tests and generate a coverage report:
+## 🚀 Getting Started
 
+### 1. Prerequisites
+* Python 3.12+
+* Docker & Docker Compose
+* GPU (CUDA) recommended but not strictly required (supports CPU fallback).
+
+### 2. Infrastructure Setup
+Start the PostgreSQL database, Redis cache, and MinIO object storage:
 ```bash
-source venv/bin/activate
-coverage run -m pytest
-coverage report -m
+sudo docker compose up -d
 ```
 
-## Endpoints
+### 3. Backend Setup
+Create a virtual environment and install dependencies:
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
 
--   `GET /health`: Basic health check endpoint.
--   `GET /ready`: Readiness probe to verify all heavy ML models are fully loaded into memory.
--   `POST /api/v1/predict`: (VQA) Accepts a medical image and a question, returns the predicted text answer.
--   `POST /api/v1/caption`: (Captioning) Accepts a medical image and returns an autoregressively generated radiological description.
--   `GET /metrics`: Prometheus metrics endpoint.
+Run database migrations to initialize tables:
+```bash
+alembic upgrade head
+```
+
+Start the FastAPI server:
+```bash
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+*The API documentation (Swagger UI) will be available at: http://localhost:8000/docs*
+
+### 4. Frontend Setup
+To prevent dependency conflicts with FastAPI, the Streamlit frontend uses its own isolated environment:
+```bash
+cd frontend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+streamlit run app.py
+```
+*The Streamlit App will be available at: http://localhost:8501*
+
+## 🔐 Default Credentials
+Upon the first database initialization, a default admin account is automatically created:
+* **Username**: `admin`
+* **Email**: `admin@vqa.com`
+* **Password**: `Admin@123`
+
+## 🧪 Running Tests
+The project includes a robust suite of unit and integration tests covering the ML pipeline, API endpoints, and business logic services.
+```bash
+source venv/bin/activate
+pytest
+```
+
+## 📝 License
+This project is proprietary and confidential. Do not distribute without permission.
