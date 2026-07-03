@@ -9,6 +9,7 @@ from sse_starlette.sse import EventSourceResponse
 import asyncio
 
 from app.api.deps import get_db, get_current_user
+from app.db.base import AsyncSessionLocal
 from app.db.models import User
 from app.schemas.chat import ChatSessionResponse, ChatSessionDetailResponse, ChatMessageResponse
 from app.services.chat_service import chat_service
@@ -154,7 +155,7 @@ async def send_message(
                 await asyncio.sleep(0.01)
 
             # Done streaming, save assistant message
-            async with db.session_factory() as bg_db:
+            async with AsyncSessionLocal() as bg_db:
                 await chat_service.save_message(
                     db=bg_db,
                     session_id=session_id,

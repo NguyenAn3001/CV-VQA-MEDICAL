@@ -5,8 +5,9 @@ from PIL import Image
 
 from app.llm.factory import get_llm_provider
 from app.llm.tools import TOOLS_CONFIG, SYSTEM_PROMPT, VQA_TOOL_NAME, CAPTION_TOOL_NAME
-from app.llm.base import StreamChunk
+from app.llm.base import StreamChunk, ToolCall
 from app.ml.inference import ai_pipeline
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -15,29 +16,29 @@ class LLMOrchestrator:
         self.provider = get_llm_provider()
         self.tools = TOOLS_CONFIG
         
-    def _format_history(self, db_messages) -> list[dict]:
+    def _format_history(self, db_messages, use_fallback: bool = False) -> list[dict]:
         """Convert DB messages to LLM expected format"""
-        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+        base_prompt = SYSTEM_PROMPT
+        if use_fallback:
+            from app.llm.fallback_prompts import get_fallback_system_prompt
+            base_prompt += "\n" + get_fallback_system_prompt(self.tools)
+            
+        messages = [{"role": "system", "content": base_prompt}]
         
         for msg in db_messages:
             role = msg.role
             content = msg.content
             
-            # Simple message appending for now
-            # Note: A full robust implementation would reconstruct tool calls and tool responses
-            # to maintain exact LLM state, but this suffices for many cases.
             if msg.tool_calls:
-                # Add context about what tools were used and results
                 tool_summary = "\n[Tool Results used to form this answer: "
                 for tc in msg.tool_calls:
-                    tool_summary += f"{tc.get('name')} -> {tc.get('result')}; "
+                    tool_summary += f"{tc.get('name')} -> {tc.get('result', 'Success')}; "
                 tool_summary += "]\n"
                 
-                # Append tool summary to user message just before it, or append to assistant content
                 if role == "assistant":
-                    content = tool_summary + content
+                    content = tool_summary + (content or "")
                     
-            messages.append({"role": role, "content": content})
+            messages.append({"role": role, "content": content or ""})
             
         return messages
 
@@ -58,19 +59,22 @@ class LLMOrchestrator:
         """
         Handle a chat turn, managing tool calls if the LLM requests them.
         """
-        messages = self._format_history(db_history)
+        use_fallback = not settings.LLM_SUPPORTS_TOOL_CALLING
+        messages = self._format_history(db_history, use_fallback=use_fallback)
         messages.append({"role": "user", "content": current_message})
         
         iteration = 0
-        max_iterations = 3 # Prevent infinite tool loops
+        max_iterations = 3
         
         while iteration < max_iterations:
             iteration += 1
             
             # 1. Start streaming from LLM
-            stream = self.provider.chat_stream(messages, tools=None)
+            tools_to_pass = self.tools if not use_fallback else None
+            stream = self.provider.chat_stream(messages, tools=tools_to_pass)
             
             tool_calls = []
+            accumulated_content = ""
             
             # 2. Yield chunks to client, collect tool calls
             async for chunk in stream:
@@ -78,20 +82,34 @@ class LLMOrchestrator:
                     tool_calls.extend(chunk.tool_calls)
                     yield chunk
                 elif chunk.content:
-                    yield chunk
+                    accumulated_content += chunk.content
+                    # Only yield content if we are not potentially buffering a JSON payload (fallback)
+                    if use_fallback and accumulated_content.strip().startswith("{"):
+                        pass # Buffering for JSON check
+                    else:
+                        yield chunk
                 elif chunk.is_done and not tool_calls:
+                    # Check fallback before done
+                    if use_fallback and accumulated_content.strip().startswith("{"):
+                        from app.llm.fallback_prompts import parse_fallback_tool_call
+                        fallback_tc = parse_fallback_tool_call(accumulated_content)
+                        if fallback_tc:
+                            for ftc in fallback_tc:
+                                tc_obj = ToolCall(id=ftc["id"], name=ftc["name"], arguments=ftc["arguments"])
+                                tool_calls.append(tc_obj)
+                            yield StreamChunk(tool_calls=tool_calls)
+                        else:
+                             yield StreamChunk(content=accumulated_content)
+                    
                     yield chunk
-                    return # We are completely done
+                    if not tool_calls:
+                        return
                     
             # 3. If LLM requested tools, execute them
             if tool_calls:
-                # We need to simulate adding the assistant's tool call request to the message history
-                # This depends on exact provider format, simplified here:
                 messages.append({
                     "role": "assistant",
-                    "content": None,
-                    # We'd normally attach tool_calls here for OpenAI exact format, 
-                    # but for our simplified retry loop we just append tool results as user/tool messages.
+                    "content": accumulated_content if use_fallback else None,
                 })
                 
                 for tc in tool_calls:
@@ -105,7 +123,6 @@ class LLMOrchestrator:
                         question = args.get("question", "")
                         logger.info(f"Executing tool {VQA_TOOL_NAME} with question: {question}")
                         try:
-                            # Run ML Inference!
                             res = ai_pipeline.predict(current_image, question)
                             result_str = f"Answer: {res['answer']} (Confidence: {res['confidence']:.2f})"
                         except Exception as e:
@@ -120,19 +137,14 @@ class LLMOrchestrator:
                     else:
                         result_str = f"Error: Unknown tool {tool_name}"
                         
-                    # Yield tool result to client (optional, for UI debug)
                     yield StreamChunk(content=f"\n*[Tool {tool_name} returned: {result_str}]*\n")
                     
-                    # Append result to messages for the next LLM iteration
                     messages.append({
-                        "role": "tool",
-                        "name": tool_name,
-                        "content": result_str
+                        "role": "user" if use_fallback else "tool",
+                        "name": tool_name if not use_fallback else None,
+                        "content": f"Tool {tool_name} result: {result_str}" if use_fallback else result_str
                     })
-                    
-                # Loop continues, sending tools results back to LLM to get final text response
             else:
-                # No tool calls, generation is done
                 break
                 
 llm_orchestrator = LLMOrchestrator()
