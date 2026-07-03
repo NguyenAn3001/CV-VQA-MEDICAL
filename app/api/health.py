@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, Response
 from app.ml.inference import ai_pipeline
 from app.core.config import settings
 import torch
@@ -24,5 +24,4 @@ def readiness_check():
         }
     else:
         # If not ready, return 503 so Load Balancers don't route traffic here yet
-        from fastapi import Response
         return Response(status_code=503, content="Models not fully loaded yet.")

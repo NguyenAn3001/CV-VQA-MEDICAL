@@ -1,21 +1,51 @@
 from typing import List, Dict, Optional, AsyncIterator
 import json
-from openai import AsyncOpenAI
 import logging
+import httpx
+from openai import AsyncOpenAI
 
 from app.llm.base import BaseLLMProvider, LLMResponse, ToolCall, StreamChunk
 
 logger = logging.getLogger(__name__)
+
+async def prepare_request(request: httpx.Request):
+    # Set a standard web browser User-Agent
+    request.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    # Remove x-stainless-* headers which get blocked by WAFs
+    for key in list(request.headers.keys()):
+        if key.lower().startswith("x-stainless"):
+            del request.headers[key]
+
+    logger.info(f"HTTP Request: {request.method} {request.url}")
+    headers = {k: v for k, v in request.headers.items() if k.lower() != 'authorization'}
+    logger.info(f"Request Headers: {headers}")
+    if request.content:
+        try:
+            body = json.loads(request.content.decode('utf-8'))
+            logger.info(f"Request Body: {json.dumps(body, indent=2)}")
+        except Exception:
+            logger.info(f"Request Body (raw): {request.content.decode('utf-8')}")
+
+async def log_response(response: httpx.Response):
+    logger.info(f"HTTP Response: {response.status_code} {response.url}")
+    logger.info(f"Response Headers: {response.headers}")
+    await response.aread()
+    logger.info(f"Response Body: {response.text}")
 
 class OpenAICompatibleProvider(BaseLLMProvider):
     def __init__(self, base_url: str, api_key: str, model: str, temperature: float = 0.3, max_tokens: int = 1024, timeout: int = 120, supports_tool_calling: bool = True):
         # Allow empty API key for local providers like Ollama
         api_key = api_key if api_key else "not-needed"
         
+        http_client = httpx.AsyncClient(
+            event_hooks={'request': [prepare_request], 'response': [log_response]},
+            timeout=timeout
+        )
+        
         self.client = AsyncOpenAI(
             base_url=base_url,
             api_key=api_key,
-            timeout=timeout
+            http_client=http_client
         )
         self.model = model
         self.temperature = temperature

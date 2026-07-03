@@ -8,6 +8,7 @@ from app.llm.tools import TOOLS_CONFIG, SYSTEM_PROMPT, VQA_TOOL_NAME, CAPTION_TO
 from app.llm.base import StreamChunk, ToolCall
 from app.ml.inference import ai_pipeline
 from app.core.config import settings
+from app.llm.fallback_prompts import get_fallback_system_prompt, parse_fallback_tool_call
 
 logger = logging.getLogger(__name__)
 
@@ -20,14 +21,13 @@ class LLMOrchestrator:
         """Convert DB messages to LLM expected format"""
         base_prompt = SYSTEM_PROMPT
         if use_fallback:
-            from app.llm.fallback_prompts import get_fallback_system_prompt
             base_prompt += "\n" + get_fallback_system_prompt(self.tools)
             
         messages = [{"role": "system", "content": base_prompt}]
         
         for msg in db_messages:
             role = msg.role
-            content = msg.content
+            content = msg.content or ""
             
             if msg.tool_calls:
                 tool_summary = "\n[Tool Results used to form this answer: "
@@ -36,9 +36,13 @@ class LLMOrchestrator:
                 tool_summary += "]\n"
                 
                 if role == "assistant":
-                    content = tool_summary + (content or "")
-                    
-            messages.append({"role": role, "content": content or ""})
+                    content = tool_summary + content
+            
+            # Squash consecutive messages of the same role
+            if messages and messages[-1]["role"] == role:
+                messages[-1]["content"] += "\n\n" + content
+            else:
+                messages.append({"role": role, "content": content})
             
         return messages
 
@@ -61,7 +65,12 @@ class LLMOrchestrator:
         """
         use_fallback = not settings.LLM_SUPPORTS_TOOL_CALLING
         messages = self._format_history(db_history, use_fallback=use_fallback)
-        messages.append({"role": "user", "content": current_message})
+        
+        # Also squash the current message if the last one in history was also "user"
+        if messages[-1]["role"] == "user":
+            messages[-1]["content"] += "\n\n" + current_message
+        else:
+            messages.append({"role": "user", "content": current_message})
         
         iteration = 0
         max_iterations = 3
@@ -91,7 +100,6 @@ class LLMOrchestrator:
                 elif chunk.is_done and not tool_calls:
                     # Check fallback before done
                     if use_fallback and accumulated_content.strip().startswith("{"):
-                        from app.llm.fallback_prompts import parse_fallback_tool_call
                         fallback_tc = parse_fallback_tool_call(accumulated_content)
                         if fallback_tc:
                             for ftc in fallback_tc:
@@ -107,10 +115,20 @@ class LLMOrchestrator:
                     
             # 3. If LLM requested tools, execute them
             if tool_calls:
-                messages.append({
+                # Add strictly compliant assistant message
+                ast_msg = {
                     "role": "assistant",
-                    "content": accumulated_content if use_fallback else None,
-                })
+                    "content": accumulated_content if use_fallback else ""
+                }
+                if not use_fallback:
+                    ast_msg["tool_calls"] = [
+                        {
+                            "id": tc.id,
+                            "type": "function",
+                            "function": {"name": tc.name, "arguments": json.dumps(tc.arguments)}
+                        } for tc in tool_calls
+                    ]
+                messages.append(ast_msg)
                 
                 for tc in tool_calls:
                     tool_name = tc.name
@@ -139,11 +157,15 @@ class LLMOrchestrator:
                         
                     yield StreamChunk(content=f"\n*[Tool {tool_name} returned: {result_str}]*\n")
                     
-                    messages.append({
+                    # Add strictly compliant tool result message
+                    tool_msg = {
                         "role": "user" if use_fallback else "tool",
-                        "name": tool_name if not use_fallback else None,
                         "content": f"Tool {tool_name} result: {result_str}" if use_fallback else result_str
-                    })
+                    }
+                    if not use_fallback:
+                        tool_msg["tool_call_id"] = tc.id
+                        
+                    messages.append(tool_msg)
             else:
                 break
                 

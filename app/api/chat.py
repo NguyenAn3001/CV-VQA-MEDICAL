@@ -172,7 +172,7 @@ async def send_message(
         except asyncio.CancelledError:
             logger.info("Client disconnected during stream")
         except Exception as e:
-            logger.error(f"Error in SSE generator: {e}")
+            logger.exception("Error in SSE generator")
             yield {
                 "event": "error",
                 "data": json.dumps({"detail": "An error occurred during generation"})

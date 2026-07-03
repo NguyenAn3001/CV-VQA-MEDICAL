@@ -10,6 +10,22 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from app.main import app
 from app.ml.inference import ai_pipeline
+from app.api.deps import get_current_user
+from app.db.models import User
+import uuid
+
+@pytest.fixture(autouse=True)
+def override_auth():
+    dummy_user = User(
+        id=uuid.uuid4(),
+        username="testuser",
+        email="test@vqa.com",
+        role="user",
+        is_active=True
+    )
+    app.dependency_overrides[get_current_user] = lambda: dummy_user
+    yield
+    app.dependency_overrides.pop(get_current_user, None)
 
 @pytest.fixture
 def test_client():

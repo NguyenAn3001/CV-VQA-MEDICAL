@@ -57,7 +57,7 @@ class Settings(BaseSettings):
 
     # --- System Defaults ---
     DEFAULT_ADMIN_USERNAME: str = "admin"
-    DEFAULT_ADMIN_EMAIL: str = "admin@vqa.local"
+    DEFAULT_ADMIN_EMAIL: str = "admin@vqa.com"
     DEFAULT_ADMIN_PASSWORD: str = "Admin@123"
     DEFAULT_RESET_PASSWORD: str = "ChangeMe@123"
 
