@@ -16,21 +16,10 @@ async def prepare_request(request: httpx.Request):
         if key.lower().startswith("x-stainless"):
             del request.headers[key]
 
-    logger.info(f"HTTP Request: {request.method} {request.url}")
-    headers = {k: v for k, v in request.headers.items() if k.lower() != 'authorization'}
-    logger.info(f"Request Headers: {headers}")
-    if request.content:
-        try:
-            body = json.loads(request.content.decode('utf-8'))
-            logger.info(f"Request Body: {json.dumps(body, indent=2)}")
-        except Exception:
-            logger.info(f"Request Body (raw): {request.content.decode('utf-8')}")
+    logger.debug(f"HTTP Request: {request.method} {request.url}")
 
 async def log_response(response: httpx.Response):
-    logger.info(f"HTTP Response: {response.status_code} {response.url}")
-    logger.info(f"Response Headers: {response.headers}")
-    await response.aread()
-    logger.info(f"Response Body: {response.text}")
+    logger.debug(f"HTTP Response: {response.status_code} {response.url}")
 
 class OpenAICompatibleProvider(BaseLLMProvider):
     def __init__(self, base_url: str, api_key: str, model: str, temperature: float = 0.3, max_tokens: int = 1024, timeout: int = 120, supports_tool_calling: bool = True):
