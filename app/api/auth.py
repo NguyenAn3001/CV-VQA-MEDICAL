@@ -9,8 +9,11 @@ from app.api.deps import get_db, get_current_user, get_redis
 from app.core.config import settings
 from app.core.security import verify_password, get_password_hash, create_access_token, create_refresh_token
 from app.db.models import User
-from app.schemas.auth import LoginRequest, RegisterRequest, TokenResponse, RefreshRequest, ChangePasswordRequest
+from app.schemas.auth import LoginRequest, RegisterRequest, TokenResponse, RefreshRequest, ChangePasswordRequest, LogoutRequest
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from typing import Optional
 
+security = HTTPBearer()
 router = APIRouter()
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
@@ -106,7 +109,7 @@ async def refresh_token(
     if exp_timestamp:
         ttl = max(0, exp_timestamp - int(datetime.utcnow().timestamp()))
         if ttl > 0:
-            await redis_client.setex(f"blacklist:{jti}", ttl, "true")
+            await redis_client.set(f"blacklist:{jti}", "true", ex=ttl)
     
     return {
         "access_token": access_token, 
@@ -116,13 +119,36 @@ async def refresh_token(
 
 @router.post("/logout")
 async def logout(
-    current_user: User = Depends(get_current_user),
+    req: Optional[LogoutRequest] = None,
+    credentials: HTTPAuthorizationCredentials = Depends(security),
     redis_client: redis.Redis = Depends(get_redis),
-    # To truly logout, frontend should send BOTH access and refresh tokens to blacklist, 
-    # but for simplicity we'll just return success and expect frontend to delete tokens
 ):
-    # In a full implementation, you'd extract the JWT from the Authorization header 
-    # and add its JTI to the Redis blacklist here.
+    # 1. Blacklist the access token
+    access_token = credentials.credentials
+    try:
+        payload = jwt.decode(access_token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        jti = payload.get("jti")
+        exp = payload.get("exp")
+        if jti and exp:
+            ttl = max(0, exp - int(datetime.utcnow().timestamp()))
+            if ttl > 0:
+                await redis_client.set(f"blacklist:{jti}", "true", ex=ttl)
+    except JWTError:
+        pass
+
+    # 2. Blacklist the refresh token if provided
+    if req and req.refresh_token:
+        try:
+            payload = jwt.decode(req.refresh_token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+            jti = payload.get("jti")
+            exp = payload.get("exp")
+            if jti and exp:
+                ttl = max(0, exp - int(datetime.utcnow().timestamp()))
+                if ttl > 0:
+                    await redis_client.set(f"blacklist:{jti}", "true", ex=ttl)
+        except JWTError:
+            pass
+
     return {"msg": "Successfully logged out"}
 
 @router.put("/change-password")

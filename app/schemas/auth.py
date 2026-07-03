@@ -19,6 +19,9 @@ class TokenResponse(BaseModel):
 class RefreshRequest(BaseModel):
     refresh_token: str
 
+class LogoutRequest(BaseModel):
+    refresh_token: Optional[str] = None
+
 class ChangePasswordRequest(BaseModel):
     old_password: str
     new_password: str = Field(..., min_length=6)

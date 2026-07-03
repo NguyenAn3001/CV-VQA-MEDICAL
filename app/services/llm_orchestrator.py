@@ -140,18 +140,66 @@ class LLMOrchestrator:
                     elif tool_name == VQA_TOOL_NAME:
                         question = args.get("question", "")
                         logger.info(f"Executing tool {VQA_TOOL_NAME} with question: {question}")
+                        
+                        # Cache lookup
+                        cache_key = None
                         try:
-                            res = ai_pipeline.predict(current_image, question)
-                            result_str = f"Answer: {res['answer']} (Confidence: {res['confidence']:.2f})"
+                            from app.core.redis import redis_client
+                            import hashlib
+                            if redis_client.redis:
+                                img_bytes = current_image.tobytes()
+                                img_hash = hashlib.sha256(img_bytes).hexdigest()
+                                q_hash = hashlib.sha256(question.encode('utf-8')).hexdigest()
+                                cache_key = f"inference:predict:{img_hash}:{q_hash}"
+                                cached_res = await redis_client.redis.get(cache_key)
+                                if cached_res:
+                                    logger.info(f"Returning cached VQA tool result for: {question}")
+                                    cached_data = json.loads(cached_res)
+                                    result_str = f"Answer: {cached_data['answer']} (Confidence: {cached_data['confidence']:.2f})"
                         except Exception as e:
-                            result_str = f"Error running VQA tool: {str(e)}"
+                            logger.warning(f"Tool cache lookup failed: {e}")
+                            
+                        if not result_str:
+                            try:
+                                res = ai_pipeline.predict(current_image, question)
+                                result_str = f"Answer: {res['answer']} (Confidence: {res['confidence']:.2f})"
+                                if cache_key and redis_client.redis:
+                                    await redis_client.redis.set(cache_key, json.dumps({
+                                        "answer": res["answer"],
+                                        "confidence": res["confidence"]
+                                    }), ex=3600)
+                            except Exception as e:
+                                result_str = f"Error running VQA tool: {str(e)}"
                     elif tool_name == CAPTION_TOOL_NAME:
                         logger.info(f"Executing tool {CAPTION_TOOL_NAME}")
+                        
+                        # Cache lookup
+                        cache_key = None
                         try:
-                            res = ai_pipeline.generate_caption(current_image)
-                            result_str = f"Caption: {res['caption']}"
+                            from app.core.redis import redis_client
+                            import hashlib
+                            if redis_client.redis:
+                                img_bytes = current_image.tobytes()
+                                img_hash = hashlib.sha256(img_bytes).hexdigest()
+                                cache_key = f"inference:caption:{img_hash}"
+                                cached_res = await redis_client.redis.get(cache_key)
+                                if cached_res:
+                                    logger.info("Returning cached Captioning tool result")
+                                    cached_data = json.loads(cached_res)
+                                    result_str = f"Caption: {cached_data['caption']}"
                         except Exception as e:
-                            result_str = f"Error running Caption tool: {str(e)}"
+                            logger.warning(f"Tool cache lookup failed: {e}")
+                            
+                        if not result_str:
+                            try:
+                                res = ai_pipeline.generate_caption(current_image)
+                                result_str = f"Caption: {res['caption']}"
+                                if cache_key and redis_client.redis:
+                                    await redis_client.redis.set(cache_key, json.dumps({
+                                        "caption": res["caption"]
+                                    }), ex=3600)
+                            except Exception as e:
+                                result_str = f"Error running Caption tool: {str(e)}"
                     else:
                         result_str = f"Error: Unknown tool {tool_name}"
                         

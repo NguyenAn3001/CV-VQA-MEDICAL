@@ -137,7 +137,8 @@ def register(username: str, email: str, password: str) -> dict:
 
 def logout() -> None:
     try:
-        _request("POST", "/auth/logout", retry=False)
+        refresh_token = st.session_state.get("refresh_token")
+        _request("POST", "/auth/logout", json={"refresh_token": refresh_token}, retry=False)
     except Exception:
         pass  # Logout best-effort; clear local state regardless
 
