@@ -1,6 +1,7 @@
 import json
 import logging
-from typing import AsyncIterator
+import hashlib
+from typing import AsyncIterator, Optional
 from PIL import Image
 
 from app.llm.factory import get_llm_provider
@@ -9,6 +10,7 @@ from app.llm.base import StreamChunk, ToolCall
 from app.ml.inference import ai_pipeline
 from app.core.config import settings
 from app.llm.fallback_prompts import get_fallback_system_prompt, parse_fallback_tool_call
+from app.core.redis import redis_client
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +60,37 @@ class LLMOrchestrator:
         except Exception as e:
             logger.error(f"Failed to generate title: {e}")
             return "New Chat Session"
+
+    def _get_image_hash(self, image: Image.Image) -> str:
+        """Generate a stable hash for PIL Image bytes"""
+        try:
+            img_bytes = image.tobytes()
+            return hashlib.sha256(img_bytes).hexdigest()
+        except Exception as e:
+            logger.warning(f"Failed to generate image hash: {e}")
+            # Fallback to a random/unique string if hashing fails to avoid None/collision
+            return str(hash(image))
+
+    async def _get_cached_result(self, cache_key: str) -> Optional[dict]:
+        """Fetch result from Redis cache if available"""
+        if not redis_client.redis:
+            return None
+        try:
+            cached_res = await redis_client.redis.get(cache_key)
+            if cached_res:
+                return json.loads(cached_res)
+        except Exception as e:
+            logger.warning(f"Cache lookup failed for key {cache_key}: {e}")
+        return None
+
+    async def _set_cached_result(self, cache_key: str, data: dict, expiry: int = 3600):
+        """Set result to Redis cache"""
+        if not redis_client.redis:
+            return
+        try:
+            await redis_client.redis.set(cache_key, json.dumps(data), ex=expiry)
+        except Exception as e:
+            logger.warning(f"Cache set failed for key {cache_key}: {e}")
 
     async def stream_chat(self, db_history: list, current_message: str, current_image: Image.Image = None) -> AsyncIterator[StreamChunk]:
         """
@@ -137,69 +170,48 @@ class LLMOrchestrator:
                     
                     if not current_image:
                         result_str = "Error: No image available in this session. Ask the user to upload one."
-                    elif tool_name == VQA_TOOL_NAME:
-                        question = args.get("question", "")
-                        logger.info(f"Executing tool {VQA_TOOL_NAME} with question: {question}")
+                    elif tool_name in (VQA_TOOL_NAME, CAPTION_TOOL_NAME):
+                        img_hash = self._get_image_hash(current_image)
                         
-                        # Cache lookup
-                        cache_key = None
-                        try:
-                            from app.core.redis import redis_client
-                            import hashlib
-                            if redis_client.redis:
-                                img_bytes = current_image.tobytes()
-                                img_hash = hashlib.sha256(img_bytes).hexdigest()
-                                q_hash = hashlib.sha256(question.encode('utf-8')).hexdigest()
-                                cache_key = f"inference:predict:{img_hash}:{q_hash}"
-                                cached_res = await redis_client.redis.get(cache_key)
-                                if cached_res:
-                                    logger.info(f"Returning cached VQA tool result for: {question}")
-                                    cached_data = json.loads(cached_res)
-                                    result_str = f"Answer: {cached_data['answer']} (Confidence: {cached_data['confidence']:.2f})"
-                        except Exception as e:
-                            logger.warning(f"Tool cache lookup failed: {e}")
+                        if tool_name == VQA_TOOL_NAME:
+                            question = args.get("question", "")
+                            logger.info(f"Executing tool {VQA_TOOL_NAME} with question: {question}")
                             
-                        if not result_str:
-                            try:
-                                res = ai_pipeline.predict(current_image, question)
-                                result_str = f"Answer: {res['answer']} (Confidence: {res['confidence']:.2f})"
-                                if cache_key and redis_client.redis:
-                                    await redis_client.redis.set(cache_key, json.dumps({
+                            q_hash = hashlib.sha256(question.encode('utf-8')).hexdigest()
+                            cache_key = f"inference:predict:{img_hash}:{q_hash}"
+                            
+                            cached_data = await self._get_cached_result(cache_key)
+                            if cached_data:
+                                logger.info(f"Returning cached VQA tool result for: {question}")
+                                result_str = f"Answer: {cached_data['answer']} (Confidence: {cached_data['confidence']:.2f})"
+                            else:
+                                try:
+                                    res = ai_pipeline.predict(current_image, question)
+                                    result_str = f"Answer: {res['answer']} (Confidence: {res['confidence']:.2f})"
+                                    await self._set_cached_result(cache_key, {
                                         "answer": res["answer"],
                                         "confidence": res["confidence"]
-                                    }), ex=3600)
-                            except Exception as e:
-                                result_str = f"Error running VQA tool: {str(e)}"
-                    elif tool_name == CAPTION_TOOL_NAME:
-                        logger.info(f"Executing tool {CAPTION_TOOL_NAME}")
-                        
-                        # Cache lookup
-                        cache_key = None
-                        try:
-                            from app.core.redis import redis_client
-                            import hashlib
-                            if redis_client.redis:
-                                img_bytes = current_image.tobytes()
-                                img_hash = hashlib.sha256(img_bytes).hexdigest()
-                                cache_key = f"inference:caption:{img_hash}"
-                                cached_res = await redis_client.redis.get(cache_key)
-                                if cached_res:
-                                    logger.info("Returning cached Captioning tool result")
-                                    cached_data = json.loads(cached_res)
-                                    result_str = f"Caption: {cached_data['caption']}"
-                        except Exception as e:
-                            logger.warning(f"Tool cache lookup failed: {e}")
+                                    })
+                                except Exception as e:
+                                    result_str = f"Error running VQA tool: {str(e)}"
+                                    
+                        elif tool_name == CAPTION_TOOL_NAME:
+                            logger.info(f"Executing tool {CAPTION_TOOL_NAME}")
                             
-                        if not result_str:
-                            try:
-                                res = ai_pipeline.generate_caption(current_image)
-                                result_str = f"Caption: {res['caption']}"
-                                if cache_key and redis_client.redis:
-                                    await redis_client.redis.set(cache_key, json.dumps({
+                            cache_key = f"inference:caption:{img_hash}"
+                            cached_data = await self._get_cached_result(cache_key)
+                            if cached_data:
+                                logger.info("Returning cached Captioning tool result")
+                                result_str = f"Caption: {cached_data['caption']}"
+                            else:
+                                try:
+                                    res = ai_pipeline.generate_caption(current_image)
+                                    result_str = f"Caption: {res['caption']}"
+                                    await self._set_cached_result(cache_key, {
                                         "caption": res["caption"]
-                                    }), ex=3600)
-                            except Exception as e:
-                                result_str = f"Error running Caption tool: {str(e)}"
+                                    })
+                                except Exception as e:
+                                    result_str = f"Error running Caption tool: {str(e)}"
                     else:
                         result_str = f"Error: Unknown tool {tool_name}"
                         
