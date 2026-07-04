@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MedVQA - New Chat</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#434655",
+                        "inverse-surface": "#2d3133",
+                        "on-primary-fixed": "#00174b",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#f7f9fb",
+                        "tertiary-fixed": "#ffdbcd",
+                        "primary-fixed": "#dbe1ff",
+                        "surface-container-low": "#f2f4f6",
+                        "secondary": "#505f76",
+                        "secondary-fixed": "#d3e4fe",
+                        "surface-container-high": "#e6e8ea",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "on-error": "#ffffff",
+                        "primary": "#004ac6",
+                        "on-error-container": "#93000a",
+                        "surface-white": "#ffffff",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "surface-bright": "#f7f9fb",
+                        "surface-variant": "#e0e3e5",
+                        "medical-success": "#10b981",
+                        "tertiary-container": "#bc4800",
+                        "secondary-container": "#d0e1fb",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#54647a",
+                        "on-surface": "#191c1e",
+                        "tertiary": "#943700",
+                        "border-subtle": "#e2e8f0",
+                        "outline": "#737686",
+                        "medical-error": "#ef4444",
+                        "outline-variant": "#c3c6d7",
+                        "on-tertiary-container": "#ffede6",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#eeefff",
+                        "inverse-primary": "#b4c5ff",
+                        "surface-container": "#eceef0",
+                        "background": "#f7f9fb",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "error-container": "#ffdad6",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "sidebar-bg": "#f9fafb",
+                        "on-secondary-fixed": "#0b1c30",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "surface-tint": "#0053db",
+                        "surface-container-highest": "#e0e3e5",
+                        "primary-container": "#2563eb",
+                        "on-tertiary-fixed": "#360f00",
+                        "on-background": "#191c1e",
+                        "surface-dim": "#d8dadc"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-padding": "2rem",
+                        "gutter": "1rem",
+                        "message-gap": "1.5rem",
+                        "inner-padding": "1rem",
+                        "sidebar-width": "280px"
+                    },
+                    "fontFamily": {
+                        "label-xs": ["Inter"],
+                        "mono-label": ["jetbrainsMono"],
+                        "label-md": ["Inter"],
+                        "body-base": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-xs": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "mono-label": ["13px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "body-base": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-sm": ["18px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface-white text-on-surface h-screen overflow-hidden flex font-body-base">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col h-full p-4 gap-2 bg-sidebar-bg dark:bg-inverse-surface border-r border-border-subtle w-sidebar-width flex-shrink-0">
+<!-- Header -->
+<div class="flex items-center gap-3 px-2 py-3 mb-2">
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">medical_services</span>
+</div>
+<div>
+<h1 class="text-headline-sm font-headline-sm font-bold text-on-surface">MedVQA</h1>
+<p class="text-label-xs font-label-xs text-on-surface-variant">AI Medical Assistant</p>
+</div>
+<button class="ml-auto text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined">left_panel_close</span>
+</button>
+</div>
+<!-- CTA -->
+<button class="w-full flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-white border border-border-subtle hover:bg-surface-container-high transition-colors mb-4">
+<span class="material-symbols-outlined">add</span>
+<span class="text-label-md font-label-md">New Chat</span>
+</button>
+<!-- Nav Links (Scrollable) -->
+<div class="flex-1 overflow-y-auto">
+<div class="px-2 py-2">
+<h3 class="text-label-xs font-label-xs text-on-surface-variant mb-2 px-2 uppercase tracking-wider">Today</h3>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 bg-secondary-container dark:bg-on-secondary-fixed-variant text-on-secondary-container dark:text-on-primary-container rounded-lg" href="#">
+<span class="material-symbols-outlined text-[18px]">chat_bubble</span>
+<span class="text-label-md font-label-md flex-1 truncate">Brain MRI Analysis</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">chat_bubble</span>
+<span class="text-label-md font-label-md flex-1 truncate">CT Scan - Chest</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">chat_bubble</span>
+<span class="text-label-md font-label-md flex-1 truncate">X-ray Interpretation</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">chat_bubble</span>
+<span class="text-label-md font-label-md flex-1 truncate">Follow-up: Treatment</span>
+</a>
+</nav>
+</div>
+<div class="px-2 py-4">
+<h3 class="text-label-xs font-label-xs text-on-surface-variant mb-2 px-2 uppercase tracking-wider">Previous 7 Days</h3>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">history</span>
+<span class="text-label-md font-label-md flex-1 truncate">Knee MRI Findings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">history</span>
+<span class="text-label-md font-label-md flex-1 truncate">Abdominal CT Review</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">history</span>
+<span class="text-label-md font-label-md flex-1 truncate">Medical Report Help</span>
+</a>
+</nav>
+</div>
+</div>
+<!-- Footer -->
+<div class="mt-auto pt-4 border-t border-border-subtle flex flex-col gap-2">
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px] text-primary">verified_user</span>
+<span class="text-label-md font-label-md text-primary font-medium">Admin Panel</span>
+</a>
+<div class="flex items-center justify-between px-3 py-2 hover:bg-surface-container-low rounded-lg cursor-pointer transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-variant">
+<img class="w-full h-full object-cover" data-alt="Professional headshot of a male doctor in a white coat, clean background, bright lighting, high quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzF8pqLLQU90lPhHVH8U_kw5rSTiqUCmDA2NxWfSWYcn1czNOL2D_uk1spDVMeJjDfldrCc8QdPFxzCpkDTgAo2j-qY59kupgqTQqHSvB2pCMYpYxf5w5ZAl1NdgOmkr0R8qd56DhMFR8GplhNIvHlGasslHrZOswAwcXig-MQu90Cnj1c9IK8dvM1rE1WWiBqaWniSqU36LP2FZVIdnIpzetq0y9eyHXy_I1DBXckgr0OiH0cLqxtzA"/>
+</div>
+<div class="flex flex-col">
+<span class="text-label-md font-label-md text-on-surface">Dr. John Doe</span>
+<span class="text-label-xs font-label-xs text-on-surface-variant">john.doe@hospital.com</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">more_vert</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-full bg-surface-white relative">
+<!-- TopAppBar (Mobile & Chat Header) -->
+<header class="flex justify-between items-center w-full px-inner-padding py-3 border-b border-border-subtle bg-surface dark:bg-inverse-surface z-10 sticky top-0">
+<div class="flex items-center gap-2">
+<button class="md:hidden text-on-surface p-1 hover:bg-surface-container-high rounded-full">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="flex items-center gap-1 cursor-pointer hover:bg-surface-container-high px-2 py-1 rounded-md transition-colors">
+<h2 class="text-headline-sm font-headline-sm font-bold text-on-surface">New Chat</h2>
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant">keyboard_arrow_down</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border border-border-subtle bg-surface-white">
+<span class="material-symbols-outlined text-primary text-[16px]">magic_button</span>
+<span class="text-label-md font-label-md text-on-surface-variant">GPT-4o + Medical</span>
+</div>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Empty State Canvas -->
+<div class="flex-1 overflow-y-auto flex flex-col items-center justify-center p-container-padding">
+<div class="max-w-2xl w-full flex flex-col items-center text-center space-y-8 animate-fade-in">
+<!-- Icon/Illustration -->
+<div class="relative w-24 h-24 flex items-center justify-center">
+<div class="absolute inset-0 bg-primary-fixed rounded-full opacity-50"></div>
+<span class="material-symbols-outlined text-[48px] text-primary relative z-10" style="font-variation-settings: 'FILL' 1;">stethoscope</span>
+<!-- Decorative sparks -->
+<span class="material-symbols-outlined absolute -top-2 -right-2 text-primary-fixed-dim text-[16px]">spark</span>
+<span class="material-symbols-outlined absolute bottom-4 -left-4 text-primary-fixed-dim text-[20px]">spark</span>
+</div>
+<!-- Heading -->
+<h1 class="text-2xl md:text-3xl font-headline-sm font-semibold text-on-surface tracking-tight">
+                    How can I help you <br class="hidden sm:block"/> analyze this scan today?
+                </h1>
+<!-- Suggested Actions Grid -->
+<div class="flex flex-wrap justify-center gap-3 pt-4">
+<button class="px-5 py-2.5 rounded-full border border-border-subtle text-on-surface text-label-md font-label-md hover:bg-surface-container-low hover:border-outline-variant transition-all flex items-center gap-2 shadow-sm">
+<span class="material-symbols-outlined text-[18px] text-secondary">api</span>
+                        Upload an MRI
+                    </button>
+<button class="px-5 py-2.5 rounded-full border border-border-subtle text-on-surface text-label-md font-label-md hover:bg-surface-container-low hover:border-outline-variant transition-all flex items-center gap-2 shadow-sm">
+<span class="material-symbols-outlined text-[18px] text-secondary">view_in_ar</span>
+                        Analyze a CT Scan
+                    </button>
+<button class="px-5 py-2.5 rounded-full border border-border-subtle text-on-surface text-label-md font-label-md hover:bg-surface-container-low hover:border-outline-variant transition-all flex items-center gap-2 shadow-sm">
+<span class="material-symbols-outlined text-[18px] text-secondary">help</span>
+                        Ask a Question
+                    </button>
+</div>
+</div>
+</div>
+<!-- Floating Input Area -->
+<div class="p-container-padding bg-gradient-to-t from-surface-white via-surface-white to-transparent pb-8">
+<div class="max-w-3xl mx-auto">
+<div class="relative bg-surface-white border border-border-subtle rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-all duration-200 p-2 pl-4 flex items-end min-h-[60px]">
+<button class="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded-full transition-colors self-center flex-shrink-0" title="Attach file">
+<span class="material-symbols-outlined">attach_file</span>
+</button>
+<textarea class="flex-1 bg-transparent border-none focus:ring-0 resize-none py-3 px-3 text-body-base text-on-surface placeholder-on-surface-variant max-h-32 overflow-y-auto" placeholder="Ask a medical question or describe a symptom..." rows="1" style="min-height: 44px;"></textarea>
+<button class="p-2 bg-surface-variant text-on-surface-variant rounded-full transition-colors self-center flex-shrink-0 cursor-not-allowed">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">arrow_upward</span>
+</button>
+</div>
+<p class="text-center text-label-xs text-on-surface-variant mt-3">
+                    MedVQA can make mistakes. Always verify with clinical judgment.
+                </p>
+</div>
+</div>
+</main>
+</body></html>

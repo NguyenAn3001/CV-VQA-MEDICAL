@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MedVQA - Session Details</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style data-purpose="design-system-variables">
+    :root {
+      --color-surface: #f7f9fb;
+      --color-surface-dim: #d8dadc;
+      --color-surface-bright: #f7f9fb;
+      --color-surface-container-lowest: #ffffff;
+      --color-surface-container-low: #f2f4f6;
+      --color-surface-container: #ebebeb;
+      --color-surface-container-high: #e5e7e8;
+      --color-surface-container-highest: #dfe1e3;
+      --color-on-surface: #191b1d;
+      --color-on-surface-variant: #42474b;
+      --color-outline: #72777b;
+      --color-outline-variant: #c1c7cc;
+      --color-primary: #2563eb;
+      --color-on-primary: #ffffff;
+      --color-primary-container: #d6e2ff;
+      --color-on-primary-container: #001a41;
+      --color-error: #ba1a1a;
+      --color-on-error: #ffffff;
+      --color-error-container: #ffdad6;
+      --color-on-error-container: #410002;
+    }
+  </style>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            surface: 'var(--color-surface)',
+            'surface-dim': 'var(--color-surface-dim)',
+            'surface-bright': 'var(--color-surface-bright)',
+            'surface-container-lowest': 'var(--color-surface-container-lowest)',
+            'surface-container-low': 'var(--color-surface-container-low)',
+            'surface-container': 'var(--color-surface-container)',
+            'surface-container-high': 'var(--color-surface-container-high)',
+            'surface-container-highest': 'var(--color-surface-container-highest)',
+            'on-surface': 'var(--color-on-surface)',
+            'on-surface-variant': 'var(--color-on-surface-variant)',
+            outline: 'var(--color-outline)',
+            'outline-variant': 'var(--color-outline-variant)',
+            primary: 'var(--color-primary)',
+            'on-primary': 'var(--color-on-primary)',
+            'primary-container': 'var(--color-primary-container)',
+            'on-primary-container': 'var(--color-on-primary-container)',
+            error: 'var(--color-error)',
+            'on-error': 'var(--color-on-error)',
+            'error-container': 'var(--color-error-container)',
+            'on-error-container': 'var(--color-on-error-container)',
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          borderRadius: {
+            lg: '8px',
+          }
+        }
+      }
+    }
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-surface font-sans text-on-surface h-screen flex">
+<!-- BEGIN: Main Layout Overlay (Simulating underlying chat interface with blur/dim) -->
+<div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 flex items-center justify-center p-4">
+<!-- BEGIN: Session Details Modal -->
+<div class="bg-surface-container-lowest rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col z-50">
+<!-- Modal Header -->
+<header class="flex items-center justify-between p-4 border-b border-outline-variant">
+<h2 class="text-lg font-semibold text-on-surface">Session Details</h2>
+<button class="text-on-surface-variant hover:text-on-surface p-1 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary">
+<i class="fa-solid fa-xmark text-lg"></i>
+<span class="sr-only">Close</span>
+</button>
+</header>
+<!-- Modal Content -->
+<main class="p-6 space-y-6 flex-1 overflow-y-auto">
+<!-- Title Field -->
+<div class="space-y-1">
+<label class="block text-sm font-medium text-on-surface-variant" for="session-title">Title</label>
+<div class="flex items-center">
+<input class="w-full bg-transparent border-0 border-b border-transparent hover:border-outline-variant focus:border-primary focus:ring-0 px-0 py-1 font-medium text-on-surface transition-colors cursor-text group" id="session-title" type="text" value="Brain MRI Analysis"/>
+<button class="text-on-surface-variant ml-2 hover:text-primary transition-colors focus:outline-none">
+<i class="fa-solid fa-pen text-sm"></i>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-[100px_1fr] gap-y-4 text-sm">
+<!-- Created Info -->
+<div class="text-on-surface-variant font-medium">Created</div>
+<div class="text-on-surface">May 12, 2024 at 10:43 AM</div>
+<!-- Model Info -->
+<div class="text-on-surface-variant font-medium">Model</div>
+<div class="text-on-surface">GPT-4o + Medical</div>
+<!-- Messages Count -->
+<div class="text-on-surface-variant font-medium">Messages</div>
+<div class="text-on-surface">6</div>
+</div>
+<!-- Attached Image Section -->
+<div class="space-y-3 pt-2">
+<h3 class="text-sm font-medium text-on-surface-variant">Attached Image</h3>
+<div class="flex items-center justify-between p-3 border border-outline-variant rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors group">
+<div class="flex items-center gap-3">
+<!-- Thumbnail -->
+<div class="h-12 w-12 rounded bg-black flex-shrink-0 overflow-hidden relative border border-outline-variant">
+<!-- Using a placeholder MRI image for context -->
+<img alt="Brain MRI Thumbnail" class="h-full w-full object-cover object-center opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGGv7TDIG7Nn3Zak5yOPxbSu69pVqFIMMOuieQ-Dmyt4ZrcCq36I-zXa7tV_r3AvOjUv4dxep2noFfpkf5MZC1r7mvQ2y77YqO-3aP7n7CKbgBIIrpGEwj9g3c60f1bviSg_9iUykUOfnazFKEf6gLv-S2GKM4gLozW4pQd6E0EQRukUU_C3z5sZJrpVUiA8JarfeI_PXMf_WaNi1eieQSEu1B8oeNkjw6kLi_AjFbBiczWBg5-Tgd3Q"/>
+</div>
+<!-- File Info -->
+<div class="flex flex-col">
+<span class="text-sm font-medium text-on-surface truncate max-w-[160px]">brain_mri.png</span>
+<span class="text-xs text-on-surface-variant">1.2 MB</span>
+</div>
+</div>
+<!-- Actions -->
+<button class="text-on-surface-variant hover:text-primary p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-primary transition-colors" title="Download">
+<i class="fa-solid fa-download"></i>
+</button>
+</div>
+</div>
+</main>
+<!-- Modal Footer -->
+<footer class="p-4 border-t border-outline-variant bg-surface-container-low flex justify-center">
+<button class="w-full max-w-[200px] text-error hover:bg-error-container hover:text-on-error-container font-medium py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-error focus:ring-offset-1 focus:ring-offset-surface">
+          Delete Session
+        </button>
+</footer>
+</div>
+<!-- END: Session Details Modal -->
+</div>
+<!-- END: Main Layout Overlay -->
+</body></html>

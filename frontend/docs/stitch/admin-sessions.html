@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MedVQA Admin - Sessions</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#2d3133",
+                        "background": "#f7f9fb",
+                        "tertiary-fixed": "#ffdbcd",
+                        "on-secondary-fixed": "#0b1c30",
+                        "surface-container": "#eceef0",
+                        "surface-container-low": "#f2f4f6",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed": "#360f00",
+                        "surface-variant": "#e0e3e5",
+                        "on-primary-fixed": "#00174b",
+                        "primary-fixed": "#dbe1ff",
+                        "tertiary-container": "#bc4800",
+                        "tertiary": "#943700",
+                        "on-background": "#191c1e",
+                        "medical-success": "#10b981",
+                        "medical-error": "#ef4444",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "on-primary-container": "#eeefff",
+                        "secondary-container": "#d0e1fb",
+                        "inverse-primary": "#b4c5ff",
+                        "primary-container": "#2563eb",
+                        "on-tertiary-container": "#ffede6",
+                        "on-error-container": "#93000a",
+                        "outline-variant": "#c3c6d7",
+                        "surface-container-highest": "#e0e3e5",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#0053db",
+                        "on-surface-variant": "#434655",
+                        "outline": "#737686",
+                        "secondary-fixed": "#d3e4fe",
+                        "surface-container-high": "#e6e8ea",
+                        "on-error": "#ffffff",
+                        "border-subtle": "#e2e8f0",
+                        "on-surface": "#191c1e",
+                        "primary": "#004ac6",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "inverse-on-surface": "#eff1f3",
+                        "surface-bright": "#f7f9fb",
+                        "on-secondary": "#ffffff",
+                        "secondary": "#505f76",
+                        "surface": "#f7f9fb",
+                        "on-secondary-container": "#54647a",
+                        "sidebar-bg": "#f9fafb",
+                        "surface-dim": "#d8dadc",
+                        "surface-white": "#ffffff",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "message-gap": "1.5rem",
+                        "sidebar-width": "280px",
+                        "inner-padding": "1rem",
+                        "gutter": "1rem",
+                        "container-padding": "2rem"
+                    },
+                    "fontFamily": {
+                        "body-base": ["Inter"],
+                        "mono-label": ["JetBrains Mono"],
+                        "label-xs": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-base": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "mono-label": ["13px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "label-xs": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "headline-sm": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-base antialiased min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-surface-white dark:bg-surface-container h-16 fixed top-0 right-0 z-40 border-b border-border-subtle dark:border-outline-variant flex justify-between items-center px-6 w-[calc(100%-280px)] ml-[280px] hidden md:flex">
+<div class="flex items-center gap-4">
+<!-- Search hidden as per JSON -->
+</div>
+<div class="flex items-center gap-4">
+<button aria-label="notifications" class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors scale-95 transition-transform">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button aria-label="help" class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors scale-95 transition-transform">
+<span class="material-symbols-outlined">help</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-container overflow-hidden">
+<img alt="Admin Profile" class="object-cover w-full h-full" data-alt="A detailed headshot of a professional medical administrator in a clinical setting, wearing a lab coat, well-lit with soft natural light, maintaining a clinical and professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnrpzpPUD4-Lkem4OOl-hsL5NHPq7SIEoRTAY-c1PTuU_DxwMirCsXXyS5ieGmIvrogdcs9wBcOBOsH_Gl6cDKduS9p8idQb-6L_7-Qrg-p6CPNoWxJNGfksnFJLEv1Lgqnbuxl1D4oMOO34cFI6qTTYkE9bABhR6yLSHSEB5-9OcAGpSt8_OMAo7xl6QUr1zWKCZmdOBIoC3pbDaLvMBQ7c0IEUveXen_vHHIx_98K2eaOorkfmz6zQ"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<nav class="bg-sidebar-bg dark:bg-inverse-surface w-sidebar-width h-screen fixed left-0 top-0 border-r border-border-subtle dark:border-outline-variant flex flex-col h-full p-4 space-y-2 z-50">
+<div class="flex items-center gap-3 px-4 py-4 mb-6">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold">M</div>
+<div>
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary dark:text-primary-fixed">MedVQA Admin</h1>
+<p class="font-label-xs text-label-xs text-on-surface-variant">Management Portal</p>
+</div>
+</div>
+<div class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-on-surface-variant/10 rounded-lg hover:bg-surface-container dark:hover:bg-on-surface-variant/10 transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-on-surface-variant/10 rounded-lg hover:bg-surface-container dark:hover:bg-on-surface-variant/10 transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-md text-label-md">Users</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-lg font-bold opacity-90 transition-opacity" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">forum</span>
+<span class="font-label-md text-label-md">Sessions</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-on-surface-variant/10 rounded-lg hover:bg-surface-container dark:hover:bg-on-surface-variant/10 transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-md text-label-md">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-on-surface-variant/10 rounded-lg hover:bg-surface-container dark:hover:bg-on-surface-variant/10 transition-colors" href="#">
+<span class="material-symbols-outlined">neurology</span>
+<span class="font-label-md text-label-md">Models</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-on-surface-variant/10 rounded-lg hover:bg-surface-container dark:hover:bg-on-surface-variant/10 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</div>
+<div class="mt-auto border-t border-border-subtle pt-4">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-on-surface-variant/10 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">arrow_back</span>
+<span class="font-label-md text-label-md">Back to Chat</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="md:ml-[280px] pt-16 min-h-screen">
+<div class="p-container-padding max-w-7xl mx-auto">
+<!-- Page Header & Actions -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">Sessions</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Monitor all chat sessions</p>
+</div>
+<div class="flex flex-wrap items-center gap-3">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="pl-10 pr-4 py-2 border border-border-subtle rounded-DEFAULT bg-surface-white focus:ring-2 focus:ring-primary focus:border-primary font-body-sm text-body-sm w-full md:w-64 outline-none" placeholder="Search sessions..." type="text"/>
+</div>
+<select class="py-2 pl-3 pr-8 border border-border-subtle rounded-DEFAULT bg-surface-white font-body-sm text-body-sm outline-none focus:ring-2 focus:ring-primary focus:border-primary appearance-none">
+<option>All Users</option>
+<option>Doctors</option>
+<option>Radiologists</option>
+</select>
+<select class="py-2 pl-3 pr-8 border border-border-subtle rounded-DEFAULT bg-surface-white font-body-sm text-body-sm outline-none focus:ring-2 focus:ring-primary focus:border-primary appearance-none">
+<option>All Time</option>
+<option>Last 7 Days</option>
+<option>Last 30 Days</option>
+</select>
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-white border border-border-subtle rounded-DEFAULT hover:bg-surface-container-low transition-colors font-label-md text-label-md text-on-surface">
+<span class="material-symbols-outlined text-sm">download</span>
+                        Export
+                    </button>
+</div>
+</div>
+<!-- Data Table Card -->
+<div class="bg-surface-white rounded-lg border border-border-subtle overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-border-subtle bg-surface-bright">
+<th class="px-6 py-4 font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider">Session Title</th>
+<th class="px-6 py-4 font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider">User</th>
+<th class="px-6 py-4 font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider">Messages</th>
+<th class="px-6 py-4 font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider">Created</th>
+<th class="px-6 py-4 font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider">Last Active</th>
+<th class="px-6 py-4 font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-subtle">
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4">
+<div class="font-label-md text-label-md text-on-surface font-medium">Brain MRI Analysis</div>
+<div class="font-label-xs text-label-xs text-on-surface-variant flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[14px]">psychology</span> GPT-4o + Medical
+                                    </div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-xs">JS</div>
+<span class="font-body-sm text-body-sm text-on-surface">Dr. John Smith</span>
+</div>
+</td>
+<td class="px-6 py-4 font-mono-label text-mono-label text-on-surface-variant">6</td>
+<td class="px-6 py-4 font-body-sm text-body-sm text-on-surface-variant">May 12, 2024 10:42 AM</td>
+<td class="px-6 py-4 font-body-sm text-body-sm text-on-surface-variant">May 12, 2024 10:45 AM</td>
+<td class="px-6 py-4 text-right">
+<button aria-label="View Session" class="text-on-surface-variant hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4">
+<div class="font-label-md text-label-md text-on-surface font-medium">CT Scan - Chest</div>
+<div class="font-label-xs text-label-xs text-on-surface-variant flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[14px]">radiology</span> GPT-4o + Medical
+                                    </div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-xs">JD</div>
+<span class="font-body-sm text-body-sm text-on-surface">Jane Doe</span>
+</div>
+</td>
+<td class="px-6 py-4 font-mono-label text-mono-label text-on-surface-variant">4</td>
+<td class="px-6 py-4 font-body-sm text-body-sm text-on-surface-variant">May 12, 2024 9:15 AM</td>
+<td class="px-6 py-4 font-body-sm text-body-sm text-on-surface-variant">May 12, 2024 9:20 AM</td>
+<td class="px-6 py-4 text-right">
+<button aria-label="View Session" class="text-on-surface-variant hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4">
+<div class="font-label-md text-label-md text-on-surface font-medium">X-ray Interpretation</div>
+<div class="font-label-xs text-label-xs text-on-surface-variant flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[14px]">skeleton</span> Claude 3 Opus
+                                    </div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-xs">ML</div>
+<span class="font-body-sm text-body-sm text-on-surface">Michael Lee</span>
+</div>
+</td>
+<td class="px-6 py-4 font-mono-label text-mono-label text-on-surface-variant">8</td>
+<td class="px-6 py-4 font-body-sm text-body-sm text-on-surface-variant">May 11, 2024 4:30 PM</td>
+<td class="px-6 py-4 font-body-sm text-body-sm text-on-surface-variant">May 11, 2024 4:45 PM</td>
+<td class="px-6 py-4 text-right">
+<button aria-label="View Session" class="text-on-surface-variant hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4">
+<div class="font-label-md text-label-md text-on-surface font-medium">Abdominal CT Review</div>
+<div class="font-label-xs text-label-xs text-on-surface-variant flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[14px]">radiology</span> GPT-4o + Medical
+                                    </div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-xs">SW</div>
+<span class="font-body-sm text-body-sm text-on-surface">Sarah Wang</span>
+</div>
+</td>
+<td class="px-6 py-4 font-mono-label text-mono-label text-on-surface-variant">5</td>
+<td class="px-6 py-4 font-body-sm text-body-sm text-on-surface-variant">May 10, 2024 2:10 PM</td>
+<td class="px-6 py-4 font-body-sm text-body-sm text-on-surface-variant">May 10, 2024 2:25 PM</td>
+<td class="px-6 py-4 text-right">
+<button aria-label="View Session" class="text-on-surface-variant hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4">
+<div class="font-label-md text-label-md text-on-surface font-medium">Follow-up: Treatment Plan</div>
+<div class="font-label-xs text-label-xs text-on-surface-variant flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[14px]">prescriptions</span> GPT-4 Turbo
+                                    </div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-xs">JS</div>
+<span class="font-body-sm text-body-sm text-on-surface">Dr. John Smith</span>
+</div>
+</td>
+<td class="px-6 py-4 font-mono-label text-mono-label text-on-surface-variant">3</td>
+<td class="px-6 py-4 font-body-sm text-body-sm text-on-surface-variant">May 10, 2024 11:05 AM</td>
+<td class="px-6 py-4 font-body-sm text-body-sm text-on-surface-variant">May 10, 2024 11:10 AM</td>
+<td class="px-6 py-4 text-right">
+<button aria-label="View Session" class="text-on-surface-variant hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="px-6 py-4 border-t border-border-subtle bg-surface-white flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Showing 1 to 5 of 156 sessions</span>
+<div class="flex items-center gap-1">
+<button class="w-8 h-8 flex items-center justify-center rounded-DEFAULT text-on-surface-variant hover:bg-surface-container disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-DEFAULT bg-primary-container text-on-primary-container font-label-sm text-label-sm font-medium">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-DEFAULT hover:bg-surface-container text-on-surface font-label-sm text-label-sm">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-DEFAULT hover:bg-surface-container text-on-surface font-label-sm text-label-sm">3</button>
+<span class="w-8 h-8 flex items-center justify-center text-on-surface-variant">...</span>
+<button class="w-8 h-8 flex items-center justify-center rounded-DEFAULT hover:bg-surface-container text-on-surface font-label-sm text-label-sm">32</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-DEFAULT text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

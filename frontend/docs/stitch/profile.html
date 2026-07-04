@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MedVQA - Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary": "#ffffff",
+                      "on-secondary-fixed-variant": "#38485d",
+                      "on-tertiary-container": "#ffede6",
+                      "on-secondary-container": "#54647a",
+                      "surface-container-high": "#e6e8ea",
+                      "on-surface": "#191c1e",
+                      "sidebar-bg": "#f9fafb",
+                      "medical-success": "#10b981",
+                      "tertiary-fixed": "#ffdbcd",
+                      "on-tertiary": "#ffffff",
+                      "primary-fixed": "#dbe1ff",
+                      "surface-container-highest": "#e0e3e5",
+                      "secondary": "#505f76",
+                      "error": "#ba1a1a",
+                      "surface-tint": "#0053db",
+                      "secondary-fixed": "#d3e4fe",
+                      "inverse-surface": "#2d3133",
+                      "primary": "#004ac6",
+                      "background": "#f7f9fb",
+                      "surface-container": "#eceef0",
+                      "surface-white": "#ffffff",
+                      "surface-bright": "#f7f9fb",
+                      "error-container": "#ffdad6",
+                      "outline-variant": "#c3c6d7",
+                      "on-background": "#191c1e",
+                      "outline": "#737686",
+                      "secondary-container": "#d0e1fb",
+                      "on-error-container": "#93000a",
+                      "tertiary-container": "#bc4800",
+                      "surface-variant": "#e0e3e5",
+                      "on-error": "#ffffff",
+                      "secondary-fixed-dim": "#b7c8e1",
+                      "on-primary-container": "#eeefff",
+                      "border-subtle": "#e2e8f0",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary-fixed-variant": "#7d2d00",
+                      "surface-container-low": "#f2f4f6",
+                      "primary-container": "#2563eb",
+                      "inverse-primary": "#b4c5ff",
+                      "on-tertiary-fixed": "#360f00",
+                      "on-primary-fixed-variant": "#003ea8",
+                      "tertiary": "#943700",
+                      "on-secondary-fixed": "#0b1c30",
+                      "on-primary-fixed": "#00174b",
+                      "tertiary-fixed-dim": "#ffb596",
+                      "surface": "#f7f9fb",
+                      "on-surface-variant": "#434655",
+                      "primary-fixed-dim": "#b4c5ff",
+                      "inverse-on-surface": "#eff1f3",
+                      "on-secondary": "#ffffff",
+                      "surface-dim": "#d8dadc",
+                      "medical-error": "#ef4444"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "container-padding": "2rem",
+                      "gutter": "1rem",
+                      "inner-padding": "1rem",
+                      "message-gap": "1.5rem",
+                      "sidebar-width": "280px"
+              },
+              "fontFamily": {
+                      "headline-sm": [
+                              "Inter"
+                      ],
+                      "body-base": [
+                              "Inter"
+                      ],
+                      "mono-label": [
+                              "jetbrainsMono"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "label-xs": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-sm": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-base": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "mono-label": [
+                              "13px",
+                              {
+                                      "lineHeight": "18px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-xs": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.02em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "500"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface-white text-on-surface h-screen overflow-hidden flex">
+<!-- SideNavBar -->
+<aside class="bg-sidebar-bg dark:bg-inverse-surface border-r border-border-subtle docked left h-screen w-sidebar-width flex flex-col p-4 gap-2 hidden md:flex z-10 shrink-0">
+<div class="flex items-center gap-3 mb-6 px-2">
+<span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">neurology</span>
+<div>
+<h1 class="text-headline-sm font-headline-sm font-bold text-on-surface">MedVQA</h1>
+<p class="text-label-xs font-label-xs text-on-surface-variant">AI Medical Assistant</p>
+</div>
+<button class="ml-auto text-on-surface-variant hover:bg-surface-container-low p-1 rounded">
+<span class="material-symbols-outlined text-sm">keyboard_double_arrow_left</span>
+</button>
+</div>
+<button class="w-full flex items-center justify-center gap-2 bg-surface-white border border-border-subtle hover:bg-surface-container-lowest text-on-surface py-2 px-4 rounded-lg text-label-md font-label-md shadow-sm transition-colors mb-6">
+<span class="material-symbols-outlined text-[18px]">add</span>
+            New Chat
+        </button>
+<div class="flex-1 overflow-y-auto pr-2">
+<div class="text-label-xs font-label-xs text-on-surface-variant mb-2 px-2 uppercase tracking-wider">Today</div>
+<nav class="space-y-1 mb-6">
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low hover:bg-surface-container-high dark:hover:bg-on-surface-variant transition-colors rounded-lg group" href="#">
+<span class="material-symbols-outlined text-[18px] opacity-70 group-hover:opacity-100">chat_bubble</span>
+<span class="text-label-md font-label-md truncate">Brain MRI Analysis</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low hover:bg-surface-container-high dark:hover:bg-on-surface-variant transition-colors rounded-lg group" href="#">
+<span class="material-symbols-outlined text-[18px] opacity-70 group-hover:opacity-100">chat_bubble</span>
+<span class="text-label-md font-label-md truncate">CT Scan - Chest</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low hover:bg-surface-container-high dark:hover:bg-on-surface-variant transition-colors rounded-lg group" href="#">
+<span class="material-symbols-outlined text-[18px] opacity-70 group-hover:opacity-100">chat_bubble</span>
+<span class="text-label-md font-label-md truncate">X-ray Interpretation</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low hover:bg-surface-container-high dark:hover:bg-on-surface-variant transition-colors rounded-lg group" href="#">
+<span class="material-symbols-outlined text-[18px] opacity-70 group-hover:opacity-100">chat_bubble</span>
+<span class="text-label-md font-label-md truncate">Follow-up: Treatment</span>
+</a>
+</nav>
+<div class="text-label-xs font-label-xs text-on-surface-variant mb-2 px-2 uppercase tracking-wider">Previous 7 Days</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low hover:bg-surface-container-high dark:hover:bg-on-surface-variant transition-colors rounded-lg group" href="#">
+<span class="material-symbols-outlined text-[18px] opacity-70 group-hover:opacity-100">history</span>
+<span class="text-label-md font-label-md truncate">Knee MRI Findings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low hover:bg-surface-container-high dark:hover:bg-on-surface-variant transition-colors rounded-lg group" href="#">
+<span class="material-symbols-outlined text-[18px] opacity-70 group-hover:opacity-100">history</span>
+<span class="text-label-md font-label-md truncate">Abdominal CT Review</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low hover:bg-surface-container-high dark:hover:bg-on-surface-variant transition-colors rounded-lg group" href="#">
+<span class="material-symbols-outlined text-[18px] opacity-70 group-hover:opacity-100">history</span>
+<span class="text-label-md font-label-md truncate">Medical Report Help</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto pt-4 border-t border-border-subtle flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors group" href="#">
+<span class="material-symbols-outlined text-[18px] opacity-70 group-hover:opacity-100">verified_user</span>
+<span class="text-label-md font-label-md">Admin Panel</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-secondary-container dark:bg-on-secondary-fixed-variant text-on-secondary-container dark:text-on-primary-container rounded-lg group scale-[0.99] transition-transform duration-150" href="#">
+<div class="w-6 h-6 rounded-full bg-surface-variant overflow-hidden shrink-0">
+<img alt="Dr. John Doe" class="w-full h-full object-cover" data-alt="A detailed headshot portrait of a professional male doctor in his 40s. He is wearing a clean white medical coat over a light blue button-down shirt. He has short, neatly styled brown hair, glasses, and a warm, trustworthy smile. The lighting is soft and flattering, typical of a modern clinical setting. Background is a neutral, slightly blurred hospital corridor. High resolution, photorealistic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLX_bZ-WW1ysuhYW5Nk3c2dyBHOvjtkeilTCTTYhXuDbeoyCo3yWUgvGXKdrcIx486-VjX4OGlKrlVkDZpwNUVaMgocWHGre7aSzLhHW_RrNmMFsX6mRR2UJ-86-FHnQA3KrFxwzUdQi6fdZGGcFfodIimwWJWJTsn_yXKdVZQXir-IK_3tzyOD4HyOgCrZwJc99V7QLgdkfHw8lcspqdxAEoWTp467WOqgk1mgoYfp-iLg8KHYpa4MA"/>
+</div>
+<span class="text-label-md font-label-md font-medium flex-1 truncate">Dr. John Doe</span>
+<span class="material-symbols-outlined text-[18px] opacity-50">more_vert</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col h-full overflow-hidden bg-surface-bright relative">
+<!-- TopAppBar (Mobile Only) -->
+<header class="bg-surface dark:bg-inverse-surface flex justify-between items-center w-full px-inner-padding py-3 border-b border-border-subtle md:hidden shrink-0 flat no shadows">
+<button class="text-on-surface-variant p-2 -ml-2 rounded-lg hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="text-headline-sm font-headline-sm font-bold text-on-surface dark:text-inverse-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">neurology</span>
+                 MedVQA
+            </div>
+<button class="text-on-surface-variant p-2 -mr-2 rounded-lg hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</header>
+<!-- Canvas Area -->
+<div class="flex-1 overflow-y-auto p-4 md:p-8">
+<div class="max-w-4xl mx-auto">
+<div class="mb-8 flex items-center justify-between">
+<h2 class="text-2xl font-semibold text-on-surface">Profile</h2>
+</div>
+<!-- Profile Header Card -->
+<div class="bg-surface-white border border-border-subtle rounded-xl p-6 mb-8 flex flex-col md:flex-row items-start md:items-center gap-6">
+<div class="w-20 h-20 md:w-24 md:h-24 rounded-full bg-surface-variant overflow-hidden shrink-0 border-4 border-surface-bright shadow-sm relative">
+<img alt="Dr. John Doe" class="w-full h-full object-cover" data-alt="A highly detailed close-up portrait of a male radiologist, Dr. John Doe. He appears to be in his mid-40s with a professional and calm demeanor. He has short brown hair and is wearing a standard white lab coat over a light blue shirt. The background is a clean, bright, slightly out-of-focus medical office setting with cool, clinical lighting emphasizing clarity and trust. High resolution." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAinV9nYpZ-I9gDYkDaqEasvrRWSwoSvUP4F6mJ7vgFCEJ5z-JIg6pB3AM2-MYQsO764ntB3BdplUP2Wx_bnW4OYdlTZOFzKo1UKpUMWTrLz0s8afaNBT4uwrE5j0FqmSNWS6sv0TcymilZt3o9kdsUJ45abGVP8SyvQsW7xPGJAVDsHNzzl4F0v_ay_8vHyOf5t_jWfT5mu3C26sMKG6Mwt4Le-s0KvYHlbzq_D5iGwH6xje2kCjT2sQ"/>
+<button class="absolute bottom-0 right-0 bg-surface-white border border-border-subtle rounded-full p-1 shadow-sm hover:bg-surface-container-low transition-colors group" title="Change Avatar">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant group-hover:text-primary">edit</span>
+</button>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-3 mb-1">
+<h3 class="text-xl font-bold text-on-surface">Dr. John Doe</h3>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant text-label-xs font-label-xs font-medium border border-primary-fixed-dim">
+<span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                Verified
+                            </span>
+</div>
+<p class="text-body-base font-body-base text-on-surface-variant mb-1">john.doe@hospital.com</p>
+<p class="text-body-sm font-body-sm text-outline flex items-center gap-1 mb-2">
+<span class="material-symbols-outlined text-[16px]">work</span>
+                             Radiologist
+                        </p>
+<p class="text-label-xs font-label-xs text-outline">Member since May 10, 2024</p>
+</div>
+<button class="mt-4 md:mt-0 px-4 py-2 bg-surface-white border border-border-subtle text-on-surface rounded-lg text-label-md font-label-md hover:bg-surface-container-lowest transition-colors shadow-sm font-medium">
+                        Edit Profile
+                    </button>
+</div>
+<!-- Account & Preferences Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Account Section -->
+<section class="bg-surface-white border border-border-subtle rounded-xl p-6">
+<h4 class="text-lg font-semibold text-on-surface mb-6 flex items-center gap-2 border-b border-border-subtle pb-3">
+<span class="material-symbols-outlined text-primary">manage_accounts</span>
+                            Account
+                        </h4>
+<div class="space-y-6">
+<div class="flex justify-between items-center group">
+<div>
+<p class="text-label-xs font-label-xs text-outline mb-1 uppercase tracking-wide">Full Name</p>
+<p class="text-body-base font-body-base text-on-surface font-medium">Dr. John Doe</p>
+</div>
+</div>
+<div class="flex justify-between items-center group">
+<div>
+<p class="text-label-xs font-label-xs text-outline mb-1 uppercase tracking-wide">Email</p>
+<p class="text-body-base font-body-base text-on-surface font-medium">john.doe@hospital.com</p>
+</div>
+</div>
+<div class="flex justify-between items-center pt-2 border-t border-border-subtle/50">
+<div>
+<p class="text-label-xs font-label-xs text-outline mb-1 uppercase tracking-wide">Password</p>
+<p class="text-body-base font-body-base text-on-surface font-mono tracking-widest mt-1">••••••••</p>
+</div>
+<button class="text-primary hover:text-on-primary-fixed-variant text-label-md font-label-md font-medium transition-colors">
+                                    Change
+                                </button>
+</div>
+</div>
+</section>
+<!-- Preferences Section -->
+<section class="bg-surface-white border border-border-subtle rounded-xl p-6">
+<h4 class="text-lg font-semibold text-on-surface mb-6 flex items-center gap-2 border-b border-border-subtle pb-3">
+<span class="material-symbols-outlined text-primary">settings</span>
+                            Preferences
+                        </h4>
+<div class="space-y-6">
+<div class="flex justify-between items-center">
+<div>
+<p class="text-label-xs font-label-xs text-outline mb-1 uppercase tracking-wide">Language</p>
+<p class="text-body-base font-body-base text-on-surface font-medium">English</p>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface p-1 rounded transition-colors group" title="Change Language">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</div>
+<div class="flex justify-between items-center">
+<div>
+<p class="text-label-xs font-label-xs text-outline mb-1 uppercase tracking-wide">Timezone</p>
+<p class="text-body-base font-body-base text-on-surface font-medium">(UTC+7) Bangkok, Hanoi, Jakarta</p>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface p-1 rounded transition-colors group" title="Change Timezone">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</div>
+<div class="flex justify-between items-center pt-2 border-t border-border-subtle/50">
+<div>
+<p class="text-label-xs font-label-xs text-outline mb-1 uppercase tracking-wide">Theme</p>
+<p class="text-body-base font-body-base text-on-surface font-medium">System Default (Light)</p>
+</div>
+<div class="flex gap-1 border border-border-subtle rounded-lg p-0.5 bg-surface-container-low">
+<button class="p-1.5 rounded-md bg-surface-white shadow-sm text-on-surface transition-all">
+<span class="material-symbols-outlined text-[18px]">light_mode</span>
+</button>
+<button class="p-1.5 rounded-md text-on-surface-variant hover:text-on-surface transition-all">
+<span class="material-symbols-outlined text-[18px]">dark_mode</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</div>
+<div class="mt-8 flex justify-end">
+<button class="text-error hover:bg-error-container hover:text-on-error-container px-4 py-2 rounded-lg text-label-md font-label-md transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+                        Sign Out
+                    </button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

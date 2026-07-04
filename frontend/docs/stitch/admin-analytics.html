@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MedVQA Admin - Analytics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#2d3133",
+                        "background": "#f7f9fb",
+                        "tertiary-fixed": "#ffdbcd",
+                        "on-secondary-fixed": "#0b1c30",
+                        "surface-container": "#eceef0",
+                        "surface-container-low": "#f2f4f6",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed": "#360f00",
+                        "surface-variant": "#e0e3e5",
+                        "on-primary-fixed": "#00174b",
+                        "primary-fixed": "#dbe1ff",
+                        "tertiary-container": "#bc4800",
+                        "tertiary": "#943700",
+                        "on-background": "#191c1e",
+                        "medical-success": "#10b981",
+                        "medical-error": "#ef4444",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "on-primary-container": "#eeefff",
+                        "secondary-container": "#d0e1fb",
+                        "inverse-primary": "#b4c5ff",
+                        "primary-container": "#2563eb",
+                        "on-tertiary-container": "#ffede6",
+                        "on-error-container": "#93000a",
+                        "outline-variant": "#c3c6d7",
+                        "surface-container-highest": "#e0e3e5",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#0053db",
+                        "on-surface-variant": "#434655",
+                        "outline": "#737686",
+                        "secondary-fixed": "#d3e4fe",
+                        "surface-container-high": "#e6e8ea",
+                        "on-error": "#ffffff",
+                        "border-subtle": "#e2e8f0",
+                        "on-surface": "#191c1e",
+                        "primary": "#004ac6",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "inverse-on-surface": "#eff1f3",
+                        "surface-bright": "#f7f9fb",
+                        "on-secondary": "#ffffff",
+                        "secondary": "#505f76",
+                        "surface": "#f7f9fb",
+                        "on-secondary-container": "#54647a",
+                        "sidebar-bg": "#f9fafb",
+                        "surface-dim": "#d8dadc",
+                        "surface-white": "#ffffff",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "message-gap": "1.5rem",
+                        "sidebar-width": "280px",
+                        "inner-padding": "1rem",
+                        "gutter": "1rem",
+                        "container-padding": "2rem"
+                    },
+                    "fontFamily": {
+                        "body-base": ["Inter", "sans-serif"],
+                        "mono-label": ["JetBrains Mono", "monospace"],
+                        "label-xs": ["Inter", "sans-serif"],
+                        "label-md": ["Inter", "sans-serif"],
+                        "headline-sm": ["Inter", "sans-serif"],
+                        "body-sm": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "body-base": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "mono-label": ["13px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "label-xs": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "headline-sm": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-base min-h-screen flex antialiased">
+<!-- SideNavBar -->
+<aside class="w-sidebar-width h-screen fixed left-0 top-0 bg-sidebar-bg dark:bg-inverse-surface border-r border-border-subtle dark:border-outline-variant hidden md:flex flex-col p-4 space-y-2 z-50">
+<div class="mb-6 flex items-center gap-3 px-2">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-lg">M</div>
+<div>
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary dark:text-primary-fixed">MedVQA Admin</h1>
+<p class="font-label-xs text-label-xs text-on-surface-variant">Management Portal</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-on-surface-variant/10 rounded-lg transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-on-surface-variant/10 rounded-lg transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">group</span>
+                Users
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-on-surface-variant/10 rounded-lg transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">forum</span>
+                Sessions
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-lg font-bold font-label-md text-label-md opacity-90 transition-opacity" href="#">
+<span class="material-symbols-outlined">analytics</span>
+                Analytics
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-on-surface-variant/10 rounded-lg transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">neurology</span>
+                Models
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-on-surface-variant/10 rounded-lg transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">settings</span>
+                Settings
+            </a>
+</nav>
+<div class="mt-auto border-t border-border-subtle pt-4">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-on-surface-variant/10 rounded-lg transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">arrow_back</span>
+                Back to Chat
+            </a>
+</div>
+</aside>
+<!-- TopAppBar -->
+<header class="h-16 fixed top-0 right-0 z-40 bg-surface-white dark:bg-surface-container border-b border-border-subtle dark:border-outline-variant flex justify-between items-center px-6 w-full md:w-[calc(100%-280px)] md:ml-[280px]">
+<div class="flex items-center gap-4 md:hidden">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface dark:text-inverse-on-surface">MedVQA Admin</span>
+</div>
+<div class="hidden md:block">
+<!-- Breadcrumbs or empty space -->
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors scale-95 transition-transform">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors scale-95 transition-transform">
+<span class="material-symbols-outlined">help</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-border-subtle">
+<img alt="Admin Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB49J3Jf4LW4Keom4rJ9wVDMQfr1_3DWWlEZTchO9dWfTXvJwH1ckiOlm1QYNcxkQLaZNg2u787DlQfz0NGLR2xmPlsgKFDi0JpDRAFkq-hU6S0D1NRG3mN8R6qRMK-G0tdzbWaBiB5sGgLeDL91gD3qqt3l4Lsl0synrc4N4FM_jBpmPE4QoDXzNzlujFXr1Pvg718PuqreF0gc6kcEaZSn9Dx5BpOXeRLtk3b3Uf8S3OCcsIRKZGJ9w"/>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="w-full md:w-[calc(100%-280px)] md:ml-[280px] mt-16 p-container-padding flex flex-col gap-6">
+<!-- Page Header -->
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+<div>
+<h2 class="font-headline-sm text-[24px] leading-[32px] font-bold text-on-surface">Analytics Overview</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">System usage statistics and insights</p>
+</div>
+<div class="relative">
+<button class="flex items-center gap-2 bg-surface-white border border-border-subtle rounded-lg px-4 py-2 font-label-md text-label-md text-on-surface hover:bg-surface-container transition-colors shadow-sm">
+                    May 6, 2024 - May 12, 2024
+                    <span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+</div>
+</div>
+<!-- KPI Cards Bento Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Total Sessions -->
+<div class="bg-surface-white border border-border-subtle rounded-xl p-5 flex flex-col gap-2 shadow-sm">
+<span class="font-label-md text-label-md text-on-surface-variant">Total Sessions</span>
+<span class="font-headline-sm text-[28px] leading-[36px] font-bold text-on-surface">1,248</span>
+<div class="flex items-center gap-1 font-label-xs text-label-xs text-medical-success mt-1">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+<span>12.5% vs last 7 days</span>
+</div>
+</div>
+<!-- Total Messages -->
+<div class="bg-surface-white border border-border-subtle rounded-xl p-5 flex flex-col gap-2 shadow-sm">
+<span class="font-label-md text-label-md text-on-surface-variant">Total Messages</span>
+<span class="font-headline-sm text-[28px] leading-[36px] font-bold text-on-surface">8,521</span>
+<div class="flex items-center gap-1 font-label-xs text-label-xs text-medical-success mt-1">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+<span>16.3% vs last 7 days</span>
+</div>
+</div>
+<!-- Active Users -->
+<div class="bg-surface-white border border-border-subtle rounded-xl p-5 flex flex-col gap-2 shadow-sm">
+<span class="font-label-md text-label-md text-on-surface-variant">Active Users</span>
+<span class="font-headline-sm text-[28px] leading-[36px] font-bold text-on-surface">342</span>
+<div class="flex items-center gap-1 font-label-xs text-label-xs text-medical-success mt-1">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+<span>8.7% vs last 7 days</span>
+</div>
+</div>
+<!-- Images Analyzed -->
+<div class="bg-surface-white border border-border-subtle rounded-xl p-5 flex flex-col gap-2 shadow-sm">
+<span class="font-label-md text-label-md text-on-surface-variant">Images Analyzed</span>
+<span class="font-headline-sm text-[28px] leading-[36px] font-bold text-on-surface">1,102</span>
+<div class="flex items-center gap-1 font-label-xs text-label-xs text-medical-success mt-1">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+<span>15.2% vs last 7 days</span>
+</div>
+</div>
+</div>
+<!-- Charts Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Line Chart (Sessions Over Time) -->
+<div class="lg:col-span-2 bg-surface-white border border-border-subtle rounded-xl p-6 shadow-sm flex flex-col">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline-sm text-[16px] leading-[24px] font-bold text-on-surface">Sessions Over Time</h3>
+<div class="flex items-center gap-4 font-label-xs text-label-xs">
+<div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-primary-container"></div> Sessions</div>
+<div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-surface-dim"></div> Users</div>
+</div>
+</div>
+<div class="flex-1 w-full h-[300px] relative">
+<canvas id="sessionsChart"></canvas>
+</div>
+</div>
+<!-- Donut Chart (Model Usage) -->
+<div class="bg-surface-white border border-border-subtle rounded-xl p-6 shadow-sm flex flex-col">
+<h3 class="font-headline-sm text-[16px] leading-[24px] font-bold text-on-surface mb-6">Model Usage</h3>
+<div class="flex-1 w-full h-[200px] relative flex justify-center items-center">
+<canvas id="modelChart"></canvas>
+</div>
+<div class="mt-6 flex flex-col gap-3">
+<div class="flex justify-between items-center font-label-xs text-label-xs">
+<div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-primary-container"></div> <span class="text-on-surface-variant">GPT-4o + Medical</span></div>
+<span class="font-mono-label font-bold text-on-surface">65%</span>
+</div>
+<div class="flex justify-between items-center font-label-xs text-label-xs">
+<div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#10b981]"></div> <span class="text-on-surface-variant">Claude 3 Opus</span></div>
+<span class="font-mono-label font-bold text-on-surface">20%</span>
+</div>
+<div class="flex justify-between items-center font-label-xs text-label-xs">
+<div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#f59e0b]"></div> <span class="text-on-surface-variant">GPT-4 Turbo</span></div>
+<span class="font-mono-label font-bold text-on-surface">15%</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<script>
+        // Chart.js Configuration
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Sessions Chart
+            const ctxSessions = document.getElementById('sessionsChart').getContext('2d');
+            new Chart(ctxSessions, {
+                type: 'line',
+                data: {
+                    labels: ['May 6', 'May 7', 'May 8', 'May 9', 'May 10', 'May 11', 'May 12'],
+                    datasets: [
+                        {
+                            label: 'Sessions',
+                            data: [180, 220, 190, 280, 250, 170, 290],
+                            borderColor: '#2563eb', // primary-container
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            pointBackgroundColor: '#2563eb',
+                            fill: true
+                        },
+                        {
+                            label: 'Users',
+                            data: [150, 180, 160, 210, 190, 140, 220],
+                            borderColor: '#d8dadc', // surface-dim
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            tension: 0.4,
+                            pointBackgroundColor: '#d8dadc',
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            grid: { color: '#e2e8f0', drawBorder: false }, // border-subtle
+                            ticks: { color: '#737686', font: { family: 'Inter', size: 12 } } // outline
+                        },
+                        x: { 
+                            grid: { display: false, drawBorder: false },
+                            ticks: { color: '#737686', font: { family: 'Inter', size: 12 } }
+                        }
+                    }
+                }
+            });
+
+            // Model Usage Chart
+            const ctxModel = document.getElementById('modelChart').getContext('2d');
+            new Chart(ctxModel, {
+                type: 'doughnut',
+                data: {
+                    labels: ['GPT-4o + Medical', 'Claude 3 Opus', 'GPT-4 Turbo'],
+                    datasets: [{
+                        data: [65, 20, 15],
+                        backgroundColor: [
+                            '#2563eb', // primary-container
+                            '#10b981', // medical-success/green
+                            '#f59e0b'  // amber
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: { legend: { display: false } }
+                }
+            });
+        });
+    </script>
+</body></html>

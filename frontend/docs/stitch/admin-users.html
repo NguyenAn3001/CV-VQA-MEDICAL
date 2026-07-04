@@ -1,0 +1,275 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Admin Panel - User Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#434655",
+                        "inverse-surface": "#2d3133",
+                        "on-primary-fixed": "#00174b",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#f7f9fb",
+                        "tertiary-fixed": "#ffdbcd",
+                        "primary-fixed": "#dbe1ff",
+                        "surface-container-low": "#f2f4f6",
+                        "secondary": "#505f76",
+                        "secondary-fixed": "#d3e4fe",
+                        "surface-container-high": "#e6e8ea",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "on-error": "#ffffff",
+                        "primary": "#004ac6",
+                        "on-error-container": "#93000a",
+                        "surface-white": "#ffffff",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "surface-bright": "#f7f9fb",
+                        "surface-variant": "#e0e3e5",
+                        "medical-success": "#10b981",
+                        "tertiary-container": "#bc4800",
+                        "secondary-container": "#d0e1fb",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#54647a",
+                        "on-surface": "#191c1e",
+                        "tertiary": "#943700",
+                        "border-subtle": "#e2e8f0",
+                        "outline": "#737686",
+                        "medical-error": "#ef4444",
+                        "outline-variant": "#c3c6d7",
+                        "on-tertiary-container": "#ffede6",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#eeefff",
+                        "inverse-primary": "#b4c5ff",
+                        "surface-container": "#eceef0",
+                        "background": "#f7f9fb",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "error-container": "#ffdad6",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "sidebar-bg": "#f9fafb",
+                        "on-secondary-fixed": "#0b1c30",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "surface-tint": "#0053db",
+                        "surface-container-highest": "#e0e3e5",
+                        "primary-container": "#2563eb",
+                        "on-tertiary-fixed": "#360f00",
+                        "on-background": "#191c1e",
+                        "surface-dim": "#d8dadc"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-padding": "2rem",
+                        "gutter": "1rem",
+                        "message-gap": "1.5rem",
+                        "inner-padding": "1rem",
+                        "sidebar-width": "280px"
+                    },
+                    "fontFamily": {
+                        "label-xs": ["Inter"],
+                        "mono-label": ["jetbrainsMono"],
+                        "label-md": ["Inter"],
+                        "body-base": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-xs": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "mono-label": ["13px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "body-base": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-sm": ["18px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-base h-screen overflow-hidden flex">
+<!-- TopAppBar (Mobile Only) -->
+<header class="md:hidden flex justify-between items-center w-full px-inner-padding border-b border-border-subtle bg-surface dark:bg-inverse-surface absolute top-0 left-0 z-20 h-14">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-weight="fill" style="font-variation-settings: 'FILL' 1;">medical_services</span>
+<span class="text-headline-sm font-headline-sm font-bold text-on-surface dark:text-inverse-on-surface">MedVQA</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-label-md font-label-md text-on-surface-variant bg-surface-container-high px-2 py-1 rounded-full">GPT-4o + Medical</span>
+<button class="text-on-surface hover:bg-surface-container-high rounded-full p-1 transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</header>
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col h-screen w-sidebar-width p-4 gap-2 bg-sidebar-bg dark:bg-inverse-surface border-r border-border-subtle shrink-0 z-10 relative">
+<div class="flex items-center justify-between mb-4 px-2">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold">
+<span class="material-symbols-outlined text-xl" data-weight="fill" style="font-variation-settings: 'FILL' 1;">medical_services</span>
+</div>
+<div>
+<h1 class="text-headline-sm font-headline-sm font-bold text-on-surface leading-tight">MedVQA Admin</h1>
+<p class="text-label-xs font-label-xs text-on-surface-variant">AI Medical Assistant</p>
+</div>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface p-1 rounded-lg hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">keyboard_double_arrow_left</span>
+</button>
+</div>
+<div class="flex flex-col gap-1 mb-4"><a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-container-low text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-[20px]">dashboard</span><span class="text-label-md font-medium">Dashboard</span></a><a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary-container text-on-primary-container transition-colors"><span class="material-symbols-outlined text-[20px]">group</span><span class="text-label-md font-medium">Users</span></a><a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-container-low text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-[20px]">history</span><span class="text-label-md font-medium">Sessions</span></a><a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-container-low text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-[20px]">analytics</span><span class="text-label-md font-medium">Analytics</span></a><a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-container-low text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-[20px]">neurology</span><span class="text-label-md font-medium">Models</span></a><a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-container-low text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-[20px]">settings</span><span class="text-label-md font-medium">Settings</span></a></div>
+
+<div class="mt-auto pt-4 border-t border-border-subtle flex flex-col gap-2"><a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-container-low text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-[20px]">arrow_back</span><span class="text-label-md font-medium">Back to Chat</span></a></div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col h-full overflow-hidden bg-background pt-14 md:pt-0">
+<div class="flex-1 overflow-y-auto w-full p-4 md:p-8">
+<div class="max-w-6xl mx-auto">
+<!-- Page Header -->
+<div class="mb-8">
+<h2 class="text-2xl font-bold text-on-surface tracking-tight mb-2">User Management</h2>
+<p class="text-body-sm text-on-surface-variant">Manage hospital staff access, roles, and system permissions.</p>
+</div>
+<!-- Data Table Container -->
+<div class="bg-surface-white border border-border-subtle rounded-xl overflow-hidden shadow-sm">
+<!-- Table Toolbar -->
+<div class="flex items-center justify-between p-4 border-b border-border-subtle bg-surface-container-lowest">
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="w-full pl-9 pr-4 py-2 bg-surface-container-low border-none rounded-lg text-body-sm font-body-sm text-on-surface focus:ring-2 focus:ring-primary focus:bg-surface-white transition-all outline-none placeholder-on-surface-variant/60" placeholder="Search users..." type="text">
+</div>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg text-label-md font-label-md hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined text-sm">person_add</span>
+                            Add User
+                        </button>
+</div>
+<!-- Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-lowest border-b border-border-subtle">
+<th class="px-6 py-4 text-label-xs font-label-xs text-on-surface-variant uppercase tracking-wider font-medium">User</th>
+<th class="px-6 py-4 text-label-xs font-label-xs text-on-surface-variant uppercase tracking-wider font-medium">Email</th>
+<th class="px-6 py-4 text-label-xs font-label-xs text-on-surface-variant uppercase tracking-wider font-medium">Role</th>
+<th class="px-6 py-4 text-label-xs font-label-xs text-on-surface-variant uppercase tracking-wider font-medium">Joined Date</th>
+<th class="px-6 py-4 text-right text-label-xs font-label-xs text-on-surface-variant uppercase tracking-wider font-medium">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-subtle">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center text-label-xs font-bold">DS</div>
+<span class="text-body-sm font-body-sm text-on-surface font-medium">dr.smith</span>
+</div>
+</td>
+<td class="px-6 py-4 text-body-sm text-on-surface-variant">dr.smith@hospital.com</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary-fixed text-on-primary-fixed">admin</span>
+</td>
+<td class="px-6 py-4 text-body-sm text-on-surface-variant">May 12, 2024</td>
+<td class="px-6 py-4 text-right">
+<button class="text-on-surface-variant hover:text-on-surface opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-surface-variant">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center text-label-xs font-bold">JD</div>
+<span class="text-body-sm font-body-sm text-on-surface font-medium">jane.doe</span>
+</div>
+</td>
+<td class="px-6 py-4 text-body-sm text-on-surface-variant">jane.doe@hospital.com</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-surface-container-high text-on-surface-variant border border-border-subtle">user</span>
+</td>
+<td class="px-6 py-4 text-body-sm text-on-surface-variant">May 10, 2024</td>
+<td class="px-6 py-4 text-right">
+<button class="text-on-surface-variant hover:text-on-surface opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-surface-variant">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center text-label-xs font-bold">ML</div>
+<span class="text-body-sm font-body-sm text-on-surface font-medium">michael.lee</span>
+</div>
+</td>
+<td class="px-6 py-4 text-body-sm text-on-surface-variant">michael.lee@clinic.com</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-surface-container-high text-on-surface-variant border border-border-subtle">user</span>
+</td>
+<td class="px-6 py-4 text-body-sm text-on-surface-variant">May 8, 2024</td>
+<td class="px-6 py-4 text-right">
+<button class="text-on-surface-variant hover:text-on-surface opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-surface-variant">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-fixed-dim text-on-primary-fixed-variant flex items-center justify-center text-label-xs font-bold">SW</div>
+<span class="text-body-sm font-body-sm text-on-surface font-medium">sarah.wang</span>
+</div>
+</td>
+<td class="px-6 py-4 text-body-sm text-on-surface-variant">sarah.wang@hospital.com</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-surface-container-high text-on-surface-variant border border-border-subtle">user</span>
+</td>
+<td class="px-6 py-4 text-body-sm text-on-surface-variant">May 5, 2024</td>
+<td class="px-6 py-4 text-right">
+<button class="text-on-surface-variant hover:text-on-surface opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-surface-variant">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer/Pagination -->
+<div class="flex items-center justify-between px-6 py-3 border-t border-border-subtle bg-surface-container-lowest text-sm">
+<span class="text-on-surface-variant text-label-xs">Showing 1 to 4 of 48 users</span>
+<div class="flex gap-1">
+<button class="px-3 py-1 rounded border border-border-subtle text-on-surface-variant disabled:opacity-50" disabled="">Previous</button>
+<button class="px-3 py-1 rounded bg-primary text-on-primary">1</button>
+<button class="px-3 py-1 rounded border border-border-subtle text-on-surface hover:bg-surface-container-low">2</button>
+<button class="px-3 py-1 rounded border border-border-subtle text-on-surface hover:bg-surface-container-low">3</button>
+<span class="px-2 py-1 text-on-surface-variant">...</span>
+<button class="px-3 py-1 rounded border border-border-subtle text-on-surface hover:bg-surface-container-low">Next</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+
+
+
+</body></html>
