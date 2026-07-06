@@ -1,7 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import AppLayout from './components/layout/AppLayout';
-import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
+import AuthPage from './pages/auth/AuthPage';
 import ChangePassword from './pages/auth/ChangePassword';
 import ChatPage from './pages/chat/ChatPage';
 import ProfilePage from './pages/profile/ProfilePage';
@@ -54,13 +54,16 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   return (
-    <BrowserRouter>
+    <>
+      <Toaster position="top-right" richColors closeButton />
+      <BrowserRouter>
       <Routes>
+        <Route path="/" element={<PublicOnlyRoute><AuthPage /></PublicOnlyRoute>} />
         <Route
           path="/login"
           element={
             <PublicOnlyRoute>
-              <Login />
+              <AuthPage />
             </PublicOnlyRoute>
           }
         />
@@ -68,7 +71,7 @@ function App() {
           path="/register"
           element={
             <PublicOnlyRoute>
-              <Register />
+              <AuthPage />
             </PublicOnlyRoute>
           }
         />
@@ -80,7 +83,6 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="/" element={<Navigate to="/chat" replace />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/chat/:sessionId" element={<ChatPage />} />
           <Route path="/sessions/:sessionId" element={<SessionDetailPage />} />
@@ -119,7 +121,8 @@ function App() {
           />
         </Route>
       </Routes>
-    </BrowserRouter>
+      </BrowserRouter>
+    </>
   );
 }
 
