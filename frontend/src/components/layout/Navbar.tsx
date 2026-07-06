@@ -1,17 +1,63 @@
+import { useChatStore } from '../../store/chatStore';
+import { Menu } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+
 interface NavbarProps {
   title: string;
   subtitle?: string;
   actions?: React.ReactNode;
 }
 
-export default function Navbar({ title, subtitle, actions }: NavbarProps) {
+export default function Navbar({ title }: NavbarProps) {
+  const toggleSidebar = useChatStore((state) => state.toggleSidebar);
+  const isSidebarCollapsed = useChatStore((state) => state.isSidebarCollapsed);
+  const activeSessionId = useChatStore((state) => state.activeSessionId);
+  const openDetailModal = useChatStore((state) => state.openDetailModal);
+  const deleteSession = useChatStore((state) => state.deleteSession);
+
   return (
-    <header className="flex h-16 items-center justify-between border-b border-slate-200 px-6 lg:px-8">
-      <div className="min-w-0">
-        <h1 className="truncate text-[17px] font-semibold text-slate-900">{title}</h1>
-        {subtitle ? <p className="truncate text-sm text-slate-500">{subtitle}</p> : null}
+    <header className="bg-surface flex justify-between items-center w-full px-inner-padding border-b border-border-subtle h-14 shrink-0 z-10">
+      <div className="flex items-center gap-2 cursor-pointer hover:bg-surface-container-high rounded-md px-2 py-1 transition-colors">
+        {isSidebarCollapsed && (
+          <button 
+            className="p-1 -ml-1 mr-1 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors md:hidden"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleSidebar();
+            }}
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        )}
+        <h2 className="text-headline-sm font-headline-sm font-semibold text-on-surface truncate max-w-[200px] sm:max-w-[400px]">{title}</h2>
       </div>
-      {actions ? <div className="ml-4 flex items-center gap-3">{actions}</div> : null}
+      <div className="flex items-center gap-3">
+        <div className="hidden sm:flex items-center gap-2 bg-surface-container-low border border-border-subtle rounded-full px-3 py-1 text-label-md font-label-md text-on-surface-variant">
+          <span className="material-symbols-outlined text-[16px] text-primary">magic_button</span>
+          GPT-4o + Medical
+        </div>
+        
+        {activeSessionId && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="p-1 hover:bg-surface-container-high rounded-full text-on-surface-variant transition-colors outline-none">
+                <span className="material-symbols-outlined">more_vert</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 z-50">
+              <DropdownMenuItem onClick={() => openDetailModal(activeSessionId)} className="cursor-pointer">
+                View Details
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => deleteSession(activeSessionId)} 
+                className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-50"
+              >
+                Delete Chat
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </div>
     </header>
   );
 }
