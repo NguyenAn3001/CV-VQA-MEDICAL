@@ -57,10 +57,15 @@ export default function ChatPage() {
     });
   }, [activeSessionId, fetchSessionDetail, sessionDetailsById]);
 
-  const activeSession = useMemo(
-    () => sessions.find((session) => session.id === activeSessionId) ?? null,
-    [activeSessionId, sessions]
-  );
+  // Expose a global resize listener to let image load / markdown reflows trigger a re-scroll
+  useEffect(() => {
+    const handleResize = () => {
+      // Force a slight state update to trigger layout effect in ChatWindow
+      window.dispatchEvent(new CustomEvent('chat-reflow'));
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleSend = async () => {
     if ((!inputText.trim() && !selectedFile) || isGenerating) {
@@ -69,41 +74,73 @@ export default function ChatPage() {
 
     setErrorMessage(null);
 
+    // Capture current input state
+    const textToSend = inputText;
+    const fileToSend = selectedFile;
+    
+    // Create temporary optimistic message
+    const tempUserMessage: ChatMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: textToSend,
+      image_url: fileToSend ? URL.createObjectURL(fileToSend) : null,
+      created_at: new Date().toISOString()
+    };
+
+    // Immediate UI Update
+    setMessages(prev => [...prev, tempUserMessage]);
+    setInputText('');
+    setSelectedFile(null);
+
     let targetSessionId = activeSessionId;
     if (!targetSessionId) {
       targetSessionId = await createSession();
       if (!targetSessionId) {
         setErrorMessage('Unable to create a chat session.');
+        // Remove optimistic message if session creation fails
+        setMessages(prev => prev.filter(m => m.id !== tempUserMessage.id));
         return;
       }
 
       setActiveSession(targetSessionId);
-      navigate(`/chat/${targetSessionId}`);
+      navigate(`/chat/${targetSessionId}`, { replace: true });
     }
 
     try {
-      const { userMessage, assistantMessage } = await sendMessage(targetSessionId, inputText, selectedFile);
-      const nextMessages = [...messages, userMessage, assistantMessage];
-      setMessages(nextMessages);
-      setSessionMessages(targetSessionId, nextMessages);
-      setInputText('');
-      setSelectedFile(null);
-
+      const { assistantMessage } = await sendMessage(targetSessionId, textToSend, fileToSend);
+      
+      // We don't need the server's userMessage as we already have our optimistic one.
+      // But we should fetch the final details to ensure sync.
       const detail = await fetchSessionDetail(targetSessionId);
       if (detail) {
         setMessages(detail.messages);
         setSessionMessages(targetSessionId, detail.messages);
         upsertSession(detail);
+      } else {
+        // Fallback if fetch fails
+        const nextMessages = [...messages, tempUserMessage, assistantMessage];
+        setMessages(nextMessages);
+        setSessionMessages(targetSessionId, nextMessages);
       }
 
       await fetchSessions();
     } catch (error: any) {
       setErrorMessage(error.message || 'Unable to complete the request.');
+      // Keep user message but maybe show error state in future
     }
   };
 
+  const activeSession = useMemo(
+    () => sessions.find((session) => session.id === activeSessionId) ?? null,
+    [activeSessionId, sessions]
+  );
+
+  const handleSuggestionClick = (suggestionText: string) => {
+    setInputText(suggestionText);
+  };
+
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-white">
+    <>
       <Navbar
         title={activeSession?.title || 'New Chat'}
         subtitle={activeSession ? 'GPT-4o + Medical' : 'Start a new medical review'}
@@ -113,11 +150,13 @@ export default function ChatPage() {
         streamingContent={streamingContent}
         activeTools={activeTools}
         isGenerating={isGenerating}
-        sessionTitle={activeSession?.title}
         isEmptyState={!activeSessionId && messages.length === 0}
+        onSuggestionClick={handleSuggestionClick}
       />
       {errorMessage ? (
-        <div className="mx-auto mb-2 w-full max-w-3xl px-4 text-sm text-red-600">{errorMessage}</div>
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-50 bg-red-100 text-red-700 px-4 py-2 rounded-full text-sm font-medium shadow-sm">
+          {errorMessage}
+        </div>
       ) : null}
       <ChatInput
         inputText={inputText}
@@ -127,6 +166,6 @@ export default function ChatPage() {
         onFileChange={setSelectedFile}
         isGenerating={isGenerating}
       />
-    </div>
+    </>
   );
 }

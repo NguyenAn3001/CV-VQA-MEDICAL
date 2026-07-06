@@ -58,3 +58,22 @@
     font-family: Inter, system-ui, sans-serif;
   }
 }
+
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+.icon-fill { font-variation-settings: 'FILL' 1; }
+
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.streaming-cursor {
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  background-color: currentColor;
+  vertical-align: middle;
+  animation: cursor-blink 1s step-end infinite;
+  margin-left: 0.25rem;
+}
+
