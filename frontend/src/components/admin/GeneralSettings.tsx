@@ -13,10 +13,11 @@ import {
 import { cn } from '@/lib/utils';
 import type { SettingsFormValues } from './settingsSchema';
 import {
-  MODEL_OPTIONS,
   LANGUAGE_OPTIONS,
   TIMEZONE_OPTIONS,
 } from './settingsSchema';
+import { useEffect, useState } from 'react';
+import api from '@/lib/axios';
 
 // ── Shared row layout ────────────────────────────────────────────
 interface SettingsRowProps {
@@ -62,6 +63,64 @@ interface GeneralSettingsProps {
 
 // ── Component ───────────────────────────────────────────────────
 export default function GeneralSettings({ control, errors }: GeneralSettingsProps) {
+  const [modelOptions, setModelOptions] = useState<{value: string, label: string}[]>([]);
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
+
+  useEffect(() => {
+    // Fetch models from all configured providers
+    const fetchModels = async () => {
+      setIsLoadingModels(true);
+      try {
+        const providersRes = await api.get('/admin/providers');
+        const allProviders = providersRes.data || [];
+        
+        let allModelOptions: {value: string, label: string}[] = [];
+        
+        for (const provider of allProviders) {
+            try {
+               const modelsRes = await api.post(`/admin/providers/${provider.id}/models`);
+               if (modelsRes.data.success && modelsRes.data.models.length > 0) {
+                   const providerModels = modelsRes.data.models.map((m: string) => ({
+                       value: m, 
+                       label: `${m} (${provider.name})`
+                   }));
+                   allModelOptions = [...allModelOptions, ...providerModels];
+               } else if (provider.chatModel) {
+                   allModelOptions.push({
+                       value: provider.chatModel,
+                       label: `${provider.chatModel} (${provider.name})`
+                   });
+               }
+            } catch (err) {
+               console.error(`Failed to load models for provider ${provider.name}`, err);
+               if (provider.chatModel) {
+                   allModelOptions.push({
+                       value: provider.chatModel,
+                       label: `${provider.chatModel} (${provider.name} - Offline)`
+                   });
+               }
+            }
+        }
+        
+        // Remove duplicates just in case multiple providers expose the same model name, 
+        // though the label will differ so they are technically unique options if desired.
+        // We'll keep them unique by value, or if user wants to select a model explicitly via a provider,
+        // we might need to store provider info. Let's keep it simple: model names are often unique, 
+        // but if not, the first one found takes precedence for the exact string value.
+        const uniqueModels = Array.from(new Map(allModelOptions.map(item => [item.value, item])).values());
+        
+        setModelOptions(uniqueModels);
+        
+      } catch (err) {
+        console.error("Failed to load models for general settings", err);
+        setModelOptions([]);
+      } finally {
+        setIsLoadingModels(false);
+      }
+    };
+    fetchModels();
+  }, []);
+
   return (
     <div role="tabpanel" id="settings-panel-general" aria-labelledby="settings-tab-general">
       {/* ── System Name ──────────────────── */}
@@ -99,20 +158,34 @@ export default function GeneralSettings({ control, errors }: GeneralSettingsProp
         <Controller
           name="defaultModel"
           control={control}
-          render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger id="defaultModel" className="h-10">
-                <SelectValue placeholder="Select model…" />
-              </SelectTrigger>
-              <SelectContent>
-                {MODEL_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          render={({ field }) => {
+            // Ensure the currently selected value is always in the dropdown options to prevent Select from breaking
+            const currentOptions = [...modelOptions];
+            if (field.value && !currentOptions.find(o => o.value === field.value)) {
+              currentOptions.push({ value: field.value, label: field.value });
+            }
+
+            return (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger id="defaultModel" className="h-10">
+                  <SelectValue placeholder={isLoadingModels ? "Loading models..." : "Select model…"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {currentOptions.length > 0 ? (
+                    currentOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="none" disabled>
+                      No models available
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            );
+          }}
         />
       </SettingsRow>
 

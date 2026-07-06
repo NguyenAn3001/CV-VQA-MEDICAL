@@ -157,14 +157,6 @@ function App() {
             }
           />
           <Route
-            path="/admin/models"
-            element={
-              <AdminRoute>
-                <UsersPage />
-              </AdminRoute>
-            }
-          />
-          <Route
             path="/admin/settings"
             element={
               <AdminRoute>

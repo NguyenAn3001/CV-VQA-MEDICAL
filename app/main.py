@@ -13,6 +13,8 @@ from app.api.health import router as health_router
 from app.api.auth import router as auth_router
 from app.api.users import router as users_router
 from app.api.chat import router as chat_router
+from app.api.settings import router as settings_router
+from app.api.providers import router as providers_router
 from app.core.redis import redis_client
 from app.services.minio_service import minio_service
 from app.db.init_db import init_db
@@ -76,6 +78,8 @@ app.add_middleware(
 app.include_router(health_router, tags=["Health"])
 app.include_router(auth_router, prefix=f"{settings.API_V1_STR}/auth", tags=["Authentication"])
 app.include_router(users_router, prefix=f"{settings.API_V1_STR}/admin/users", tags=["Admin Users"])
+app.include_router(settings_router, prefix=f"{settings.API_V1_STR}/admin/settings", tags=["Admin Settings"])
+app.include_router(providers_router, prefix=f"{settings.API_V1_STR}/admin/providers", tags=["Admin Providers"])
 app.include_router(chat_router, prefix=f"{settings.API_V1_STR}/chat", tags=["Chatbot"])
 app.include_router(predict_router, prefix=settings.API_V1_STR, tags=["Medical AI Inference"])
 

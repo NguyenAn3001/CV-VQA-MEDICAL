@@ -98,7 +98,15 @@ class OpenAICompatibleProvider(BaseLLMProvider):
 
         try:
             stream = await self.client.chat.completions.create(**params)
-            
+        except Exception as e:
+            logger.error(f"Error starting OpenAI stream: {str(e)}")
+            yield StreamChunk(
+                content=f"**API Connection Error:** {str(e)}",
+                is_done=True
+            )
+            return
+
+        try:
             current_tool_calls = {}
             
             async for chunk in stream:
