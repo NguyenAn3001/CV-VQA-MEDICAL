@@ -100,7 +100,7 @@ cp .env.example .env
 
 ### 5. Download Model Weights
 Place the required model weights into the `models/` directory:
-* **VQA Weights**: `models/ViT/best_vit_pubmedbert_slake.pth` (VQA pipeline weights containing `answer2idx`)
+* **VQA Weights**: `models/best_vit_pubmedbert_slake.pth` (VQA pipeline weights containing `answer2idx`)
 * **Captioning Weights**: `models/best_captioning_roco_v6_fulldata.pth` (Captioning pipeline weights)
 
 ---
