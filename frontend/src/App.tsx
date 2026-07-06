@@ -6,9 +6,13 @@ import ChangePassword from './pages/auth/ChangePassword';
 import ChatPage from './pages/chat/ChatPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
+import UsersPage from './pages/admin/UsersPage';
 import AdminAnalyticsPage from './pages/admin/AdminAnalyticsPage';
+import AnalyticsPage from './pages/admin/AnalyticsPage';
 import AdminSettingsPage from './pages/admin/AdminSettingsPage';
+import SettingsPage from './pages/admin/SettingsPage';
 import AdminSessionsPage from './pages/admin/AdminSessionsPage';
+import SessionsPage from './pages/admin/SessionsPage';
 import SessionDetailPage from './pages/chat/SessionDetailPage';
 import { useAuthStore } from './store/authStore';
 
@@ -27,8 +31,22 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+/**
+ * AdminRoute — standalone guard (does NOT rely on being inside AppLayout).
+ * Checks auth + mustChangePassword + admin role independently.
+ */
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const mustChangePassword = useAuthStore((state) => state.mustChangePassword);
   const user = useAuthStore((state) => state.user);
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (mustChangePassword) {
+    return <Navigate to="/change-password" replace />;
+  }
 
   if (user?.role !== 'admin') {
     return <Navigate to="/chat" replace />;
@@ -56,6 +74,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* ── Public routes ──────────────────────────────────────────── */}
         <Route
           path="/login"
           element={
@@ -73,6 +92,8 @@ function App() {
           }
         />
         <Route path="/change-password" element={<ChangePassword />} />
+
+        {/* ── Chat / Profile — wrapped in AppLayout (chat sidebar) ───── */}
         <Route
           element={
             <ProtectedRoute>
@@ -85,39 +106,64 @@ function App() {
           <Route path="/chat/:sessionId" element={<ChatPage />} />
           <Route path="/sessions/:sessionId" element={<SessionDetailPage />} />
           <Route path="/profile" element={<ProfilePage />} />
-          <Route
-            path="/admin/users"
-            element={
-              <AdminRoute>
-                <AdminUsersPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/analytics"
-            element={
-              <AdminRoute>
-                <AdminAnalyticsPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/settings"
-            element={
-              <AdminRoute>
-                <AdminSettingsPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/sessions"
-            element={
-              <AdminRoute>
-                <AdminSessionsPage />
-              </AdminRoute>
-            }
-          />
+          {/* Legacy admin pages (still use chat AppLayout) */}
+          <Route path="/admin/users-legacy"     element={<AdminUsersPage />} />
+          <Route path="/admin/analytics-legacy" element={<AdminAnalyticsPage />} />
+          <Route path="/admin/sessions-legacy"  element={<AdminSessionsPage />} />
+          <Route path="/admin/settings-legacy"  element={<AdminSettingsPage />} />
         </Route>
+
+        {/* ── Admin Dashboard — NOT inside AppLayout ─────────────────── */}
+        {/* Each page renders DashboardLayout + AdminSidebar internally.  */}
+        {/* This prevents the double-sidebar overlap.                     */}
+        <Route
+          path="/admin/users"
+          element={
+            <AdminRoute>
+              <UsersPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <AdminRoute>
+              <UsersPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/analytics"
+          element={
+            <AdminRoute>
+              <AnalyticsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/sessions"
+          element={
+            <AdminRoute>
+              <SessionsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/models"
+          element={
+            <AdminRoute>
+              <UsersPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/settings"
+          element={
+            <AdminRoute>
+              <SettingsPage />
+            </AdminRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
