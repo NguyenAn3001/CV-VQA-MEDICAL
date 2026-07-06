@@ -1,14 +1,18 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import AppLayout from './components/layout/AppLayout';
-import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
+import AuthPage from './pages/auth/AuthPage';
 import ChangePassword from './pages/auth/ChangePassword';
 import ChatPage from './pages/chat/ChatPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
+import UsersPage from './pages/admin/UsersPage';
 import AdminAnalyticsPage from './pages/admin/AdminAnalyticsPage';
+import AnalyticsPage from './pages/admin/AnalyticsPage';
 import AdminSettingsPage from './pages/admin/AdminSettingsPage';
+import SettingsPage from './pages/admin/SettingsPage';
 import AdminSessionsPage from './pages/admin/AdminSessionsPage';
+import SessionsPage from './pages/admin/SessionsPage';
 import SessionDetailPage from './pages/chat/SessionDetailPage';
 import { useAuthStore } from './store/authStore';
 
@@ -27,8 +31,22 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+/**
+ * AdminRoute — standalone guard (does NOT rely on being inside AppLayout).
+ * Checks auth + mustChangePassword + admin role independently.
+ */
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const mustChangePassword = useAuthStore((state) => state.mustChangePassword);
   const user = useAuthStore((state) => state.user);
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (mustChangePassword) {
+    return <Navigate to="/change-password" replace />;
+  }
 
   if (user?.role !== 'admin') {
     return <Navigate to="/chat" replace />;
@@ -54,42 +72,71 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path="/login"
-          element={
-            <PublicOnlyRoute>
-              <Login />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <PublicOnlyRoute>
-              <Register />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route path="/change-password" element={<ChangePassword />} />
-        <Route
-          element={
-            <ProtectedRoute>
-              <AppLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/" element={<Navigate to="/chat" replace />} />
-          <Route path="/chat" element={<ChatPage />} />
-          <Route path="/chat/:sessionId" element={<ChatPage />} />
-          <Route path="/sessions/:sessionId" element={<SessionDetailPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
+    <>
+      <Toaster position="top-right" richColors closeButton />
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <PublicOnlyRoute>
+                <AuthPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <PublicOnlyRoute>
+                <AuthPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <PublicOnlyRoute>
+                <AuthPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route path="/change-password" element={<ChangePassword />} />
+
+          {/* ── Chat / Profile — wrapped in AppLayout (chat sidebar) ───── */}
+          <Route
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/chat" element={<ChatPage />} />
+            <Route path="/chat/:sessionId" element={<ChatPage />} />
+            <Route path="/sessions/:sessionId" element={<SessionDetailPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            {/* Legacy admin pages (still use chat AppLayout) */}
+            <Route path="/admin/users-legacy" element={<AdminUsersPage />} />
+            <Route path="/admin/analytics-legacy" element={<AdminAnalyticsPage />} />
+            <Route path="/admin/sessions-legacy" element={<AdminSessionsPage />} />
+            <Route path="/admin/settings-legacy" element={<AdminSettingsPage />} />
+          </Route>
+
+          {/* ── Admin Dashboard — NOT inside AppLayout ─────────────────── */}
+          {/* Each page renders DashboardLayout + AdminSidebar internally.  */}
+          {/* This prevents the double-sidebar overlap.                     */}
           <Route
             path="/admin/users"
             element={
               <AdminRoute>
-                <AdminUsersPage />
+                <UsersPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <AdminRoute>
+                <UsersPage />
               </AdminRoute>
             }
           />
@@ -97,15 +144,7 @@ function App() {
             path="/admin/analytics"
             element={
               <AdminRoute>
-                <AdminAnalyticsPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/settings"
-            element={
-              <AdminRoute>
-                <AdminSettingsPage />
+                <AnalyticsPage />
               </AdminRoute>
             }
           />
@@ -113,13 +152,29 @@ function App() {
             path="/admin/sessions"
             element={
               <AdminRoute>
-                <AdminSessionsPage />
+                <SessionsPage />
               </AdminRoute>
             }
           />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+          <Route
+            path="/admin/models"
+            element={
+              <AdminRoute>
+                <UsersPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/settings"
+            element={
+              <AdminRoute>
+                <SettingsPage />
+              </AdminRoute>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </>
   );
 }
 

@@ -60,14 +60,14 @@ class GeminiProvider(BaseLLMProvider):
             required = func.get("parameters", {}).get("required", [])
             
             for prop_name, prop_details in func.get("parameters", {}).get("properties", {}).items():
-                prop_type = types.Type.STRING if prop_details.get("type") == "string" else types.Type.OBJECT
+                prop_type = "STRING" if prop_details.get("type") == "string" else "OBJECT"
                 properties[prop_name] = types.Schema(
                     type=prop_type,
                     description=prop_details.get("description", "")
                 )
             
             schema = types.Schema(
-                type=types.Type.OBJECT,
+                type="OBJECT",
                 properties=properties,
                 required=required
             ) if properties else None
@@ -141,7 +141,7 @@ class GeminiProvider(BaseLLMProvider):
         )
 
         try:
-            stream = await self.client.aio.models.generate_content_stream(
+            stream = self.client.aio.models.generate_content_stream(
                 model=self.model,
                 contents=gemini_messages,
                 config=config
