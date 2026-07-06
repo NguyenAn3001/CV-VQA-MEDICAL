@@ -1,25 +1,17 @@
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import {
-  Activity,
-  ChevronRight,
-  LogOut,
-  MessageSquare,
-  Plus,
-  Settings,
-  Shield,
-  UserCircle2,
-  Users,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '../../store/authStore';
 import { useChatStore } from '../../store/chatStore';
+import { ChevronLeft, ChevronRight, Plus, MessageSquare, Verified, LogOut } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useEffect, useState } from 'react';
 
-const sidebarLinkClass = ({ isActive }: { isActive: boolean }) =>
+const sidebarLinkClass = ({ isActive, isCollapsed }: { isActive: boolean; isCollapsed: boolean }) =>
   cn(
-    'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-    isActive ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-white hover:text-slate-900'
+    'flex items-center text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg group',
+    isCollapsed ? 'justify-center p-2' : 'gap-3 px-3 py-2',
+    isActive ? 'bg-secondary-container text-on-secondary-container scale-[0.99] transition-transform duration-150' : ''
   );
 
 export default function Sidebar() {
@@ -29,18 +21,31 @@ export default function Sidebar() {
   const logout = useAuthStore((state) => state.logout);
   const sessions = useChatStore((state) => state.sessions);
   const activeSessionId = useChatStore((state) => state.activeSessionId);
-  const createSession = useChatStore((state) => state.createSession);
-  const deleteSession = useChatStore((state) => state.deleteSession);
   const setActiveSession = useChatStore((state) => state.setActiveSession);
+  const isCollapsed = useChatStore((state) => state.isSidebarCollapsed);
+  const toggleSidebar = useChatStore((state) => state.toggleSidebar);
+  const setSidebarCollapsed = useChatStore((state) => state.setSidebarCollapsed);
+  
+  // Manage responsive collapse
+  const [isMobile, setIsMobile] = useState(false);
 
-  const handleNewChat = async () => {
-    const id = await createSession();
-    if (!id) {
-      return;
-    }
+  useEffect(() => {
+    const checkResponsive = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setSidebarCollapsed(true);
+      }
+    };
+    
+    checkResponsive();
+    window.addEventListener('resize', checkResponsive);
+    return () => window.removeEventListener('resize', checkResponsive);
+  }, [setSidebarCollapsed]);
 
-    setActiveSession(id);
-    navigate(`/chat/${id}`);
+  const handleNewChat = () => {
+    setActiveSession(null);
+    navigate(`/chat`);
   };
 
   const handleLogout = () => {
@@ -51,110 +56,192 @@ export default function Sidebar() {
   const onSessionClick = (id: string) => {
     setActiveSession(id);
     navigate(`/chat/${id}`);
+    if (isMobile) {
+      setSidebarCollapsed(true);
+    }
   };
 
   return (
-    <aside className="hidden w-[280px] shrink-0 border-r border-slate-200 bg-[#f9fafb] lg:flex lg:flex-col">
-      <div className="border-b border-slate-200 px-5 py-5">
-        <Link to="/chat" className="block">
-          <div className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">MedVQA</div>
-          <div className="mt-1 text-lg font-semibold text-slate-900">Clinical Clarity</div>
-          <p className="mt-1 text-sm text-slate-500">Medical-grade chat and review workflows.</p>
-        </Link>
-        <Button className="mt-5 w-full justify-start rounded-lg bg-[#2563eb] hover:bg-[#1d4ed8]" onClick={handleNewChat}>
-          <Plus className="h-4 w-4" />
-          New chat
-        </Button>
-      </div>
-
-      <div className="px-3 pt-4">
-        <div className="px-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Workspace</div>
-        <nav className="mt-2 space-y-1">
-          <NavLink to="/chat" end className={sidebarLinkClass}>
-            <MessageSquare className="h-4 w-4" />
-            Chat
-          </NavLink>
-          <NavLink to="/profile" className={sidebarLinkClass}>
-            <UserCircle2 className="h-4 w-4" />
-            Profile
-          </NavLink>
-          {user?.role === 'admin' ? (
-            <>
-              <NavLink to="/admin/users" className={sidebarLinkClass}>
-                <Users className="h-4 w-4" />
-                Users
-              </NavLink>
-              <NavLink to="/admin/analytics" className={sidebarLinkClass}>
-                <Activity className="h-4 w-4" />
-                Analytics
-              </NavLink>
-              <NavLink to="/admin/sessions" className={sidebarLinkClass}>
-                <Shield className="h-4 w-4" />
-                Sessions
-              </NavLink>
-              <NavLink to="/admin/settings" className={sidebarLinkClass}>
-                <Settings className="h-4 w-4" />
-                Settings
-              </NavLink>
-            </>
-          ) : null}
-        </nav>
-      </div>
-
-      <div className="mt-4 px-5 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Recent sessions</div>
-      <ScrollArea className="mt-2 flex-1 px-3">
-        <div className="space-y-1 pb-4">
-          {sessions.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-200 bg-white px-3 py-4 text-sm text-slate-500">
-              No sessions yet. Start a new review to begin.
+    <TooltipProvider delayDuration={300}>
+      <motion.nav 
+        initial={false}
+        animate={{ 
+          width: isCollapsed ? (isMobile ? 0 : 72) : 280,
+          opacity: isCollapsed && isMobile ? 0 : 1,
+        }}
+        transition={{ duration: 0.25, ease: 'easeInOut' }}
+        className={cn(
+          "bg-sidebar-bg border-r border-border-subtle h-screen flex flex-col p-4 gap-2 z-20 shrink-0 overflow-hidden",
+          isMobile && "fixed left-0 top-0 bottom-0 shadow-2xl"
+        )}
+      >
+        {/* Header */}
+        <div className={cn("flex items-center mb-6 px-1", isCollapsed ? "justify-center flex-col gap-4" : "justify-between")}>
+          <div 
+            className={cn("flex items-center gap-3 cursor-pointer overflow-hidden", isCollapsed && "justify-center")} 
+            onClick={() => navigate('/chat')}
+          >
+            <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold shrink-0">
+              <span className="material-symbols-outlined icon-fill">medical_services</span>
             </div>
-          ) : null}
-          {sessions.map((session) => {
-            const isActive =
-              activeSessionId === session.id || location.pathname === `/chat/${session.id}`;
-
-            return (
-              <div
-                key={session.id}
-                className={cn(
-                  'group flex items-center justify-between rounded-lg border px-3 py-2 transition-colors',
-                  isActive
-                    ? 'border-slate-900 bg-white'
-                    : 'border-transparent hover:border-slate-200 hover:bg-white'
-                )}
+            {!isCollapsed && (
+              <motion.div 
+                initial={{ opacity: 0 }} 
+                animate={{ opacity: 1 }} 
+                exit={{ opacity: 0 }}
+                className="overflow-hidden whitespace-nowrap"
               >
-                <button
-                  type="button"
-                  className="min-w-0 flex-1 text-left"
-                  onClick={() => onSessionClick(session.id)}
-                >
-                  <div className="truncate text-sm font-medium text-slate-800">{session.title || 'New Chat'}</div>
-                  <div className="truncate text-xs text-slate-500">{session.message_count} messages</div>
-                </button>
-                <button
-                  type="button"
-                  className="ml-3 rounded-md p-1 text-slate-400 opacity-0 transition group-hover:opacity-100 hover:bg-slate-100 hover:text-slate-700"
-                  onClick={() => deleteSession(session.id)}
-                  aria-label={`Delete ${session.title}`}
-                >
-                  <ChevronRight className="h-4 w-4 rotate-45" />
-                </button>
-              </div>
-            );
-          })}
+                <h1 className="text-headline-sm font-headline-sm font-bold text-on-surface">MedVQA</h1>
+                <p className="text-label-xs font-label-xs text-on-surface-variant">AI Medical Assistant</p>
+              </motion.div>
+            )}
+          </div>
+          
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button 
+                onClick={toggleSidebar}
+                className="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors shrink-0 hidden md:block"
+                aria-label={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+              >
+                {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right" className="z-[100]">
+              {isCollapsed ? "Expand sidebar (Ctrl+B)" : "Collapse sidebar (Ctrl+B)"}
+            </TooltipContent>
+          </Tooltip>
         </div>
-      </ScrollArea>
+        
+        {/* CTA */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button 
+              className={cn(
+                "bg-surface-white border border-border-subtle hover:bg-surface-container-low text-on-surface font-label-md text-label-md py-2 rounded-lg flex items-center justify-center gap-2 mb-6 transition-colors shadow-sm shrink-0",
+                isCollapsed ? "px-0 w-10 h-10 mx-auto rounded-full" : "px-4 w-full"
+              )}
+              onClick={handleNewChat}
+            >
+              <Plus className="h-5 w-5 shrink-0" />
+              {!isCollapsed && <span className="whitespace-nowrap">New Chat</span>}
+            </button>
+          </TooltipTrigger>
+          {isCollapsed && <TooltipContent side="right">New Chat</TooltipContent>}
+        </Tooltip>
 
-      <div className="border-t border-slate-200 px-5 py-4">
-        <div className="mb-3 rounded-xl border border-slate-200 bg-white px-3 py-3">
-          <div className="text-sm font-medium text-slate-900">{user?.username ?? 'User'}</div>
-          <div className="mt-1 text-xs text-slate-500">{user?.role === 'admin' ? 'Administrator' : 'Clinical user'}</div>
+        {/* History Lists */}
+        <AnimatePresence>
+          {!isCollapsed && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col gap-6 scrollbar-hide"
+            >
+              <div>
+                <h3 className="text-label-xs font-label-xs text-on-surface-variant px-3 mb-2 uppercase tracking-wider whitespace-nowrap">
+                  Recent Sessions
+                </h3>
+                <ul className="flex flex-col gap-1">
+                  {sessions.length === 0 ? (
+                    <li className="px-3 py-2 text-sm text-slate-500 whitespace-nowrap">
+                      No sessions yet.
+                    </li>
+                  ) : null}
+                  {sessions.map((session) => {
+                    const isActive = activeSessionId === session.id || location.pathname === `/chat/${session.id}`;
+
+                    return (
+                      <li key={session.id}>
+                        <button
+                          type="button"
+                          className={sidebarLinkClass({ isActive, isCollapsed: false })}
+                          onClick={() => onSessionClick(session.id)}
+                        >
+                          <MessageSquare className="h-5 w-5 shrink-0" />
+                          <span className="text-label-md font-label-md truncate flex-1 text-left">
+                            {session.title || 'New Chat'}
+                          </span>
+                          <span className={cn(
+                            "text-label-xs font-label-xs transition-opacity whitespace-nowrap",
+                            isActive ? "opacity-70" : "opacity-0 group-hover:opacity-70"
+                          )}>
+                            {session.message_count} msg
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {isCollapsed && <div className="flex-1" /> /* Spacer when collapsed */}
+
+        {/* Footer */}
+        <div className="mt-auto pt-4 border-t border-border-subtle flex flex-col gap-2 shrink-0 overflow-hidden">
+          {user?.role === 'admin' ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button 
+                  className={cn(
+                    "flex items-center text-primary hover:bg-surface-container-high transition-colors rounded-lg",
+                    isCollapsed ? "justify-center p-2 mx-auto w-10 h-10" : "gap-3 px-3 py-2 w-full text-left"
+                  )} 
+                  onClick={() => navigate('/admin/users')}
+                >
+                  <Verified className="h-5 w-5 shrink-0" />
+                  {!isCollapsed && <span className="text-label-md font-label-md font-medium whitespace-nowrap">Admin Panel</span>}
+                </button>
+              </TooltipTrigger>
+              {isCollapsed && <TooltipContent side="right">Admin Panel</TooltipContent>}
+            </Tooltip>
+          ) : null}
+          
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div 
+                className={cn(
+                  "flex items-center hover:bg-surface-container-high transition-colors rounded-lg cursor-pointer",
+                  isCollapsed ? "justify-center p-2 mx-auto w-10 h-10" : "gap-3 px-3 py-2 w-full"
+                )} 
+                onClick={handleLogout}
+              >
+                <div className="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold shrink-0">
+                  {user?.username?.[0]?.toUpperCase() || 'U'}
+                </div>
+                {!isCollapsed && (
+                  <>
+                    <div className="flex-1 min-w-0 pr-2">
+                      <p className="text-label-md font-label-md text-on-surface font-medium truncate">{user?.username ?? 'User'}</p>
+                      <p className="text-label-xs font-label-xs text-on-surface-variant truncate">{user?.role === 'admin' ? 'Administrator' : 'Clinical user'}</p>
+                    </div>
+                    <LogOut className="h-4 w-4 shrink-0 text-on-surface-variant" />
+                  </>
+                )}
+              </div>
+            </TooltipTrigger>
+            {isCollapsed && <TooltipContent side="right">Logout ({user?.username})</TooltipContent>}
+          </Tooltip>
         </div>
-        <Button variant="ghost" className="w-full justify-start rounded-lg text-slate-600 hover:bg-white hover:text-slate-900" onClick={handleLogout}>
-          <LogOut className="h-4 w-4" />
-          Logout
-        </Button>
-      </div>
-    </aside>
+      </motion.nav>
+      
+      {/* Mobile Backdrop */}
+      <AnimatePresence>
+        {isMobile && !isCollapsed && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/20 z-10 md:hidden backdrop-blur-sm" 
+            onClick={() => setSidebarCollapsed(true)} 
+          />
+        )}
+      </AnimatePresence>
+    </TooltipProvider>
   );
 }
