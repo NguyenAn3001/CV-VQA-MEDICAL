@@ -17,6 +17,10 @@ class User(Base):
     role = Column(String(20), default="user", nullable=False)
     is_active = Column(Boolean, default=True)
     must_change_password = Column(Boolean, default=False)
+    full_name = Column(String(100), nullable=True)
+    avatar_url = Column(String, nullable=True)
+    bio = Column(String, nullable=True)
+    specialty = Column(String(100), nullable=True)
     
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
