@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)
 
 class LLMOrchestrator:
     def __init__(self):
-        self.provider = get_llm_provider()
         self.tools = TOOLS_CONFIG
         
     def _format_history(self, db_messages, use_fallback: bool = False) -> list[dict]:
@@ -55,7 +54,8 @@ class LLMOrchestrator:
             {"role": "user", "content": first_user_message}
         ]
         try:
-            response = await self.provider.chat(messages=messages, tools=None)
+            provider = await get_llm_provider()
+            response = await provider.chat(messages=messages, tools=None)
             return response.content.strip('"\' ')
         except Exception as e:
             logger.error(f"Failed to generate title: {e}")
@@ -96,8 +96,10 @@ class LLMOrchestrator:
         """
         Handle a chat turn, managing tool calls if the LLM requests them.
         """
-        use_fallback = not settings.LLM_SUPPORTS_TOOL_CALLING
+        # Always default to true for modern LLMs configured in settings
+        use_fallback = False 
         messages = self._format_history(db_history, use_fallback=use_fallback)
+        provider = await get_llm_provider()
         
         # Also squash the current message if the last one in history was also "user"
         if messages[-1]["role"] == "user":
@@ -113,7 +115,7 @@ class LLMOrchestrator:
             
             # 1. Start streaming from LLM
             tools_to_pass = self.tools if not use_fallback else None
-            stream = self.provider.chat_stream(messages, tools=tools_to_pass)
+            stream = provider.chat_stream(messages, tools=tools_to_pass)
             
             tool_calls = []
             accumulated_content = ""

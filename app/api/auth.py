@@ -37,7 +37,6 @@ async def logout(
     access_token = credentials.credentials
     return await auth_service.logout(redis_client, access_token, req)
 
-@router.post("/change-password")
 @router.put("/change-password")
 async def change_password(
     req: ChangePasswordRequest,

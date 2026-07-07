@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Save, CheckCircle2, Cpu, Shield, Bell, Plug } from 'lucide-react';
+import { Save, CheckCircle2, Shield, Bell, Plug } from 'lucide-react';
 import DashboardLayout from '../../components/admin/DashboardLayout';
 import SettingsTabs, { type SettingsTabId } from '../../components/admin/SettingsTabs';
 import GeneralSettings from '../../components/admin/GeneralSettings';
+import ProvidersManager from '../../components/admin/ProvidersManager';
 import PlaceholderPanel from '../../components/admin/PlaceholderPanel';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { useSettingsStore } from '../../store/settingsStore';
 import {
   settingsSchema,
   defaultSettingsValues,
@@ -16,11 +17,6 @@ import {
 
 // ── Placeholder tab content ──────────────────────────────────────
 const PLACEHOLDER_TABS = {
-  models: {
-    title: 'Model Configuration',
-    description: 'Fine-tune model parameters, temperature, context window and system prompt per use-case.',
-    icon: Cpu,
-  },
   security: {
     title: 'Security Settings',
     description: 'Configure 2FA, API keys, session expiry and IP allow-listing for hospital staff.',
@@ -63,25 +59,36 @@ function SaveSuccessToast({ visible }: { visible: boolean }) {
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTabId>('general');
   const [showToast, setShowToast]   = useState(false);
-  const [isSaving, setIsSaving]     = useState(false);
+  
+  const { fetchSettings, updateSettings, settings, isLoading: storeLoading } = useSettingsStore();
 
   const {
     control,
     handleSubmit,
-    formState: { errors, isDirty },
+    reset,
+    formState: { errors, isDirty, isSubmitting },
   } = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
     defaultValues: defaultSettingsValues,
   });
 
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
+
+  useEffect(() => {
+    if (settings) {
+      reset(settings);
+    }
+  }, [settings, reset]);
+
   const onSubmit = async (data: SettingsFormValues) => {
-    setIsSaving(true);
-    // Simulate async save (replace with real API call)
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    console.info('[SettingsPage] saved:', data);
-    setIsSaving(false);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
+    const success = await updateSettings(data);
+    if (success) {
+      reset(data); // reset form to new clean state
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    }
   };
 
   return (
@@ -89,20 +96,20 @@ export default function SettingsPage() {
       {/* ── Page Header ─────────────────────────────────────────── */}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Settings</h1>
+          <h1 className="text-[24px] font-semibold leading-tight text-slate-900">Settings</h1>
           <p className="mt-1 text-sm text-slate-500">Configure system preferences</p>
         </div>
 
         <Button
           id="save-settings-btn"
           type="button"
-          disabled={!isDirty || isSaving}
+          disabled={!isDirty || isSubmitting || storeLoading}
           onClick={handleSubmit(onSubmit)}
           className="gap-2 self-start rounded-lg bg-[#2563EB] text-white shadow-sm shadow-blue-200
                      hover:bg-[#1d4ed8] active:bg-[#1e40af] transition-colors
                      disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isSaving ? (
+          {isSubmitting ? (
             <>
               <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -119,18 +126,33 @@ export default function SettingsPage() {
         </Button>
       </div>
 
-      {/* ── Settings Card ────────────────────────────────────────── */}
-      <Card className="overflow-hidden rounded-xl border border-[#E5E7EB] bg-white shadow-sm">
-        <CardContent className="p-0">
-          {/* Tab navigation */}
-          <div className="px-6 pt-2">
+      {/* ── Settings Tabs Container ────────────────────────────────────────── */}
+      {storeLoading && !settings ? (
+        <div className="flex items-center justify-center p-20">
+          <svg className="h-8 w-8 text-[#2563EB] animate-spin" viewBox="0 0 24 24" fill="none">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+          </svg>
+        </div>
+      ) : (
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
             <SettingsTabs activeTab={activeTab} onChange={setActiveTab} />
           </div>
 
           {/* Tab panels */}
-          <div className="px-6 pb-6">
+          <div className="space-y-8">
             {activeTab === 'general' ? (
-              <GeneralSettings control={control} errors={errors} />
+              <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                <div className="p-4 border-b border-slate-200 bg-slate-50/50">
+                  <h3 className="text-sm font-semibold text-slate-900">General Configuration</h3>
+                </div>
+                <div className="p-6">
+                  <GeneralSettings control={control} errors={errors} />
+                </div>
+              </div>
+            ) : activeTab === 'models' ? (
+              <ProvidersManager />
             ) : (
               <PlaceholderPanel
                 tabId={activeTab}
@@ -140,8 +162,8 @@ export default function SettingsPage() {
               />
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      )}
 
       {/* ── Success toast ────────────────────────────────────────── */}
       <SaveSuccessToast visible={showToast} />

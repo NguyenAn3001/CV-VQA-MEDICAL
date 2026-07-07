@@ -1,8 +1,9 @@
 import { z } from 'zod';
 
 export const settingsSchema = z.object({
+  // General Settings
   systemName: z.string().min(1, 'System name is required').max(100),
-  defaultModel: z.enum(['gpt-4o-medical', 'gpt-4.1', 'claude-sonnet', 'gemini-2.5']),
+  defaultModel: z.string().optional(),
   language: z.enum(['en', 'vi', 'ja']),
   timezone: z.string().min(1),
   maxUploadSizeMB: z
@@ -11,18 +12,33 @@ export const settingsSchema = z.object({
     .max(100, 'Maximum 100 MB'),
   enableImageAnalysis: z.boolean(),
   enableSessionAutoTitle: z.boolean(),
+
+  // Models Settings (Provider Configuration) - Legacy
+  llmProvider: z.string().optional(),
+  baseUrl: z.string().optional(),
+  apiKey: z.string().optional(),
+  defaultChatModel: z.string().optional(),
+  defaultVisionModel: z.string().optional(),
 });
 
 export type SettingsFormValues = z.infer<typeof settingsSchema>;
 
 export const defaultSettingsValues: SettingsFormValues = {
+  // General
   systemName: 'MedVQA Medical Assistant',
-  defaultModel: 'gpt-4o-medical',
+  defaultModel: '',
   language: 'en',
   timezone: 'Asia/Bangkok',
   maxUploadSizeMB: 10,
   enableImageAnalysis: true,
   enableSessionAutoTitle: true,
+
+  // Models
+  llmProvider: 'OpenAI Compatible',
+  baseUrl: 'https://tkerouters.tech/v1',
+  apiKey: 'sk-1234567890abcdef',
+  defaultChatModel: 'gpt-4o-mini',
+  defaultVisionModel: 'gpt-4o-mini',
 };
 
 export const MODEL_OPTIONS = [
@@ -46,3 +62,4 @@ export const TIMEZONE_OPTIONS = [
   { value: 'Asia/Tokyo',      label: '(UTC+9) Tokyo' },
   { value: 'Asia/Shanghai',   label: '(UTC+8) Shanghai' },
 ] as const;
+

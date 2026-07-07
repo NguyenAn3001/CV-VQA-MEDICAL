@@ -53,3 +53,35 @@ class ChatMessage(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     session = relationship("ChatSession", back_populates="messages")
+
+
+class SystemSetting(Base):
+    __tablename__ = "system_settings"
+
+    key = Column(String(100), primary_key=True)
+    category = Column(String(50), nullable=False, index=True)
+    value = Column(String, nullable=True)
+    data_type = Column(String(20), nullable=False) # 'string', 'integer', 'boolean', 'secret'
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+from sqlalchemy import Float
+
+class ModelProvider(Base):
+    __tablename__ = "model_providers"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String(255), nullable=False, unique=True)
+    type = Column(String(50), nullable=False) # e.g. OpenAI Compatible, Gemini, Ollama
+    baseUrl = Column(String, nullable=True)
+    apiKey = Column(String, nullable=True) # encrypted
+    chatModel = Column(String, nullable=True)
+    temperature = Column(Float, default=0.7)
+    maxTokens = Column(Integer, default=1024)
+    timeout = Column(Integer, default=120)
+    supportsToolCalling = Column(Boolean, default=False)
+    enabled = Column(Boolean, default=True)
+    isDefault = Column(Boolean, default=False)
+    connectionStatus = Column(String(50), default="Disconnected") # Connected, Disconnected, Testing...
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

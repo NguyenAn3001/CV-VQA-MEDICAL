@@ -5,7 +5,6 @@ import {
   Users,
   History,
   BarChart3,
-  Cpu,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -27,7 +26,6 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'users',     label: 'Users',     icon: Users,           to: '/admin/users' },
   { id: 'sessions',  label: 'Sessions',  icon: History,         to: '/admin/sessions' },
   { id: 'analytics', label: 'Analytics', icon: BarChart3,       to: '/admin/analytics' },
-  { id: 'models',    label: 'Models',    icon: Cpu,             to: '/admin/models' },
   { id: 'settings',  label: 'Settings',  icon: Settings,        to: '/admin/settings' },
 ];
 

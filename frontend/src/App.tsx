@@ -1,7 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import AppLayout from './components/layout/AppLayout';
-import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
+import AuthPage from './pages/auth/AuthPage';
 import ChangePassword from './pages/auth/ChangePassword';
 import ChatPage from './pages/chat/ChatPage';
 import ProfilePage from './pages/profile/ProfilePage';
@@ -72,100 +72,101 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* ── Public routes ──────────────────────────────────────────── */}
-        <Route
-          path="/login"
-          element={
-            <PublicOnlyRoute>
-              <Login />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <PublicOnlyRoute>
-              <Register />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route path="/change-password" element={<ChangePassword />} />
+    <>
+      <Toaster position="top-right" richColors closeButton />
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <PublicOnlyRoute>
+                <AuthPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <PublicOnlyRoute>
+                <AuthPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <PublicOnlyRoute>
+                <AuthPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route path="/change-password" element={<ChangePassword />} />
 
-        {/* ── Chat / Profile — wrapped in AppLayout (chat sidebar) ───── */}
-        <Route
-          element={
-            <ProtectedRoute>
-              <AppLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/" element={<Navigate to="/chat" replace />} />
-          <Route path="/chat" element={<ChatPage />} />
-          <Route path="/chat/:sessionId" element={<ChatPage />} />
-          <Route path="/sessions/:sessionId" element={<SessionDetailPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          {/* Legacy admin pages (still use chat AppLayout) */}
-          <Route path="/admin/users-legacy"     element={<AdminUsersPage />} />
-          <Route path="/admin/analytics-legacy" element={<AdminAnalyticsPage />} />
-          <Route path="/admin/sessions-legacy"  element={<AdminSessionsPage />} />
-          <Route path="/admin/settings-legacy"  element={<AdminSettingsPage />} />
-        </Route>
+          {/* ── Chat / Profile — wrapped in AppLayout (chat sidebar) ───── */}
+          <Route
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/chat" element={<ChatPage />} />
+            <Route path="/chat/:sessionId" element={<ChatPage />} />
+            <Route path="/sessions/:sessionId" element={<SessionDetailPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            {/* Legacy admin pages (still use chat AppLayout) */}
+            <Route path="/admin/users-legacy" element={<AdminUsersPage />} />
+            <Route path="/admin/analytics-legacy" element={<AdminAnalyticsPage />} />
+            <Route path="/admin/sessions-legacy" element={<AdminSessionsPage />} />
+            <Route path="/admin/settings-legacy" element={<AdminSettingsPage />} />
+          </Route>
 
-        {/* ── Admin Dashboard — NOT inside AppLayout ─────────────────── */}
-        {/* Each page renders DashboardLayout + AdminSidebar internally.  */}
-        {/* This prevents the double-sidebar overlap.                     */}
-        <Route
-          path="/admin/users"
-          element={
-            <AdminRoute>
-              <UsersPage />
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/dashboard"
-          element={
-            <AdminRoute>
-              <UsersPage />
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/analytics"
-          element={
-            <AdminRoute>
-              <AnalyticsPage />
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/sessions"
-          element={
-            <AdminRoute>
-              <SessionsPage />
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/models"
-          element={
-            <AdminRoute>
-              <UsersPage />
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/settings"
-          element={
-            <AdminRoute>
-              <SettingsPage />
-            </AdminRoute>
-          }
-        />
-      </Routes>
-    </BrowserRouter>
+          {/* ── Admin Dashboard — NOT inside AppLayout ─────────────────── */}
+          {/* Each page renders DashboardLayout + AdminSidebar internally.  */}
+          {/* This prevents the double-sidebar overlap.                     */}
+          <Route
+            path="/admin/users"
+            element={
+              <AdminRoute>
+                <UsersPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <AdminRoute>
+                <UsersPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/analytics"
+            element={
+              <AdminRoute>
+                <AnalyticsPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/sessions"
+            element={
+              <AdminRoute>
+                <SessionsPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/settings"
+            element={
+              <AdminRoute>
+                <SettingsPage />
+              </AdminRoute>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </>
   );
 }
 

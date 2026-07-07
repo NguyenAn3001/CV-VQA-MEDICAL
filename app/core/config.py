@@ -45,15 +45,11 @@ class Settings(BaseSettings):
     MINIO_USE_SSL: bool = False
     MINIO_PRESIGNED_URL_EXPIRE_HOURS: int = 2
 
-    # --- LLM Provider Configuration ---
-    LLM_PROVIDER: str = "openai_compatible"
-    LLM_BASE_URL: str = "http://localhost:11434/v1"
-    LLM_API_KEY: str = ""
-    LLM_MODEL_NAME: str = "llama3.1"
-    LLM_TEMPERATURE: float = 0.3
-    LLM_MAX_TOKENS: int = 1024
-    LLM_TIMEOUT: int = 120
-    LLM_SUPPORTS_TOOL_CALLING: bool = True
+    # --- Security Configuration ---
+    # Used for encrypting/decrypting API keys in the database.
+    # MUST be 32 url-safe base64-encoded bytes (Fernet key).
+    # You can generate one via `from cryptography.fernet import Fernet; Fernet.generate_key()`
+    ENCRYPTION_KEY: str = "1AJqXqtGbJZP9TTWx3N5V6CfdBXzGDzp4VAseJaQwFc="
 
     # --- System Defaults ---
     DEFAULT_ADMIN_USERNAME: str = "admin"
@@ -68,6 +64,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        extra = "ignore"
 
 @lru_cache()
 def get_settings() -> Settings:
