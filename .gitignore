@@ -45,3 +45,6 @@ logs/
 .agents/
 skills-lock.json
 AGENTS.md
+
+# Node.js
+node_modules/
