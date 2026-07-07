@@ -28,3 +28,17 @@ class ChatSessionDetailResponse(ChatSessionResponse):
 
 class SendMessageRequest(BaseModel):
     message: str
+
+
+class AdminChatSessionResponse(BaseModel):
+    """Extended session info for admin view — includes username."""
+    id: UUID
+    title: Optional[str]
+    message_count: int
+    created_at: datetime
+    updated_at: datetime
+    user_id: UUID
+    username: Optional[str] = None
+
+    class Config:
+        from_attributes = True
