@@ -91,3 +91,29 @@
 
 ### Sửa đổi
 - `.agents/skills/add-task/SKILL.md` — Rewrite toàn bộ: đọc codebase trước → hỏi 2-3 câu → phân tích → ghi task; template mới Business/Approach/Ghi chú
+
+---
+
+## 2026-07-08 02:03 — Sửa skill write-commit: chỉ đưa ra message, không tự commit
+
+### Sửa đổi
+- `.agents/skills/write-commit/SKILL.md` — Thêm HARD RULES cấm tuyệt đối mọi shell command, chỉ output message
+
+---
+
+## 2026-07-08 02:37 — Fix migration: thêm bảng system_settings và model_providers
+
+### Thêm mới
+- `alembic/versions/1e451916435f_add_system_settings_and_model_providers_.py` — Migration tạo 2 bảng còn thiếu
+
+### Kết quả
+- Server startup không còn lỗi `UndefinedTableError`
+- `init_db` chạy thành công: system settings initialized, default provider created
+
+---
+
+## 2026-07-08 02:10 — Thêm frontend vào AGENTS.md + cập nhật workflow.md
+
+### Sửa đổi
+- `agents/AGENTS.md` — Thêm mục Frontend Overview: tech stack, directory tree, routing, state management, API client, types, hooks pattern
+- `agents/workflow.md` — Cập nhật cấu trúc thư mục gồm cả `frontend/` và `app/` backend chi tiết

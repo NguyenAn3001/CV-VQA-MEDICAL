@@ -51,6 +51,37 @@
 - [ ] Click vào một câu hỏi ở Right Sidebar -> Vùng chat chính tự động cuộn (scroll) đến đúng vị trí tin nhắn đó.
 - [ ] Responsive tốt (ẩn/hiện sidebar trên thiết bị di động hoặc màn hình nhỏ).
 
+## 6. Copy message button
+
+### Mô tả
+**Business**: Cho phép người dùng copy nội dung của từng tin nhắn assistant để dễ dàng sao chép kết quả chẩn đoán, phân tích sang nơi khác.
+
+**Approach**: Frontend-only. Thêm icon `Copy` từ lucide-react vào component `AssistantMessage`. Click -> gọi `navigator.clipboard.writeText()` -> hiển thị icon `Check` trong 2 giây.
+
+### File cần sửa
+- `frontend/src/components/chat/message/AssistantMessage.tsx` — Thêm button Copy bên dưới nội dung message, state copied/saved
+
+### Yêu cầu kiểm thử
+- [ ] Click Copy -> nội dung message được copy vào clipboard
+- [ ] Icon chuyển thành Check trong 2s rồi quay lại Copy
+- [ ] Không copy phần tool calls, chỉ copy nội dung markdown clean
+
+## 7. Tìm kiếm chat sessions trong Sidebar
+
+### Mô tả
+**Business**: Khi người dùng có nhiều phiên trò chuyện, cần thanh tìm kiếm để filter sessions theo title giúp tìm nhanh cuộc trò chuyện cũ.
+
+**Approach**: Frontend-only. Thêm `searchQuery` state vào store, render input Search ở đầu danh sách session trong Sidebar. Filter cục bộ bằng `String.includes()`. Debounce 300ms.
+
+### File cần sửa
+- `frontend/src/store/chatStore.ts` — Thêm `searchQuery: string` + `setSearchQuery(query: string)`
+- `frontend/src/components/layout/Sidebar.tsx` — Thêm input search, filter sessions list, clear button
+
+### Yêu cầu kiểm thử
+- [ ] Input search hiển thị ở đầu danh sách session
+- [ ] Gõ text -> danh sách filter theo title (case-insensitive)
+- [ ] Clear button xoá searchQuery và hiện lại full list
+
 ---
 
 ## ✅ Đã hoàn thành
@@ -81,5 +112,9 @@
 - `.agents/skills/run-tests/SKILL.md`
 - `.agents/skills/fix-migration/SKILL.md`
 - `.agents/skills/update-agents/SKILL.md`
+
+### 4. Fix migration: thêm bảng system_settings và model_providers
+- `alembic/versions/1e451916435f_add_system_settings_and_model_providers_.py` — Migration mới
+- Server startup không còn lỗi `UndefinedTableError`
 
 ---
