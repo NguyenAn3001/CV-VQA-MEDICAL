@@ -204,28 +204,44 @@ export default function Sidebar() {
           
           <Tooltip>
             <TooltipTrigger asChild>
-              <div 
-                className={cn(
-                  "flex items-center hover:bg-surface-container-high transition-colors rounded-lg cursor-pointer",
-                  isCollapsed ? "justify-center p-2 mx-auto w-10 h-10" : "gap-3 px-3 py-2 w-full"
-                )} 
-                onClick={handleLogout}
-              >
-                <div className="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold shrink-0">
-                  {user?.username?.[0]?.toUpperCase() || 'U'}
-                </div>
-                {!isCollapsed && (
-                  <>
+              <div className={cn(
+                "flex items-center rounded-lg",
+                isCollapsed ? "justify-center mx-auto w-10" : "gap-1 w-full"
+              )}>
+                <button
+                  className={cn(
+                    "flex items-center hover:bg-surface-container-high transition-colors rounded-lg cursor-pointer",
+                    isCollapsed
+                      ? "justify-center p-2 w-10 h-10"
+                      : "gap-3 px-3 py-2 flex-1 min-w-0",
+                    location.pathname === '/profile' && !isCollapsed
+                      ? 'bg-secondary-container text-on-secondary-container scale-[0.99] transition-transform duration-150'
+                      : ''
+                  )}
+                  onClick={() => navigate('/profile')}
+                >
+                  <div className="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold shrink-0">
+                    {user?.username?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                  {!isCollapsed && (
                     <div className="flex-1 min-w-0 pr-2">
                       <p className="text-label-md font-label-md text-on-surface font-medium truncate">{user?.username ?? 'User'}</p>
                       <p className="text-label-xs font-label-xs text-on-surface-variant truncate">{user?.role === 'admin' ? 'Administrator' : 'Clinical user'}</p>
                     </div>
-                    <LogOut className="h-4 w-4 shrink-0 text-on-surface-variant" />
-                  </>
+                  )}
+                </button>
+                {!isCollapsed && (
+                  <button
+                    onClick={handleLogout}
+                    className="p-2 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors shrink-0"
+                    aria-label="Logout"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </button>
                 )}
               </div>
             </TooltipTrigger>
-            {isCollapsed && <TooltipContent side="right">Logout ({user?.username})</TooltipContent>}
+            {isCollapsed && <TooltipContent side="right">Profile</TooltipContent>}
           </Tooltip>
         </div>
       </motion.nav>
