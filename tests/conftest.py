@@ -2,26 +2,65 @@ import pytest
 from fastapi.testclient import TestClient
 import io
 import os
+import datetime
 from pathlib import Path
+import sys
+import types
+
+# Mock heavy ML modules before importing app to avoid dependency hell
+from unittest.mock import MagicMock
+
+class MockModule(types.ModuleType):
+    def __getattr__(self, name):
+        return MagicMock()
+
+# Mock torch
+sys.modules["torch"] = MockModule("torch")
+sys.modules["torch.nn"] = MagicMock()
+sys.modules["torch.nn.functional"] = MagicMock()
+
+# Mock transformers
+sys.modules["transformers"] = MockModule("transformers")
+
+# Mock app.ml.inference completely so it doesn't try to import torch submodules
+ml_inference_mock = MagicMock()
+ml_inference_mock.ai_pipeline = MagicMock()
+ml_inference_mock.ai_pipeline.is_ready = MagicMock(return_value=True)
+ml_inference_mock.ai_pipeline.vqa_model = MagicMock()
+ml_inference_mock.ai_pipeline.caption_model = MagicMock()
+ml_inference_mock.ai_pipeline.predict = MagicMock(return_value={
+    "answer": "MRI", "confidence": 0.99, "inference_time_ms": 42.0
+})
+ml_inference_mock.ai_pipeline.generate_caption = MagicMock(return_value={
+    "caption": "test caption", "inference_time_ms": 150.0
+})
+ml_inference_mock.MedicalAIPipeline = MagicMock()
+sys.modules["app.ml.inference"] = ml_inference_mock
 
 # Fix relative imports for pytest
-import sys
 sys.path.append(str(Path(__file__).parent.parent))
 
 from app.main import app
-from app.ml.inference import ai_pipeline
 from app.api.deps import get_current_user
 from app.db.models import User
 import uuid
 
 @pytest.fixture(autouse=True)
 def override_auth():
+    now = datetime.datetime.utcnow()
     dummy_user = User(
         id=uuid.uuid4(),
         username="testuser",
         email="test@vqa.com",
         role="user",
-        is_active=True
+        is_active=True,
+        must_change_password=False,
+        full_name="Test User",
+        avatar_url=None,
+        bio="A test user",
+        specialty="Radiology",
+        created_at=now,
+        updated_at=now
     )
     app.dependency_overrides[get_current_user] = lambda: dummy_user
     yield
@@ -46,13 +85,11 @@ def test_image_bytes(test_image_path):
 @pytest.fixture
 def mock_vqa_pipeline(mocker):
     """Fixture to mock the heavy ML pipeline."""
-    # Mock is_ready to True so API doesn't throw 503
-    mocker.patch('app.services.prediction_service.ai_pipeline.is_ready', return_value=True)
-    mocker.patch('app.ml.inference.MedicalAIPipeline.is_ready', return_value=True)
+    from app.services.prediction_service import ai_pipeline as pred_pipeline
     
-    # Mock models to pass the API readiness check
-    mocker.patch('app.services.prediction_service.ai_pipeline.vqa_model', "mock_model")
-    mocker.patch('app.services.prediction_service.ai_pipeline.caption_model', "mock_model")
+    pred_pipeline.is_ready.return_value = True
+    pred_pipeline.vqa_model = MagicMock()
+    pred_pipeline.caption_model = MagicMock()
     
     def mock_predict(image, question):
         q_lower = question.lower().strip()
@@ -91,9 +128,7 @@ def mock_vqa_pipeline(mocker):
             "inference_time_ms": 150.5
         }
         
-    mocker.patch('app.services.prediction_service.ai_pipeline.predict', side_effect=mock_predict)
-    mocker.patch('app.services.prediction_service.ai_pipeline.generate_caption', side_effect=mock_caption)
-    mocker.patch('app.ml.inference.MedicalAIPipeline.predict', side_effect=mock_predict)
-    mocker.patch('app.ml.inference.MedicalAIPipeline.generate_caption', side_effect=mock_caption)
+    pred_pipeline.predict = mock_predict
+    pred_pipeline.generate_caption = mock_caption
     
-    return ai_pipeline
+    return pred_pipeline

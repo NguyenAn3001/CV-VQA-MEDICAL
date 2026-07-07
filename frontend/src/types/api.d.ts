@@ -17,3 +17,24 @@ export interface PredictionResponse {
   confidence?: number;
   inference_time_ms: number;
 }
+
+export interface ProfileResponse {
+  id: string;
+  username: string;
+  email: string;
+  role: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  specialty: string | null;
+  is_active: boolean;
+  must_change_password: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProfileUpdate {
+  full_name?: string | null;
+  bio?: string | null;
+  specialty?: string | null;
+}

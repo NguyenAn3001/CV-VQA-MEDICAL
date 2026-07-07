@@ -1,12 +1,13 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from typing import List
 
 from app.db.models import User
-from app.schemas.user import UserResponse, ResetPasswordRequest
+from app.schemas.user import UserResponse, ResetPasswordRequest, UserProfileUpdate
 from app.core.config import settings
 from app.core.security import get_password_hash
+from app.services.minio_service import minio_service
 
 class UserService:
     async def list_users(self, db: AsyncSession, skip: int = 0, limit: int = 100) -> List[User]:
@@ -44,5 +45,30 @@ class UserService:
         user.is_active = True
         await db.commit()
         return {"msg": "User activated"}
+
+    async def get_profile(self, db: AsyncSession, user: User) -> User:
+        return user
+
+    async def update_profile(self, db: AsyncSession, user: User, data: UserProfileUpdate) -> User:
+        update_data = data.model_dump(exclude_unset=True)
+        if not update_data:
+            return user
+        for field, value in update_data.items():
+            setattr(user, field, value)
+        await db.commit()
+        await db.refresh(user)
+        return user
+
+    async def update_avatar(self, db: AsyncSession, user: User, file: UploadFile) -> User:
+        contents = await file.read()
+        object_name = minio_service.upload_image(
+            user_id=str(user.id),
+            file_bytes=contents,
+            content_type=file.content_type or "image/jpeg"
+        )
+        user.avatar_url = minio_service.get_presigned_url(object_name)
+        await db.commit()
+        await db.refresh(user)
+        return user
 
 user_service = UserService()
