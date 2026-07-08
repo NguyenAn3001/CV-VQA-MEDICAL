@@ -60,30 +60,36 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          # Passing all required secrets to the runner
           envs: ECR_TOKEN,ECR_REGISTRY,ECR_REPOSITORY_BACKEND,ECR_REPOSITORY_FRONTEND,IMAGE_TAG,DATABASE_URL,JWT_SECRET_KEY,ENCRYPTION_KEY,REDIS_URL,MINIO_ENDPOINT,MINIO_ACCESS_KEY,MINIO_SECRET_KEY,LLM_API_KEY
           script: |
+            set -e
+
             # Login to ECR
             echo "$ECR_TOKEN" | sudo docker login --username AWS --password-stdin $ECR_REGISTRY
 
-            # --- Free up disk space BEFORE pulling heavy images ---
+            # Free up disk space BEFORE pulling heavy images
             sudo docker container prune -f
             sudo docker image prune -af
             sudo docker volume prune -f
             sudo docker builder prune -af
 
-            # Navigate to application directory
+            # Ensure app directory exists
             mkdir -p /home/ubuntu/app
-            cd /home/ubuntu/app
 
-            # Export variables required by docker-compose.yml
-            export ECR_REGISTRY=$ECR_REGISTRY
-            export ECR_REPOSITORY_BACKEND=$ECR_REPOSITORY_BACKEND
-            export ECR_REPOSITORY_FRONTEND=$ECR_REPOSITORY_FRONTEND
-            export IMAGE_TAG=$IMAGE_TAG
+            # Write .env file with absolute path
+            cat > /home/ubuntu/app/.env << ENVEOF
+JWT_SECRET_KEY=${JWT_SECRET_KEY}
+ENCRYPTION_KEY=${ENCRYPTION_KEY}
+DATABASE_URL=${DATABASE_URL}
+REDIS_URL=${REDIS_URL}
+MINIO_ENDPOINT=${MINIO_ENDPOINT}
+MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+LLM_API_KEY=${LLM_API_KEY}
+ENVEOF
 
-            # Upload the latest docker-compose.yml to the server
-            cat > docker-compose.yml << 'EOF'
+            # Write docker-compose.yml with absolute path (always overwrite with latest)
+            cat > /home/ubuntu/app/docker-compose.yml << 'COMPOSEEOF'
 services:
   postgres:
     image: postgres:16-alpine
@@ -130,7 +136,7 @@ services:
       retries: 5
 
   backend:
-    image: ${ECR_REGISTRY:-localhost}/${ECR_REPOSITORY_BACKEND:-vqa-system-api}:${IMAGE_TAG:-latest}
+    image: BACKEND_IMAGE
     ports:
       - "8080:8080"
     environment:
@@ -150,7 +156,7 @@ services:
         condition: service_healthy
 
   frontend:
-    image: ${ECR_REGISTRY:-localhost}/${ECR_REPOSITORY_FRONTEND:-vqa-system-frontend}:${IMAGE_TAG:-latest}
+    image: FRONTEND_IMAGE
     ports:
       - "80:80"
     depends_on:
@@ -159,27 +165,19 @@ services:
 volumes:
   pgdata:
   miniodata:
-EOF
+COMPOSEEOF
 
-            # Create the .env file for the backend container (no leading spaces)
-            cat > .env <<EOF
-            JWT_SECRET_KEY=$JWT_SECRET_KEY
-            ENCRYPTION_KEY=$ENCRYPTION_KEY
-            DATABASE_URL=$DATABASE_URL
-            REDIS_URL=$REDIS_URL
-            MINIO_ENDPOINT=$MINIO_ENDPOINT
-            MINIO_ACCESS_KEY=$MINIO_ACCESS_KEY
-            MINIO_SECRET_KEY=$MINIO_SECRET_KEY
-            LLM_API_KEY=$LLM_API_KEY
-            EOF
+            # Replace image placeholders with actual ECR image URIs
+            sed -i "s|BACKEND_IMAGE|${ECR_REGISTRY}/${ECR_REPOSITORY_BACKEND}:${IMAGE_TAG}|g" /home/ubuntu/app/docker-compose.yml
+            sed -i "s|FRONTEND_IMAGE|${ECR_REGISTRY}/${ECR_REPOSITORY_FRONTEND}:${IMAGE_TAG}|g" /home/ubuntu/app/docker-compose.yml
 
             # Pull the new images from ECR
-            sudo docker pull $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG
-            sudo docker pull $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG
+            sudo docker pull ${ECR_REGISTRY}/${ECR_REPOSITORY_BACKEND}:${IMAGE_TAG}
+            sudo docker pull ${ECR_REGISTRY}/${ECR_REPOSITORY_FRONTEND}:${IMAGE_TAG}
 
-            # Stop running containers, then start with new images
-            sudo docker compose down || true
-            sudo docker compose up -d
+            # Stop and restart with new images
+            sudo docker compose -f /home/ubuntu/app/docker-compose.yml down || true
+            sudo docker compose -f /home/ubuntu/app/docker-compose.yml up -d
 
         env:
           ECR_TOKEN: ${{ steps.ecr-token.outputs.token }}
