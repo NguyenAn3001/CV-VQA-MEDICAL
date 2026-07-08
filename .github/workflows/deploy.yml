@@ -78,94 +78,94 @@ jobs:
 
             # Write .env file with absolute path
             cat > /home/ubuntu/app/.env << ENVEOF
-JWT_SECRET_KEY=${JWT_SECRET_KEY}
-ENCRYPTION_KEY=${ENCRYPTION_KEY}
-DATABASE_URL=${DATABASE_URL}
-REDIS_URL=${REDIS_URL}
-MINIO_ENDPOINT=${MINIO_ENDPOINT}
-MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
-MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
-LLM_API_KEY=${LLM_API_KEY}
-ENVEOF
+            JWT_SECRET_KEY=${JWT_SECRET_KEY}
+            ENCRYPTION_KEY=${ENCRYPTION_KEY}
+            DATABASE_URL=${DATABASE_URL}
+            REDIS_URL=${REDIS_URL}
+            MINIO_ENDPOINT=${MINIO_ENDPOINT}
+            MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+            MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+            LLM_API_KEY=${LLM_API_KEY}
+            ENVEOF
 
             # Write docker-compose.yml with absolute path (always overwrite with latest)
             cat > /home/ubuntu/app/docker-compose.yml << 'COMPOSEEOF'
-services:
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: vqa_db
-      POSTGRES_USER: vqa_user
-      POSTGRES_PASSWORD: vqa_pass
-      PGDATA: /var/lib/postgresql/data/pgdata
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U vqa_user -d vqa_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+            services:
+              postgres:
+                image: postgres:16-alpine
+                environment:
+                  POSTGRES_DB: vqa_db
+                  POSTGRES_USER: vqa_user
+                  POSTGRES_PASSWORD: vqa_pass
+                  PGDATA: /var/lib/postgresql/data/pgdata
+                ports:
+                  - "5432:5432"
+                volumes:
+                  - pgdata:/var/lib/postgresql/data
+                healthcheck:
+                  test: ["CMD-SHELL", "pg_isready -U vqa_user -d vqa_db"]
+                  interval: 5s
+                  timeout: 5s
+                  retries: 5
 
-  redis:
-    image: redis:latest
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+              redis:
+                image: redis:latest
+                ports:
+                  - "6379:6379"
+                healthcheck:
+                  test: ["CMD", "redis-cli", "ping"]
+                  interval: 5s
+                  timeout: 5s
+                  retries: 5
 
-  minio:
-    image: minio/minio
-    command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    volumes:
-      - miniodata:/data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+              minio:
+                image: minio/minio
+                command: server /data --console-address ":9001"
+                environment:
+                  MINIO_ROOT_USER: minioadmin
+                  MINIO_ROOT_PASSWORD: minioadmin
+                ports:
+                  - "9000:9000"
+                  - "9001:9001"
+                volumes:
+                  - miniodata:/data
+                healthcheck:
+                  test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+                  interval: 10s
+                  timeout: 5s
+                  retries: 5
 
-  backend:
-    image: BACKEND_IMAGE
-    ports:
-      - "8080:8080"
-    environment:
-      - DATABASE_URL=postgresql+asyncpg://vqa_user:vqa_pass@postgres:5432/vqa_db
-      - REDIS_URL=redis://redis:6379/0
-      - MINIO_ENDPOINT=minio:9000
-    env_file:
-      - .env
-    volumes:
-      - /home/ubuntu/models:/app/models
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
+              backend:
+                image: BACKEND_IMAGE
+                ports:
+                  - "8080:8080"
+                environment:
+                  - DATABASE_URL=postgresql+asyncpg://vqa_user:vqa_pass@postgres:5432/vqa_db
+                  - REDIS_URL=redis://redis:6379/0
+                  - MINIO_ENDPOINT=minio:9000
+                env_file:
+                  - .env
+                volumes:
+                  - /home/ubuntu/models:/app/models
+                depends_on:
+                  postgres:
+                    condition: service_healthy
+                  redis:
+                    condition: service_healthy
+                  minio:
+                    condition: service_healthy
 
-  frontend:
-    image: FRONTEND_IMAGE
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
+              frontend:
+                image: FRONTEND_IMAGE
+                ports:
+                  - "80:80"
+                depends_on:
+                  - backend
 
-volumes:
-  pgdata:
-  miniodata:
-COMPOSEEOF
+            volumes:
+              pgdata:
+              miniodata:
+            COMPOSEEOF
 
             # Replace image placeholders with actual ECR image URIs
             sed -i "s|BACKEND_IMAGE|${ECR_REGISTRY}/${ECR_REPOSITORY_BACKEND}:${IMAGE_TAG}|g" /home/ubuntu/app/docker-compose.yml
