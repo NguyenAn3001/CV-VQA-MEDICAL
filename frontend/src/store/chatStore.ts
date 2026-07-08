@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { ChatMessage, ChatSession, ChatSessionDetail } from '../types/models';
+import type { PinSessionRequest } from '../types/api';
 import api from '../lib/axios';
 
 interface ChatState {
@@ -15,6 +16,7 @@ interface ChatState {
   fetchSessionDetail: (id: string) => Promise<ChatSessionDetail | null>;
   createSession: () => Promise<string | null>;
   deleteSession: (id: string) => Promise<void>;
+  togglePin: (id: string, isPinned: boolean) => Promise<void>;
   setActiveSession: (id: string | null) => void;
   setSessionMessages: (id: string, messages: ChatMessage[]) => void;
   upsertSession: (session: ChatSession) => void;
@@ -104,6 +106,22 @@ export const useChatStore = create<ChatState>()(
         }
       },
 
+      togglePin: async (id, isPinned) => {
+        try {
+          const body: PinSessionRequest = { is_pinned: isPinned };
+          const res = await api.patch(`/chat/sessions/${id}/pin`, body);
+          const updated = res.data as ChatSession;
+          set((state) => {
+            const sessions = state.sessions.map((s) =>
+              s.id === id ? { ...s, is_pinned: updated.is_pinned } : s
+            );
+            return { sessions };
+          });
+        } catch (error) {
+          console.error('Failed to toggle pin', error);
+        }
+      },
+
       updateSessionTitle: async (id, title) => {
         // Optimistic update
         set((state) => {
@@ -139,6 +157,7 @@ export const useChatStore = create<ChatState>()(
                     id,
                     title: 'Session',
                     message_count: messages.length,
+                    is_pinned: false,
                     created_at: '',
                     updated_at: '',
                     messages,

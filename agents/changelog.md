@@ -117,3 +117,52 @@
 ### Sửa đổi
 - `agents/AGENTS.md` — Thêm mục Frontend Overview: tech stack, directory tree, routing, state management, API client, types, hooks pattern
 - `agents/workflow.md` — Cập nhật cấu trúc thư mục gồm cả `frontend/` và `app/` backend chi tiết
+
+---
+
+## 2026-07-08 10:58 — Bookmark/Pin chat sessions
+
+### Thêm mới
+- `alembic/versions/8b469f808fd1_add_is_pinned_to_chat_sessions.py` — Migration thêm column is_pinned vào chat_sessions
+- `tests/integration/test_pin_session.py` — 5 test cases cho pin/unpin API
+- `frontend/src/types/api.d.ts` — Thêm PinSessionRequest type
+
+### Sửa đổi
+- `app/db/models.py` — Thêm is_pinned (Boolean, default=False) vào ChatSession model
+- `app/schemas/chat.py` — Thêm is_pinned vào ChatSessionResponse, AdminChatSessionResponse; thêm PinSessionRequest schema
+- `app/services/chat_service.py` — Thêm toggle_pin_session method; get_user_sessions order by is_pinned DESC
+- `app/api/chat.py` — Thêm PATCH /sessions/{session_id}/pin endpoint
+- `frontend/src/types/models.d.ts` — Thêm is_pinned field vào ChatSession interface
+- `frontend/src/store/chatStore.ts` — Thêm togglePin action + PinSessionRequest import
+- `frontend/src/components/layout/Sidebar.tsx` — Thêm Pinned section riêng, pin/unpin button mỗi session
+
+### Kết quả kiểm thử
+- Backend: 5/5 pin tests passed ✅ (27 tests total: 24 passed, 3 pre-existing failures)
+- Frontend: `npx tsc --noEmit` — 0 errors ✅
+- Frontend: `npm run build` — success ✅
+
+---
+
+## 2026-07-08 13:34 — Overhaul start-task: thêm Git branch & PR workflow
+
+### Thêm mới
+- `.agents/skills/start-task/SKILL.md` — Rewrite: 11-step workflow (Pre-flight → Context → Branch → Plan → Code → Test → Changelog → Commit → PR → Mark done → Report)
+- `agents/plans/2026-07-08_1334-overhaul-start-task-skill.md` — Plan cho thay đổi này
+
+### Sửa đổi
+- `.agents/skills/start-task/SKILL.md` — Workflow mới:
+  - Step 0: Pre-flight checks (git status, branch, gh CLI)
+  - Step 1: Read context (xác định task)
+  - Step 2: Create branch từ main (git pull --ff-only, infer prefix)
+  - Step 3-6: Plan → Code → Test → Changelog
+  - Step 7: Commit & Push (git add -A, write-commit, git push -u origin HEAD)
+  - Step 8: Create PR (conditional, chỉ khi gh available)
+  - Step 9: Update tasks.md metadata
+  - Step 10: Hỏi checkout main
+  - Step 11: Report
+  - Git guards: kiểm tra branch trước mọi git command
+- `agents/tasks.md` — Thêm metadata fields (Branch, Plan, Status, Created, Completed) cho tất cả tasks
+
+### Kết quả
+- start-task skill: sẵn sàng cho production workflow
+- tasks.md: task registry với metadata (Branch, Plan, Status, timestamps)

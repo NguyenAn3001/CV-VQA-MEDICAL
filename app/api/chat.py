@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_db, get_current_user
 from app.db.models import User
-from app.schemas.chat import ChatSessionResponse, ChatSessionDetailResponse
+from app.schemas.chat import ChatSessionResponse, ChatSessionDetailResponse, PinSessionRequest
 from app.services.chat_service import chat_service
 
 logger = logging.getLogger(__name__)
@@ -41,6 +41,17 @@ async def delete_session(
     current_user: User = Depends(get_current_user)
 ):
     await chat_service.delete_session(db, session_id, str(current_user.id))
+
+@router.patch("/sessions/{session_id}/pin", response_model=ChatSessionResponse)
+async def toggle_pin_session(
+    session_id: str,
+    body: PinSessionRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return await chat_service.toggle_pin_session(
+        db, session_id, str(current_user.id), body.is_pinned
+    )
 
 @router.post("/sessions/{session_id}/messages")
 async def send_message(

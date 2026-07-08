@@ -17,6 +17,7 @@ class ChatSessionResponse(BaseModel):
     id: UUID
     title: Optional[str]
     message_count: int
+    is_pinned: bool = False
     created_at: datetime
     updated_at: datetime
     
@@ -35,6 +36,7 @@ class AdminChatSessionResponse(BaseModel):
     id: UUID
     title: Optional[str]
     message_count: int
+    is_pinned: bool = False
     created_at: datetime
     updated_at: datetime
     user_id: UUID
@@ -42,3 +44,7 @@ class AdminChatSessionResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class PinSessionRequest(BaseModel):
+    is_pinned: bool

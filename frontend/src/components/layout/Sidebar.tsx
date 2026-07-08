@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '../../store/authStore';
 import { useChatStore } from '../../store/chatStore';
-import { ChevronLeft, ChevronRight, Plus, MessageSquare, Verified, LogOut } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, MessageSquare, Pin, PinOff, Verified, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEffect, useState } from 'react';
@@ -22,6 +22,7 @@ export default function Sidebar() {
   const sessions = useChatStore((state) => state.sessions);
   const activeSessionId = useChatStore((state) => state.activeSessionId);
   const setActiveSession = useChatStore((state) => state.setActiveSession);
+  const togglePin = useChatStore((state) => state.togglePin);
   const isCollapsed = useChatStore((state) => state.isSidebarCollapsed);
   const toggleSidebar = useChatStore((state) => state.toggleSidebar);
   const setSidebarCollapsed = useChatStore((state) => state.setSidebarCollapsed);
@@ -59,6 +60,14 @@ export default function Sidebar() {
     if (isMobile) {
       setSidebarCollapsed(true);
     }
+  };
+
+  const pinnedSessions = sessions.filter((s) => s.is_pinned);
+  const otherSessions = sessions.filter((s) => !s.is_pinned);
+
+  const handlePinClick = (e: React.MouseEvent, id: string, isPinned: boolean) => {
+    e.stopPropagation();
+    togglePin(id, !isPinned);
   };
 
   return (
@@ -141,23 +150,67 @@ export default function Sidebar() {
               className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col gap-6 scrollbar-hide"
             >
               <div>
+                {pinnedSessions.length > 0 && (
+                  <>
+                    <h3 className="text-label-xs font-label-xs text-on-surface-variant px-3 mb-2 uppercase tracking-wider whitespace-nowrap">
+                      Pinned
+                    </h3>
+                    <ul className="flex flex-col gap-1 mb-4">
+                      {pinnedSessions.map((session) => {
+                        const isActive = activeSessionId === session.id || location.pathname === `/chat/${session.id}`;
+                        return (
+                          <li key={session.id} className="flex items-center group">
+                            <button
+                              type="button"
+                              className={sidebarLinkClass({ isActive, isCollapsed: false }) + ' flex-1 min-w-0'}
+                              onClick={() => onSessionClick(session.id)}
+                            >
+                              <MessageSquare className="h-5 w-5 shrink-0" />
+                              <span className="text-label-md font-label-md truncate flex-1 text-left">
+                                {session.title || 'New Chat'}
+                              </span>
+                              <span className={cn(
+                                "text-label-xs font-label-xs transition-opacity whitespace-nowrap",
+                                isActive ? "opacity-70" : "opacity-0 group-hover:opacity-70"
+                              )}>
+                                {session.message_count} msg
+                              </span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => handlePinClick(e, session.id, session.is_pinned)}
+                              className="p-2 hover:bg-surface-container-high rounded text-primary shrink-0 ml-1 transition-colors"
+                              aria-label="Unpin session"
+                            >
+                              <Pin className="h-4 w-4" />
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </>
+                )}
                 <h3 className="text-label-xs font-label-xs text-on-surface-variant px-3 mb-2 uppercase tracking-wider whitespace-nowrap">
                   Recent Sessions
                 </h3>
                 <ul className="flex flex-col gap-1">
-                  {sessions.length === 0 ? (
+                  {otherSessions.length === 0 && pinnedSessions.length === 0 ? (
                     <li className="px-3 py-2 text-sm text-slate-500 whitespace-nowrap">
                       No sessions yet.
                     </li>
+                  ) : otherSessions.length === 0 ? (
+                    <li className="px-3 py-2 text-sm text-slate-500 whitespace-nowrap">
+                      No other sessions.
+                    </li>
                   ) : null}
-                  {sessions.map((session) => {
+                  {otherSessions.map((session) => {
                     const isActive = activeSessionId === session.id || location.pathname === `/chat/${session.id}`;
 
                     return (
-                      <li key={session.id}>
+                      <li key={session.id} className="flex items-center group">
                         <button
                           type="button"
-                          className={sidebarLinkClass({ isActive, isCollapsed: false })}
+                          className={sidebarLinkClass({ isActive, isCollapsed: false }) + ' flex-1 min-w-0'}
                           onClick={() => onSessionClick(session.id)}
                         >
                           <MessageSquare className="h-5 w-5 shrink-0" />
@@ -170,6 +223,14 @@ export default function Sidebar() {
                           )}>
                             {session.message_count} msg
                           </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => handlePinClick(e, session.id, session.is_pinned)}
+                          className="p-2 hover:bg-surface-container-high rounded text-on-surface-variant opacity-0 group-hover:opacity-100 transition-all shrink-0 ml-1"
+                          aria-label="Pin session"
+                        >
+                          <PinOff className="h-4 w-4" />
                         </button>
                       </li>
                     );
