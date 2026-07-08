@@ -182,7 +182,7 @@ export default function Sidebar() {
                               className="p-2 hover:bg-surface-container-high rounded text-primary shrink-0 ml-1 transition-colors"
                               aria-label="Unpin session"
                             >
-                              <Pin className="h-4 w-4" />
+                              <PinOff className="h-4 w-4" />
                             </button>
                           </li>
                         );
@@ -230,7 +230,7 @@ export default function Sidebar() {
                           className="p-2 hover:bg-surface-container-high rounded text-on-surface-variant opacity-0 group-hover:opacity-100 transition-all shrink-0 ml-1"
                           aria-label="Pin session"
                         >
-                          <PinOff className="h-4 w-4" />
+                          <Pin className="h-4 w-4" />
                         </button>
                       </li>
                     );
