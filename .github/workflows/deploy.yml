@@ -64,7 +64,7 @@ jobs:
           envs: ECR_TOKEN,ECR_REGISTRY,ECR_REPOSITORY_BACKEND,ECR_REPOSITORY_FRONTEND,IMAGE_TAG,DATABASE_URL,JWT_SECRET_KEY,ENCRYPTION_KEY,REDIS_URL,MINIO_ENDPOINT,MINIO_ACCESS_KEY,MINIO_SECRET_KEY,LLM_API_KEY
           script: |
             # Login to ECR
-            echo "$ECR_TOKEN" | docker login --username AWS --password-stdin $ECR_REGISTRY
+            echo "$ECR_TOKEN" | sudo docker login --username AWS --password-stdin $ECR_REGISTRY
 
             # Navigate to application directory
             mkdir -p /home/ubuntu/app
@@ -94,8 +94,8 @@ jobs:
 
             # Stop and restart containers using docker-compose
             # This relies on you having the docker-compose.yml file on the server in /home/ubuntu/app
-            sudo docker compose down || sudo docker-compose down || true
-            sudo docker compose up -d || sudo docker-compose up -d
+            sudo docker compose down || true
+            sudo docker compose up -d
 
             # Clean up old unused images to free up space
             sudo docker image prune -af --filter "until=24h"
