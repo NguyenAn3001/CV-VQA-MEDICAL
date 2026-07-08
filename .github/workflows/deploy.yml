@@ -1,0 +1,122 @@
+name: Deploy App to AWS Server
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY_BACKEND: tker/vqa-system-api
+  ECR_REPOSITORY_FRONTEND: tker/vqa-system-frontend
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate image tag
+        run: |
+          echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "IMAGE_TAG_FULL=$(date +%Y%m%d)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Convert ENV to upper
+        run: echo "IMAGE_ENV_UPPER=${IMAGE_ENV^^}" >> $GITHUB_ENV
+        env:
+          IMAGE_ENV: ${{ inputs.environment }}
+
+      - name: Build, tag, and push Backend image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG
+
+      - name: Build, tag, and push Frontend image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          # Pass the backend API URL dynamically so Vite can build it
+          VITE_API_URL: ${{ secrets[format('VITE_API_URL_{0}', env.IMAGE_ENV_UPPER)] }}
+        run: |
+          cd frontend
+          docker build --build-arg VITE_API_URL=$VITE_API_URL -t $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG
+
+      - name: Get ECR login token
+        id: ecr-token
+        run: |
+          TOKEN=$(aws ecr get-login-password --region ${{ env.AWS_REGION }})
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+
+      - name: Deploy to EC2 with Docker Compose
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          # Passing all required secrets to the runner
+          envs: ECR_TOKEN,ECR_REGISTRY,ECR_REPOSITORY_BACKEND,ECR_REPOSITORY_FRONTEND,IMAGE_ENV,IMAGE_TAG,DATABASE_URL,JWT_SECRET_KEY,ENCRYPTION_KEY,REDIS_URL,MINIO_ENDPOINT,MINIO_ACCESS_KEY,MINIO_SECRET_KEY,LLM_API_KEY
+          script: |
+            # Login to ECR
+            echo "$ECR_TOKEN" | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+            # Navigate to application directory
+            mkdir -p /home/ubuntu/app
+            cd /home/ubuntu/app
+
+            # Export variables required by docker-compose.yml
+            export ECR_REGISTRY=$ECR_REGISTRY
+            export ECR_REPOSITORY_BACKEND=$ECR_REPOSITORY_BACKEND
+            export ECR_REPOSITORY_FRONTEND=$ECR_REPOSITORY_FRONTEND
+            export IMAGE_TAG=$IMAGE_TAG
+
+            # Create the .env file for the backend container
+            cat <<EOF > .env
+            JWT_SECRET_KEY=$JWT_SECRET_KEY
+            ENCRYPTION_KEY=$ENCRYPTION_KEY
+            DATABASE_URL=$DATABASE_URL
+            REDIS_URL=$REDIS_URL
+            MINIO_ENDPOINT=$MINIO_ENDPOINT
+            MINIO_ACCESS_KEY=$MINIO_ACCESS_KEY
+            MINIO_SECRET_KEY=$MINIO_SECRET_KEY
+            LLM_API_KEY=$LLM_API_KEY
+            EOF
+
+            # Pull the new images
+            docker pull $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG
+            docker pull $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG
+
+            # Stop and restart containers using docker-compose
+            # This relies on you having the docker-compose.yml file on the server in /home/ubuntu/app
+            docker compose down || docker-compose down || true
+            docker compose up -d || docker-compose up -d
+
+            # Clean up old unused images to free up space
+            docker image prune -af --filter "until=24h"
+
+        env:
+          ECR_TOKEN: ${{ steps.ecr-token.outputs.token }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_ENV: ${{ inputs.environment }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+          DATABASE_URL: ${{ secrets[format('DATABASE_URL_{0}', env.IMAGE_ENV_UPPER)] }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+          REDIS_URL: ${{ secrets[format('REDIS_URL_{0}', env.IMAGE_ENV_UPPER)] }}
+          MINIO_ENDPOINT: ${{ secrets[format('MINIO_ENDPOINT_{0}', env.IMAGE_ENV_UPPER)] }}
+          MINIO_ACCESS_KEY: ${{ secrets[format('MINIO_ACCESS_KEY_{0}', env.IMAGE_ENV_UPPER)] }}
+          MINIO_SECRET_KEY: ${{ secrets[format('MINIO_SECRET_KEY_{0}', env.IMAGE_ENV_UPPER)] }}
+          LLM_API_KEY: ${{ secrets[format('LLM_API_KEY_{0}', env.IMAGE_ENV_UPPER)] }}
