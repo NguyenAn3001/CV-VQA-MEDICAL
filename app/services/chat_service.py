@@ -36,7 +36,7 @@ class ChatService:
         result = await db.execute(
             select(ChatSession)
             .where(ChatSession.user_id == uuid.UUID(user_id))
-            .order_by(desc(ChatSession.updated_at))
+            .order_by(desc(ChatSession.is_pinned), desc(ChatSession.updated_at))
             .offset(offset)
             .limit(limit)
         )
@@ -75,6 +75,13 @@ class ChatService:
                 
         await db.delete(session)
         await db.commit()
+
+    async def toggle_pin_session(self, db: AsyncSession, session_id: str, user_id: str, is_pinned: bool) -> ChatSession:
+        session = await self.get_session(db, session_id, user_id)
+        session.is_pinned = is_pinned
+        await db.commit()
+        await db.refresh(session)
+        return session
         
     async def save_message(self, db: AsyncSession, session_id: str, role: str, content: str, 
                            image_key: str = None, tool_calls: list = None) -> ChatMessage:

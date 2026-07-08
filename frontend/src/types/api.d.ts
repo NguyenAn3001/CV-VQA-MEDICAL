@@ -38,3 +38,7 @@ export interface ProfileUpdate {
   bio?: string | null;
   specialty?: string | null;
 }
+
+export interface PinSessionRequest {
+  is_pinned: boolean;
+}
