@@ -196,7 +196,17 @@
 
 ---
 
-## 2026-07-08 — Thêm task 10: hiển thị model động thay hardcode
+## 2026-07-08 15:09 — Hiển thị model đang dùng động thay hardcode
 
 ### Sửa đổi
-- `agents/tasks.md` — Thêm task 10 (Hiển thị model đang dùng động thay vì hardcode)
+- `app/schemas/chat.py` — Thêm `model: Optional[str]` vào `ChatSessionDetailResponse`
+- `app/services/chat_service.py` — `get_session_detail()` fetch default provider model từ DB
+- `frontend/src/types/models.d.ts` — Thêm `model?: string` vào `ChatSession`
+- `frontend/src/pages/chat/ChatPage.tsx` — Navbar subtitle dùng `activeSession.model`
+- `frontend/src/components/chat/RightSidebar.tsx` — Model hiển thị từ `sessionDetail.model`
+- `frontend/src/components/chat/SessionDetailModal.tsx` — Model hiển thị từ `detail.model`
+
+### Kết quả kiểm thử
+- Backend: 24/27 passed (3 pre-existing failures)
+- Frontend: `npx tsc --noEmit` — 0 errors ✅
+- Frontend: `npm run build` — success ✅

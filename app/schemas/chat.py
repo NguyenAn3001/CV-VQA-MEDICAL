@@ -25,6 +25,7 @@ class ChatSessionResponse(BaseModel):
         from_attributes = True
 
 class ChatSessionDetailResponse(ChatSessionResponse):
+    model: Optional[str] = None
     messages: List[ChatMessageResponse]
 
 class SendMessageRequest(BaseModel):

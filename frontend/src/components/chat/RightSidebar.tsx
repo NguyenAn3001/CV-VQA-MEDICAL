@@ -146,7 +146,7 @@ export default function RightSidebar() {
                         : 'Unknown'}
                     </span>
                     <span className="text-on-surface-variant">Model</span>
-                    <span className="text-on-surface">GPT-4o + Medical</span>
+                    <span className="text-on-surface">{sessionDetail.model ?? 'GPT-4o + Medical'}</span>
                   </div>
 
                   {/* Attached Images */}

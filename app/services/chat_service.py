@@ -12,7 +12,7 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy import desc
 from sse_starlette.sse import EventSourceResponse
 
-from app.db.models import ChatSession, ChatMessage
+from app.db.models import ChatSession, ChatMessage, ModelProvider, SystemSetting
 from app.db.base import AsyncSessionLocal
 from app.services.minio_service import minio_service
 from app.services.llm_orchestrator import llm_orchestrator
@@ -62,7 +62,28 @@ class ChatService:
         for msg, resp_msg in zip(session.messages, response_data.messages):
             if msg.image_object_key:
                 resp_msg.image_url = minio_service.get_presigned_url(msg.image_object_key)
-                
+
+        # Fetch default model name
+        model_name = None
+        try:
+            result = await db.execute(select(ModelProvider).where(ModelProvider.isDefault == True))
+            provider = result.scalar_one_or_none()
+            if not provider:
+                result = await db.execute(select(ModelProvider).where(ModelProvider.enabled == True).order_by(ModelProvider.created_at))
+                provider = result.scalars().first()
+            if provider:
+                model_name = provider.chatModel
+
+            # Fallback to system setting
+            if not model_name:
+                result = await db.execute(select(SystemSetting).where(SystemSetting.key == "general.defaultModel"))
+                setting = result.scalar_one_or_none()
+                if setting and setting.value:
+                    model_name = setting.value
+        except Exception:
+            pass
+
+        response_data.model = model_name or "gpt-4o-mini"
         return response_data
         
     async def delete_session(self, db: AsyncSession, session_id: str, user_id: str = None):
