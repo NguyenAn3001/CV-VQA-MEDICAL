@@ -11,7 +11,7 @@
 
 ## Danh sách task
 
-### 8. Copy message button
+### 9. Copy message button
 
 ### Mô tả
 
@@ -36,7 +36,7 @@
 - Status: Todo
 - Created: 2026-07-08 10:58
 
-### 9. Tìm kiếm chat sessions trong Sidebar
+### 10. Tìm kiếm chat sessions trong Sidebar
 
 ### Mô tả
 
@@ -47,7 +47,7 @@
 ### File cần sửa
 
 - `frontend/src/store/chatStore.ts` — Thêm `searchQuery: string` + `setSearchQuery(query: string)`
-- `frontend/src/components/layout/Sidebar.tsx` — Thêm input search, filter sessions list, clear button
+- `frontend/src/components/layout/Sidebar.tsx` — Thêm input search, filters session list, clear button
 
 ### Yêu cầu kiểm thử
 
@@ -62,23 +62,35 @@
 - Status: Todo
 - Created: 2026-07-08 10:58
 
+### 11. Fix RightSidebar mobile — không đóng được
+
+### Mô tả
+
+**Business**: Trên mobile, RightSidebar không thể đóng bằng nút X hoặc tap backdrop vì `isVisible = isOpen || isMobileOpen`, trong đó `isOpen` (`isRightSidebarOpen`) được persist trong localStorage và không được reset khi đóng mobile.
+
+**Approach**: Frontend-only.
+
+- Nút X + backdrop click: gọi thêm `toggleRightSidebar()` để set `isRightSidebarOpen = false`
+- Khi resize từ desktop → mobile: tự động set `isRightSidebarOpen = false`
+
+### File cần sửa
+
+- `frontend/src/components/chat/RightSidebar.tsx` — Mobile close button + backdrop: thêm `toggleRightSidebar()`; resize handler: set `isRightSidebarOpen = false`
+
+### Yêu cầu kiểm thử
+
+- [ ] Mở sidebar trên desktop → resize xuống mobile → sidebar tự đóng
+- [ ] Mở sidebar trên mobile → nhấn X hoặc tap backdrop → sidebar đóng hẳn
+- [ ] `isRightSidebarOpen` trong store = false sau khi đóng trên mobile
+
+- Branch:
+- Plan:
+- Status: Todo
+- Created: 2026-07-08
+
 ---
 
 ## ✅ Đã hoàn thành
-
-### 10. Hiển thị model đang dùng động thay vì hardcode "GPT-4o + Medical"
-
-- `app/schemas/chat.py` — Thêm `model: Optional[str]` vào `ChatSessionDetailResponse`
-- `app/services/chat_service.py` — `get_session_detail()` fetch default provider model từ DB
-- `frontend/src/types/models.d.ts` — Thêm `model?: string` vào `ChatSession`
-- `frontend/src/pages/chat/ChatPage.tsx` — Navbar subtitle dùng `activeSession.model`
-- `frontend/src/components/chat/RightSidebar.tsx` — Model hiển thị từ `sessionDetail.model`
-- `frontend/src/components/chat/SessionDetailModal.tsx` — Model hiển thị từ `detail.model`
-- Branch: feat/dynamic-model-display
-- Plan: agents/plans/2026-07-08_1509-dynamic-model-display.md
-- Status: Done
-- Started: 2026-07-08 15:09
-- Completed: 2026-07-08 15:15
 
 ### 1. Kết nối ProfilePage với Profile API
 
@@ -173,5 +185,19 @@
 - Status: Done
 - Created: 2026-07-08 10:58
 - Completed: 2026-07-08 14:44
+
+### 8. Hiển thị model đang dùng động thay vì hardcode "GPT-4o + Medical"
+
+- `app/schemas/chat.py` — Thêm `model: Optional[str]` vào `ChatSessionDetailResponse`
+- `app/services/chat_service.py` — `get_session_detail()` fetch default provider model từ DB
+- `frontend/src/types/models.d.ts` — Thêm `model?: string` vào `ChatSession`
+- `frontend/src/pages/chat/ChatPage.tsx` — Navbar subtitle dùng `activeSession.model`
+- `frontend/src/components/chat/RightSidebar.tsx` — Model hiển thị từ `sessionDetail.model`
+- `frontend/src/components/chat/SessionDetailModal.tsx` — Model hiển thị từ `detail.model`
+- Branch: feat/dynamic-model-display
+- Plan: agents/plans/2026-07-08_1509-dynamic-model-display.md
+- Status: Done
+- Started: 2026-07-08 15:09
+- Completed: 2026-07-08 15:15
 
 ---
