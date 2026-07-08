@@ -10,25 +10,7 @@
 
 ## Danh sách task
 
-## 5. Hiển thị danh sách câu hỏi trước đó ở Right Sidebar của Conversation
 
-### Mô tả
-**Business**: Giúp người dùng dễ dàng theo dõi, xem nhanh và điều hướng (cuộn đến) các câu hỏi mình đã gửi trong phiên trò chuyện hiện tại thông qua danh sách hiển thị ở một sidebar bên phải.
-**Approach**:
-- Frontend: Thiết kế và tích hợp một Right Sidebar mới vào giao diện Conversation. Lọc các tin nhắn có `role='user'` từ danh sách tin nhắn của session hiện tại để hiển thị. Khi click vào một câu hỏi, thực hiện cuộn (scroll) vùng chat chính đến tin nhắn đó (ví dụ dùng `ref` hoặc `Element.scrollIntoView`).
-
-### File cần sửa (Frontend)
-- `frontend/src/pages/chat/` (hoặc chat layout/page component) — Tạo layout chia đôi hoặc thêm panel bên phải (Right Sidebar).
-- `frontend/src/components/chat/` (hoặc file liên quan) — Code logic lọc câu hỏi (`role === 'user'`), render danh sách câu hỏi, và logic scroll-to-view khi click vào item.
-
-### Yêu cầu kiểm thử
-- [ ] Giao diện có Right Sidebar hiển thị danh sách tất cả các câu hỏi của user trong session hiện tại.
-- [ ] Click vào một câu hỏi ở Right Sidebar -> Vùng chat chính tự động cuộn (scroll) đến đúng vị trí tin nhắn đó.
-- [ ] Responsive tốt (ẩn/hiện sidebar trên thiết bị di động hoặc màn hình nhỏ).
-- Branch:
-- Plan:
-- Status: Todo
-- Created: 2026-07-08 10:58
 
 ## 8. Fix: Sidebar không load sessions khi ở Profile Page
 
@@ -162,5 +144,16 @@
 - Status: Done
 - Created: 2026-07-08 10:58
 - Completed: 2026-07-08 11:30
+
+### 6. Right Sidebar: Danh sách câu hỏi trong Conversation
+- `frontend/src/components/chat/RightSidebar.tsx` — Component Right Sidebar: lọc user messages, click scrollIntoView, responsive
+- `frontend/src/components/chat/ChatWindow.tsx` — Thêm data-message-id wrapper
+- `frontend/src/pages/chat/ChatPage.tsx` — Tích hợp RightSidebar, flex layout
+- Tests: tsc 0 errors ✅, npm run build ✅
+- Branch: feat/right-sidebar-question-history
+- Plan: `agents/plans/2026-07-08_1406-right-sidebar-question-list.md`
+- Status: Done
+- Created: 2026-07-08 10:58
+- Completed: 2026-07-08 14:06
 
 ---

@@ -166,3 +166,18 @@
 ### Kết quả
 - start-task skill: sẵn sàng cho production workflow
 - tasks.md: task registry với metadata (Branch, Plan, Status, timestamps)
+
+---
+
+## 2026-07-08 14:06 — Right Sidebar: Danh sách câu hỏi trong Conversation
+
+### Thêm mới
+- `frontend/src/components/chat/RightSidebar.tsx` — Component Right Sidebar: lọc user messages, click scrollIntoView, responsive (mobile toggle)
+
+### Sửa đổi
+- `frontend/src/components/chat/ChatWindow.tsx` — Bọc mỗi ChatMessage trong `<div data-message-id>` để RightSidebar scroll đến
+- `frontend/src/pages/chat/ChatPage.tsx` — Thêm RightSidebar, flex layout ChatWindow + RightSidebar
+
+### Kết quả kiểm thử
+- `npx tsc --noEmit` — 0 errors ✅
+- `npm run build` — success ✅
