@@ -18,6 +18,7 @@ class ChatSessionResponse(BaseModel):
     title: Optional[str]
     message_count: int
     is_pinned: bool = False
+    model: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     
@@ -25,7 +26,6 @@ class ChatSessionResponse(BaseModel):
         from_attributes = True
 
 class ChatSessionDetailResponse(ChatSessionResponse):
-    model: Optional[str] = None
     messages: List[ChatMessageResponse]
 
 class SendMessageRequest(BaseModel):

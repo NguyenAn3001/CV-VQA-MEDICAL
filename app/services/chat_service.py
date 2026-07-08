@@ -22,6 +22,23 @@ from app.schemas.chat import ChatSessionDetailResponse
 logger = logging.getLogger(__name__)
 
 class ChatService:
+    async def _get_default_model_name(self, db: AsyncSession) -> Optional[str]:
+        try:
+            result = await db.execute(select(ModelProvider).where(ModelProvider.isDefault == True))
+            provider = result.scalar_one_or_none()
+            if not provider:
+                result = await db.execute(select(ModelProvider).where(ModelProvider.enabled == True).order_by(ModelProvider.created_at))
+                provider = result.scalars().first()
+            if provider and provider.chatModel:
+                return provider.chatModel
+            result = await db.execute(select(SystemSetting).where(SystemSetting.key == "general.defaultModel"))
+            setting = result.scalar_one_or_none()
+            if setting and setting.value:
+                return setting.value
+        except Exception:
+            pass
+        return None
+
     async def create_session(self, db: AsyncSession, user_id: str, title: str = "New Session") -> ChatSession:
         session = ChatSession(
             user_id=uuid.UUID(user_id),
@@ -40,7 +57,11 @@ class ChatService:
             .offset(offset)
             .limit(limit)
         )
-        return result.scalars().all()
+        sessions = result.scalars().all()
+        model_name = await self._get_default_model_name(db) or "gpt-4o-mini"
+        for s in sessions:
+            s.model = model_name
+        return sessions
         
     async def get_session(self, db: AsyncSession, session_id: str, user_id: str = None) -> ChatSession:
         query = select(ChatSession).options(selectinload(ChatSession.messages)).where(ChatSession.id == uuid.UUID(session_id))
@@ -63,27 +84,7 @@ class ChatService:
             if msg.image_object_key:
                 resp_msg.image_url = minio_service.get_presigned_url(msg.image_object_key)
 
-        # Fetch default model name
-        model_name = None
-        try:
-            result = await db.execute(select(ModelProvider).where(ModelProvider.isDefault == True))
-            provider = result.scalar_one_or_none()
-            if not provider:
-                result = await db.execute(select(ModelProvider).where(ModelProvider.enabled == True).order_by(ModelProvider.created_at))
-                provider = result.scalars().first()
-            if provider:
-                model_name = provider.chatModel
-
-            # Fallback to system setting
-            if not model_name:
-                result = await db.execute(select(SystemSetting).where(SystemSetting.key == "general.defaultModel"))
-                setting = result.scalar_one_or_none()
-                if setting and setting.value:
-                    model_name = setting.value
-        except Exception:
-            pass
-
-        response_data.model = model_name or "gpt-4o-mini"
+        response_data.model = await self._get_default_model_name(db) or "gpt-4o-mini"
         return response_data
         
     async def delete_session(self, db: AsyncSession, session_id: str, user_id: str = None):
