@@ -193,3 +193,10 @@
 ### Kết quả kiểm thử
 - `npx tsc --noEmit` — 0 errors ✅
 - `npm run build` — success ✅
+
+---
+
+## 2026-07-08 — Thêm task 10: hiển thị model động thay hardcode
+
+### Sửa đổi
+- `agents/tasks.md` — Thêm task 10 (Hiển thị model đang dùng động thay vì hardcode)
