@@ -210,3 +210,14 @@
 - Backend: 24/27 passed (3 pre-existing failures)
 - Frontend: `npx tsc --noEmit` — 0 errors ✅
 - Frontend: `npm run build` — success ✅
+
+---
+
+## 2026-07-08 17:01 — Copy message button
+
+### Sửa đổi
+- `frontend/src/components/chat/message/AssistantMessage.tsx` — Thêm Copy button dùng `navigator.clipboard.writeText(cleanText)`, hiển thị Check icon 2s
+
+### Kết quả kiểm thử
+- `npx tsc --noEmit` — 0 errors ✅
+- `npm run build` — success ✅
