@@ -89,16 +89,16 @@ jobs:
             EOF
 
             # Pull the new images
-            docker pull $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG
-            docker pull $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG
+            sudo docker pull $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG
+            sudo docker pull $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG
 
             # Stop and restart containers using docker-compose
             # This relies on you having the docker-compose.yml file on the server in /home/ubuntu/app
-            docker compose down || docker-compose down || true
-            docker compose up -d || docker-compose up -d
+            sudo docker compose down || sudo docker-compose down || true
+            sudo docker compose up -d || sudo docker-compose up -d
 
             # Clean up old unused images to free up space
-            docker image prune -af --filter "until=24h"
+            sudo docker image prune -af --filter "until=24h"
 
         env:
           ECR_TOKEN: ${{ steps.ecr-token.outputs.token }}
