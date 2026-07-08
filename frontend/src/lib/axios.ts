@@ -1,7 +1,9 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '../store/authStore';
 
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+// Ensure the API URL always ends with /api/v1 if not explicitly provided
+const rawApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+export const API_URL = rawApiUrl.endsWith('/api/v1') ? rawApiUrl : `${rawApiUrl.replace(/\/$/, '')}/api/v1`;
 
 const api: AxiosInstance = axios.create({
   baseURL: API_URL,
