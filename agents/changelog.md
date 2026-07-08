@@ -181,3 +181,15 @@
 ### Kết quả kiểm thử
 - `npx tsc --noEmit` — 0 errors ✅
 - `npm run build` — success ✅
+
+---
+
+## 2026-07-08 14:44 — Fix: Sidebar không load sessions khi ở Profile Page
+
+### Sửa đổi
+- `frontend/src/pages/chat/ChatPage.tsx` — Xoá `useEffect` gọi `fetchSessions()` khi mount (giữ trong `handleSend`)
+- `frontend/src/components/layout/AppLayout.tsx` — Thêm `useEffect` gọi `fetchSessions()` khi mount để sidebar luôn có data
+
+### Kết quả kiểm thử
+- `npx tsc --noEmit` — 0 errors ✅
+- `npm run build` — success ✅

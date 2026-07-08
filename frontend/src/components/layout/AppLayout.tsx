@@ -6,6 +6,12 @@ import { useEffect } from 'react';
 
 export default function AppLayout() {
   const toggleSidebar = useChatStore(state => state.toggleSidebar);
+  const fetchSessions = useChatStore(state => state.fetchSessions);
+
+  // Fetch sessions on mount so Sidebar always has data regardless of page
+  useEffect(() => {
+    fetchSessions();
+  }, [fetchSessions]);
 
   // Global keyboard shortcut to toggle sidebar (Ctrl+B / Cmd+B)
   useEffect(() => {
