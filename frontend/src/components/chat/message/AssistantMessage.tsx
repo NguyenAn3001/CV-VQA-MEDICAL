@@ -1,10 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import ReasoningSection from '../tools/ReasoningSection';
 import { ToolExecutionData } from '../tools/ToolExecutionCard';
 import TypingIndicator from './TypingIndicator';
-import { Bot } from 'lucide-react';
+import { Bot, Copy, Check } from 'lucide-react';
 
 interface AssistantMessageProps {
   content: string;
@@ -42,6 +42,18 @@ export default function AssistantMessage({ content, isStreaming }: AssistantMess
     
     return { cleanText, tools };
   }, [content]);
+
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(cleanText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard not available
+    }
+  };
 
   const showTyping = isStreaming && !cleanText && tools.length === 0;
   
@@ -104,6 +116,18 @@ export default function AssistantMessage({ content, isStreaming }: AssistantMess
                 {textWithCursor}
               </ReactMarkdown>
             </div>
+          )}
+          {!isStreaming && cleanText && (
+            <button
+              onClick={handleCopy}
+              className="mt-2 flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              {copied ? (
+                <><Check className="h-3.5 w-3.5 text-green-500" /> Copied!</>
+              ) : (
+                <><Copy className="h-3.5 w-3.5" /> Copy</>
+              )}
+            </button>
           )}
         </div>
       </div>

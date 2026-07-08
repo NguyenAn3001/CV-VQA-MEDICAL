@@ -11,31 +11,6 @@
 
 ## Danh sách task
 
-### 9. Copy message button
-
-### Mô tả
-
-**Business**: Cho phép người dùng copy nội dung của từng tin nhắn assistant để dễ dàng sao chép kết quả chẩn đoán, phân tích sang nơi khác.
-
-**Approach**: Frontend-only. Thêm icon `Copy` từ lucide-react vào component `AssistantMessage`. Click -&gt; gọi `navigator.clipboard.writeText()` -&gt; hiển thị icon `Check` trong 2 giây.
-
-### File cần sửa
-
-- `frontend/src/components/chat/message/AssistantMessage.tsx` — Thêm button Copy bên dưới nội dung message, state copied/saved
-
-### Yêu cầu kiểm thử
-
-- [ ] Click Copy -&gt; nội dung message được copy vào clipboard
-
-- [ ] Icon chuyển thành Check trong 2s rồi quay lại Copy
-
-- [ ] Không copy phần tool calls, chỉ copy nội dung markdown clean
-
-- Branch:
-- Plan:
-- Status: Todo
-- Created: 2026-07-08 10:58
-
 ### 10. Tự động đặt tên cuộc trò chuyện dựa trên tin nhắn đầu tiên
 
 ### Mô tả
@@ -256,5 +231,15 @@
 - Status: Done
 - Started: 2026-07-08 15:09
 - Completed: 2026-07-08 15:15
+
+### 9. Copy message button
+
+- `frontend/src/components/chat/message/AssistantMessage.tsx` — Thêm Copy button với clipboard API, Check icon 2s
+- Tests: tsc 0 errors ✅, npm run build ✅
+- Branch: feat/copy-message-button
+- Plan: agents/plans/2026-07-08_1700-copy-message-button.md
+- Status: Done
+- Created: 2026-07-08 10:58
+- Completed: 2026-07-08 17:01
 
 ---
