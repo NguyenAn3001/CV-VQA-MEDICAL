@@ -5,10 +5,11 @@ import { cn } from '@/lib/utils';
 interface NavbarProps {
   title: string;
   subtitle?: string;
+  model?: string | null;
   actions?: React.ReactNode;
 }
 
-export default function Navbar({ title }: NavbarProps) {
+export default function Navbar({ title, model }: NavbarProps) {
   const toggleSidebar = useChatStore((state) => state.toggleSidebar);
   const isSidebarCollapsed = useChatStore((state) => state.isSidebarCollapsed);
   const isRightSidebarOpen = useChatStore((state) => state.isRightSidebarOpen);
@@ -33,7 +34,7 @@ export default function Navbar({ title }: NavbarProps) {
       <div className="flex items-center gap-3">
         <div className="hidden sm:flex items-center gap-2 bg-surface-container-low border border-border-subtle rounded-full px-3 py-1 text-label-md font-label-md text-on-surface-variant">
           <span className="material-symbols-outlined text-[16px] text-primary">magic_button</span>
-          GPT-4o + Medical
+          {model ?? 'GPT-4o + Medical'}
         </div>
         <button
           onClick={toggleRightSidebar}
