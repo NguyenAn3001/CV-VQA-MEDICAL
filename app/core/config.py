@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     VIT_MODEL_NAME: str = "google/vit-base-patch16-224"
     BERT_MODEL_NAME: str = "microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract"
     GPT2_MODEL_NAME: str = "gpt2"
+    MEDICAL_MODEL_DISPLAY_NAME: str = "ViT-PubMedBERT"
     
     # Inference Settings
     DEVICE: str = "cuda" # cuda or cpu

@@ -34,7 +34,7 @@ export default function Navbar({ title, model }: NavbarProps) {
       <div className="flex items-center gap-3">
         <div className="hidden sm:flex items-center gap-2 bg-surface-container-low border border-border-subtle rounded-full px-3 py-1 text-label-md font-label-md text-on-surface-variant">
           <span className="material-symbols-outlined text-[16px] text-primary">magic_button</span>
-          {model ?? 'GPT-4o + Medical'}
+          {model ?? 'GPT-4o + ViT-PubMedBERT'}
         </div>
         <button
           onClick={toggleRightSidebar}

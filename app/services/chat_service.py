@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 class ChatService:
     async def _get_default_model_name(self, db: AsyncSession) -> Optional[str]:
+        llm_model = None
         try:
             result = await db.execute(select(ModelProvider).where(ModelProvider.isDefault == True))
             provider = result.scalar_one_or_none()
@@ -30,14 +31,17 @@ class ChatService:
                 result = await db.execute(select(ModelProvider).where(ModelProvider.enabled == True).order_by(ModelProvider.created_at))
                 provider = result.scalars().first()
             if provider and provider.chatModel:
-                return provider.chatModel
-            result = await db.execute(select(SystemSetting).where(SystemSetting.key == "general.defaultModel"))
-            setting = result.scalar_one_or_none()
-            if setting and setting.value:
-                return setting.value
+                llm_model = provider.chatModel
+            if not llm_model:
+                result = await db.execute(select(SystemSetting).where(SystemSetting.key == "general.defaultModel"))
+                setting = result.scalar_one_or_none()
+                if setting and setting.value:
+                    llm_model = setting.value
         except Exception:
             pass
-        return None
+        llm_model = llm_model or "gpt-4o-mini"
+        medical_model = settings.MEDICAL_MODEL_DISPLAY_NAME
+        return f"{llm_model} + {medical_model}"
 
     async def create_session(self, db: AsyncSession, user_id: str, title: str = "New Session") -> ChatSession:
         session = ChatSession(
@@ -58,7 +62,7 @@ class ChatService:
             .limit(limit)
         )
         sessions = result.scalars().all()
-        model_name = await self._get_default_model_name(db) or "gpt-4o-mini"
+        model_name = await self._get_default_model_name(db)
         for s in sessions:
             s.model = model_name
         return sessions
@@ -84,7 +88,7 @@ class ChatService:
             if msg.image_object_key:
                 resp_msg.image_url = minio_service.get_presigned_url(msg.image_object_key)
 
-        response_data.model = await self._get_default_model_name(db) or "gpt-4o-mini"
+        response_data.model = await self._get_default_model_name(db)
         return response_data
         
     async def delete_session(self, db: AsyncSession, session_id: str, user_id: str = None):
