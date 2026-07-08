@@ -76,6 +76,17 @@ jobs:
             # Ensure app directory exists
             mkdir -p /home/ubuntu/app
 
+            # Add swap if not already configured (helps with ML model loading on low-RAM instances)
+            if [ $(sudo swapon --show | wc -l) -eq 0 ]; then
+              echo "Setting up 4GB swap..."
+              sudo fallocate -l 4G /swapfile
+              sudo chmod 600 /swapfile
+              sudo mkswap /swapfile
+              sudo swapon /swapfile
+              echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+              echo "Swap enabled."
+            fi
+
             # Write .env file with absolute path
             cat > /home/ubuntu/app/.env << ENVEOF
             JWT_SECRET_KEY=${JWT_SECRET_KEY}
@@ -147,9 +158,7 @@ jobs:
                   - .env
                 volumes:
                   - /home/ubuntu/models:/app/models
-                mem_limit: 3g
-                memswap_limit: 3g
-                restart: on-failure
+                restart: unless-stopped
                 depends_on:
                   postgres:
                     condition: service_healthy
