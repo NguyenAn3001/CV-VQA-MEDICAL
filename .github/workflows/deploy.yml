@@ -1,10 +1,8 @@
 name: Deploy App to AWS Server
 on:
-  workflow_call:
-    inputs:
-      environment:
-        required: true
-        type: string
+  push:
+    branches:
+      - main
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY_BACKEND: tker/vqa-system-api
@@ -33,11 +31,6 @@ jobs:
           echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
           echo "IMAGE_TAG_FULL=$(date +%Y%m%d)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
-      - name: Convert ENV to upper
-        run: echo "IMAGE_ENV_UPPER=${IMAGE_ENV^^}" >> $GITHUB_ENV
-        env:
-          IMAGE_ENV: ${{ inputs.environment }}
-
       - name: Build, tag, and push Backend image to ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -49,7 +42,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           # Pass the backend API URL dynamically so Vite can build it
-          VITE_API_URL: ${{ secrets[format('VITE_API_URL_{0}', env.IMAGE_ENV_UPPER)] }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
         run: |
           cd frontend
           docker build --build-arg VITE_API_URL=$VITE_API_URL -t $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG .
@@ -68,7 +61,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           # Passing all required secrets to the runner
-          envs: ECR_TOKEN,ECR_REGISTRY,ECR_REPOSITORY_BACKEND,ECR_REPOSITORY_FRONTEND,IMAGE_ENV,IMAGE_TAG,DATABASE_URL,JWT_SECRET_KEY,ENCRYPTION_KEY,REDIS_URL,MINIO_ENDPOINT,MINIO_ACCESS_KEY,MINIO_SECRET_KEY,LLM_API_KEY
+          envs: ECR_TOKEN,ECR_REGISTRY,ECR_REPOSITORY_BACKEND,ECR_REPOSITORY_FRONTEND,IMAGE_TAG,DATABASE_URL,JWT_SECRET_KEY,ENCRYPTION_KEY,REDIS_URL,MINIO_ENDPOINT,MINIO_ACCESS_KEY,MINIO_SECRET_KEY,LLM_API_KEY
           script: |
             # Login to ECR
             echo "$ECR_TOKEN" | docker login --username AWS --password-stdin $ECR_REGISTRY
@@ -110,13 +103,12 @@ jobs:
         env:
           ECR_TOKEN: ${{ steps.ecr-token.outputs.token }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_ENV: ${{ inputs.environment }}
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
-          DATABASE_URL: ${{ secrets[format('DATABASE_URL_{0}', env.IMAGE_ENV_UPPER)] }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
           ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
-          REDIS_URL: ${{ secrets[format('REDIS_URL_{0}', env.IMAGE_ENV_UPPER)] }}
-          MINIO_ENDPOINT: ${{ secrets[format('MINIO_ENDPOINT_{0}', env.IMAGE_ENV_UPPER)] }}
-          MINIO_ACCESS_KEY: ${{ secrets[format('MINIO_ACCESS_KEY_{0}', env.IMAGE_ENV_UPPER)] }}
-          MINIO_SECRET_KEY: ${{ secrets[format('MINIO_SECRET_KEY_{0}', env.IMAGE_ENV_UPPER)] }}
-          LLM_API_KEY: ${{ secrets[format('LLM_API_KEY_{0}', env.IMAGE_ENV_UPPER)] }}
+          REDIS_URL: ${{ secrets.REDIS_URL }}
+          MINIO_ENDPOINT: ${{ secrets.MINIO_ENDPOINT }}
+          MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
+          MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
