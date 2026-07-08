@@ -147,6 +147,9 @@ jobs:
                   - .env
                 volumes:
                   - /home/ubuntu/models:/app/models
+                mem_limit: 3g
+                memswap_limit: 3g
+                restart: on-failure
                 depends_on:
                   postgres:
                     condition: service_healthy
