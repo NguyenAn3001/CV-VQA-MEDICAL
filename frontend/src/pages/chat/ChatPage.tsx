@@ -29,10 +29,6 @@ export default function ChatPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchSessions();
-  }, [fetchSessions]);
-
-  useEffect(() => {
     if (sessionId) {
       setActiveSession(sessionId);
     } else {
