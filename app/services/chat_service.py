@@ -12,7 +12,7 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy import desc
 from sse_starlette.sse import EventSourceResponse
 
-from app.db.models import ChatSession, ChatMessage
+from app.db.models import ChatSession, ChatMessage, ModelProvider, SystemSetting
 from app.db.base import AsyncSessionLocal
 from app.services.minio_service import minio_service
 from app.services.llm_orchestrator import llm_orchestrator
@@ -22,6 +22,27 @@ from app.schemas.chat import ChatSessionDetailResponse
 logger = logging.getLogger(__name__)
 
 class ChatService:
+    async def _get_default_model_name(self, db: AsyncSession) -> Optional[str]:
+        llm_model = None
+        try:
+            result = await db.execute(select(ModelProvider).where(ModelProvider.isDefault == True))
+            provider = result.scalar_one_or_none()
+            if not provider:
+                result = await db.execute(select(ModelProvider).where(ModelProvider.enabled == True).order_by(ModelProvider.created_at))
+                provider = result.scalars().first()
+            if provider and provider.chatModel:
+                llm_model = provider.chatModel
+            if not llm_model:
+                result = await db.execute(select(SystemSetting).where(SystemSetting.key == "general.defaultModel"))
+                setting = result.scalar_one_or_none()
+                if setting and setting.value:
+                    llm_model = setting.value
+        except Exception:
+            pass
+        llm_model = llm_model or "gpt-4o-mini"
+        medical_model = settings.MEDICAL_MODEL_DISPLAY_NAME
+        return f"{llm_model} + {medical_model}"
+
     async def create_session(self, db: AsyncSession, user_id: str, title: str = "New Session") -> ChatSession:
         session = ChatSession(
             user_id=uuid.UUID(user_id),
@@ -40,7 +61,11 @@ class ChatService:
             .offset(offset)
             .limit(limit)
         )
-        return result.scalars().all()
+        sessions = result.scalars().all()
+        model_name = await self._get_default_model_name(db)
+        for s in sessions:
+            s.model = model_name
+        return sessions
         
     async def get_session(self, db: AsyncSession, session_id: str, user_id: str = None) -> ChatSession:
         query = select(ChatSession).options(selectinload(ChatSession.messages)).where(ChatSession.id == uuid.UUID(session_id))
@@ -62,7 +87,8 @@ class ChatService:
         for msg, resp_msg in zip(session.messages, response_data.messages):
             if msg.image_object_key:
                 resp_msg.image_url = minio_service.get_presigned_url(msg.image_object_key)
-                
+
+        response_data.model = await self._get_default_model_name(db)
         return response_data
         
     async def delete_session(self, db: AsyncSession, session_id: str, user_id: str = None):

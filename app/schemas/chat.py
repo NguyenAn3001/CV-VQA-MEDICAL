@@ -18,6 +18,7 @@ class ChatSessionResponse(BaseModel):
     title: Optional[str]
     message_count: int
     is_pinned: bool = False
+    model: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     

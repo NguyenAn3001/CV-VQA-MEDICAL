@@ -122,7 +122,7 @@ export default function SessionDetailModal() {
               
               {/* Model Info */}
               <div className="text-on-surface-variant font-medium">Model</div>
-              <div className="text-on-surface">GPT-4o + Medical</div>
+              <div className="text-on-surface">{detail.model ?? 'GPT-4o + ViT-PubMedBERT'}</div>
               
               {/* Messages Count */}
               <div className="text-on-surface-variant font-medium">Messages</div>

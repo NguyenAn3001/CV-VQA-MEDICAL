@@ -88,8 +88,8 @@ export default function RightSidebar() {
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: 'easeInOut' }}
             className={cn(
-              'bg-sidebar-bg border-l border-border-subtle h-screen flex flex-col z-20 shrink-0 overflow-hidden',
-              isMobile && 'fixed inset-y-0 right-0 shadow-2xl'
+              'bg-sidebar-bg border-l border-border-subtle h-screen flex flex-col shrink-0 overflow-hidden',
+              isMobile ? 'fixed inset-y-0 right-0 shadow-2xl z-40' : 'z-20'
             )}
           >
             {/* Header */}
@@ -146,7 +146,7 @@ export default function RightSidebar() {
                         : 'Unknown'}
                     </span>
                     <span className="text-on-surface-variant">Model</span>
-                    <span className="text-on-surface">GPT-4o + Medical</span>
+                    <span className="text-on-surface">{sessionDetail.model ?? 'GPT-4o + ViT-PubMedBERT'}</span>
                   </div>
 
                   {/* Attached Images */}

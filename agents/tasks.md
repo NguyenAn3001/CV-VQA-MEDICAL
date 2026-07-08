@@ -62,38 +62,23 @@
 - Status: Todo
 - Created: 2026-07-08 10:58
 
-### 10. Hiển thị model đang dùng động thay vì hardcode "GPT-4o + Medical"
-
-### Mô tả
-**Business**: Chat section hiện hardcode 'GPT-4o + Medical' ở Navbar, RightSidebar, SessionDetailModal. Cần lấy model name từ default provider trong DB để hiển thị chính xác.
-
-**Approach**:
-- **BE**: Thêm field `model` vào `ChatSessionDetailResponse`, populate từ default provider's `chatModel` trong `chat_service.get_session_detail()`
-- **FE**: Thay 'GPT-4o + Medical' bằng `sessionDetail.model` (có fallback)
-
-### File cần sửa
-- `app/schemas/chat.py` — Thêm `model: Optional[str] = None` vào `ChatSessionDetailResponse`
-- `app/services/chat_service.py` — Trong `get_session_detail()`, fetch default provider name/model, gán vào response
-- `frontend/src/pages/chat/ChatPage.tsx` — Line 142: `subtitle` dùng `activeSession.model` thay hardcode
-- `frontend/src/components/chat/RightSidebar.tsx` — Line 149: thay 'GPT-4o + Medical' bằng `sessionDetail.model`
-- `frontend/src/components/chat/SessionDetailModal.tsx` — Line 125: thay 'GPT-4o + Medical' bằng `detail.model`
-- `frontend/src/types/models.d.ts` — Thêm `model?: string` vào `ChatSession`
-
-### Yêu cầu kiểm thử
-- [ ] BE: API `GET /api/v1/chat/sessions/{id}` trả về field `model`
-- [ ] FE: Navbar subtitle hiển thị tên model từ API (không còn hardcode)
-- [ ] FE: RightSidebar + SessionDetailModal hiển thị model đúng
-- [ ] `npx tsc --noEmit` 0 errors
-- [ ] `npm run build` thành công
-
-- Branch:
-- Plan:
-- Status: Todo
-- Created: 2026-07-08
-
 ---
 
 ## ✅ Đã hoàn thành
+
+### 10. Hiển thị model đang dùng động thay vì hardcode "GPT-4o + Medical"
+
+- `app/schemas/chat.py` — Thêm `model: Optional[str]` vào `ChatSessionDetailResponse`
+- `app/services/chat_service.py` — `get_session_detail()` fetch default provider model từ DB
+- `frontend/src/types/models.d.ts` — Thêm `model?: string` vào `ChatSession`
+- `frontend/src/pages/chat/ChatPage.tsx` — Navbar subtitle dùng `activeSession.model`
+- `frontend/src/components/chat/RightSidebar.tsx` — Model hiển thị từ `sessionDetail.model`
+- `frontend/src/components/chat/SessionDetailModal.tsx` — Model hiển thị từ `detail.model`
+- Branch: feat/dynamic-model-display
+- Plan: agents/plans/2026-07-08_1509-dynamic-model-display.md
+- Status: Done
+- Started: 2026-07-08 15:09
+- Completed: 2026-07-08 15:15
 
 ### 1. Kết nối ProfilePage với Profile API
 

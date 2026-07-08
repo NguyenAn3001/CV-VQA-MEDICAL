@@ -139,7 +139,7 @@ export default function ChatPage() {
     <div className="flex flex-col h-full">
       <Navbar
         title={activeSession?.title || 'New Chat'}
-        subtitle={activeSession ? 'GPT-4o + Medical' : 'Start a new medical review'}
+        model={activeSession?.model}
       />
       <ChatWindow
         messages={messages}
