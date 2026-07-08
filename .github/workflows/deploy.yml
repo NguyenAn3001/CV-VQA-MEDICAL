@@ -66,6 +66,12 @@ jobs:
             # Login to ECR
             echo "$ECR_TOKEN" | sudo docker login --username AWS --password-stdin $ECR_REGISTRY
 
+            # --- Free up disk space BEFORE pulling heavy images ---
+            sudo docker container prune -f
+            sudo docker image prune -af
+            sudo docker volume prune -f
+            sudo docker builder prune -af
+
             # Navigate to application directory
             mkdir -p /home/ubuntu/app
             cd /home/ubuntu/app
@@ -76,29 +82,25 @@ jobs:
             export ECR_REPOSITORY_FRONTEND=$ECR_REPOSITORY_FRONTEND
             export IMAGE_TAG=$IMAGE_TAG
 
-            # Create the .env file for the backend container
-            cat <<EOF > .env
-            JWT_SECRET_KEY=$JWT_SECRET_KEY
-            ENCRYPTION_KEY=$ENCRYPTION_KEY
-            DATABASE_URL=$DATABASE_URL
-            REDIS_URL=$REDIS_URL
-            MINIO_ENDPOINT=$MINIO_ENDPOINT
-            MINIO_ACCESS_KEY=$MINIO_ACCESS_KEY
-            MINIO_SECRET_KEY=$MINIO_SECRET_KEY
-            LLM_API_KEY=$LLM_API_KEY
-            EOF
+            # Create the .env file for the backend container (no leading spaces)
+            cat > .env <<EOF
+JWT_SECRET_KEY=$JWT_SECRET_KEY
+ENCRYPTION_KEY=$ENCRYPTION_KEY
+DATABASE_URL=$DATABASE_URL
+REDIS_URL=$REDIS_URL
+MINIO_ENDPOINT=$MINIO_ENDPOINT
+MINIO_ACCESS_KEY=$MINIO_ACCESS_KEY
+MINIO_SECRET_KEY=$MINIO_SECRET_KEY
+LLM_API_KEY=$LLM_API_KEY
+EOF
 
-            # Pull the new images
+            # Pull the new images from ECR
             sudo docker pull $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG
             sudo docker pull $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG
 
-            # Stop and restart containers using docker-compose
-            # This relies on you having the docker-compose.yml file on the server in /home/ubuntu/app
+            # Stop running containers, then start with new images
             sudo docker compose down || true
             sudo docker compose up -d
-
-            # Clean up old unused images to free up space
-            sudo docker image prune -af --filter "until=24h"
 
         env:
           ECR_TOKEN: ${{ steps.ecr-token.outputs.token }}
