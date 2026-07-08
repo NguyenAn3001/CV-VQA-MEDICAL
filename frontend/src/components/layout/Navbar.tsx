@@ -1,6 +1,6 @@
 import { useChatStore } from '../../store/chatStore';
-import { Menu } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Menu, PanelRightOpen, PanelRightClose } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface NavbarProps {
   title: string;
@@ -11,9 +11,8 @@ interface NavbarProps {
 export default function Navbar({ title }: NavbarProps) {
   const toggleSidebar = useChatStore((state) => state.toggleSidebar);
   const isSidebarCollapsed = useChatStore((state) => state.isSidebarCollapsed);
-  const activeSessionId = useChatStore((state) => state.activeSessionId);
-  const openDetailModal = useChatStore((state) => state.openDetailModal);
-  const deleteSession = useChatStore((state) => state.deleteSession);
+  const isRightSidebarOpen = useChatStore((state) => state.isRightSidebarOpen);
+  const toggleRightSidebar = useChatStore((state) => state.toggleRightSidebar);
 
   return (
     <header className="bg-surface flex justify-between items-center w-full px-inner-padding border-b border-border-subtle h-14 shrink-0 z-10">
@@ -36,27 +35,16 @@ export default function Navbar({ title }: NavbarProps) {
           <span className="material-symbols-outlined text-[16px] text-primary">magic_button</span>
           GPT-4o + Medical
         </div>
-        
-        {activeSessionId && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="p-1 hover:bg-surface-container-high rounded-full text-on-surface-variant transition-colors outline-none">
-                <span className="material-symbols-outlined">more_vert</span>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 z-50">
-              <DropdownMenuItem onClick={() => openDetailModal(activeSessionId)} className="cursor-pointer">
-                View Details
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => deleteSession(activeSessionId)} 
-                className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-50"
-              >
-                Delete Chat
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+        <button
+          onClick={toggleRightSidebar}
+          className={cn(
+            'p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors',
+            isRightSidebarOpen && 'bg-surface-container-high text-primary'
+          )}
+          aria-label={isRightSidebarOpen ? 'Hide session panel' : 'Show session panel'}
+        >
+          {isRightSidebarOpen ? <PanelRightClose className="h-5 w-5" /> : <PanelRightOpen className="h-5 w-5" />}
+        </button>
       </div>
     </header>
   );

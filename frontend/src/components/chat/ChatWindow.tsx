@@ -96,12 +96,16 @@ export default function ChatWindow({
         We need enough padding to clear the absolute positioned ChatInput (which is around 120-150px tall).
       */}
       <div className="mx-auto w-full max-w-[850px] px-4 pt-8 pb-48 flex flex-col min-h-full">
-        {messages.map((message, index) => (
-          <ChatMessage 
-            key={message.id || `${message.role}-${index}`} 
-            message={message} 
-          />
-        ))}
+        {messages.map((message, index) => {
+          const msgId = message.id || `msg-${message.role}-${index}`;
+          return (
+            <div key={msgId} data-message-id={msgId}>
+              <ChatMessage
+                message={message}
+              />
+            </div>
+          );
+        })}
 
         {isGenerating && (
           <div className="flex flex-col w-full">

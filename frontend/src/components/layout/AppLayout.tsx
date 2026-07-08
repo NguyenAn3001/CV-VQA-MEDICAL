@@ -1,8 +1,8 @@
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import RightSidebar from '../chat/RightSidebar';
 import { useChatStore } from '../../store/chatStore';
 import { useEffect } from 'react';
-import SessionDetailModal from '../chat/SessionDetailModal';
 
 export default function AppLayout() {
   const toggleSidebar = useChatStore(state => state.toggleSidebar);
@@ -26,7 +26,7 @@ export default function AppLayout() {
       <main className="flex-1 flex flex-col h-full relative bg-surface-white min-w-0 transition-all duration-250 ease-in-out">
         <Outlet />
       </main>
-      <SessionDetailModal />
+      <RightSidebar />
     </div>
   );
 }

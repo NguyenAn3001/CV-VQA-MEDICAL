@@ -140,7 +140,7 @@ export default function ChatPage() {
   };
 
   return (
-    <>
+    <div className="flex flex-col h-full">
       <Navbar
         title={activeSession?.title || 'New Chat'}
         subtitle={activeSession ? 'GPT-4o + Medical' : 'Start a new medical review'}
@@ -166,6 +166,6 @@ export default function ChatPage() {
         onFileChange={setSelectedFile}
         isGenerating={isGenerating}
       />
-    </>
+    </div>
   );
 }
