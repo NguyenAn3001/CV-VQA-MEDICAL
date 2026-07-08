@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import ChatInput from '../../components/chat/ChatInput';
 import ChatWindow from '../../components/chat/ChatWindow';
-import RightSidebar from '../../components/chat/RightSidebar';
 import { useChatStore } from '../../store/chatStore';
 import { useSSEChat } from '../../hooks/useSSEChat';
 import type { ChatMessage } from '../../types/models';
@@ -146,17 +145,14 @@ export default function ChatPage() {
         title={activeSession?.title || 'New Chat'}
         subtitle={activeSession ? 'GPT-4o + Medical' : 'Start a new medical review'}
       />
-      <div className="flex flex-1 overflow-hidden">
-        <ChatWindow
-          messages={messages}
-          streamingContent={streamingContent}
-          activeTools={activeTools}
-          isGenerating={isGenerating}
-          isEmptyState={!activeSessionId && messages.length === 0}
-          onSuggestionClick={handleSuggestionClick}
-        />
-        <RightSidebar messages={messages} />
-      </div>
+      <ChatWindow
+        messages={messages}
+        streamingContent={streamingContent}
+        activeTools={activeTools}
+        isGenerating={isGenerating}
+        isEmptyState={!activeSessionId && messages.length === 0}
+        onSuggestionClick={handleSuggestionClick}
+      />
       {errorMessage ? (
         <div className="absolute top-16 left-1/2 -translate-x-1/2 z-50 bg-red-100 text-red-700 px-4 py-2 rounded-full text-sm font-medium shadow-sm">
           {errorMessage}

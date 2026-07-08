@@ -10,6 +10,7 @@ interface ChatState {
   sessionDetailsById: Record<string, ChatSessionDetail>;
   isLoading: boolean;
   isSidebarCollapsed: boolean;
+  isRightSidebarOpen: boolean;
   detailModalSessionId: string | null;
   
   fetchSessions: () => Promise<void>;
@@ -23,6 +24,7 @@ interface ChatState {
   updateSessionTitle: (id: string, title: string) => Promise<void>;
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
+  toggleRightSidebar: () => void;
   openDetailModal: (id: string) => void;
   closeDetailModal: () => void;
 }
@@ -35,10 +37,12 @@ export const useChatStore = create<ChatState>()(
       sessionDetailsById: {},
       isLoading: false,
       isSidebarCollapsed: false,
+      isRightSidebarOpen: true,
       detailModalSessionId: null,
 
       toggleSidebar: () => set((state) => ({ isSidebarCollapsed: !state.isSidebarCollapsed })),
       setSidebarCollapsed: (collapsed: boolean) => set({ isSidebarCollapsed: collapsed }),
+      toggleRightSidebar: () => set((state) => ({ isRightSidebarOpen: !state.isRightSidebarOpen })),
       
       openDetailModal: (id: string) => set({ detailModalSessionId: id }),
       closeDetailModal: () => set({ detailModalSessionId: null }),
@@ -180,7 +184,7 @@ export const useChatStore = create<ChatState>()(
     }),
     {
       name: 'sidebarCollapsed',
-      partialize: (state) => ({ isSidebarCollapsed: state.isSidebarCollapsed }),
+      partialize: (state) => ({ isSidebarCollapsed: state.isSidebarCollapsed, isRightSidebarOpen: state.isRightSidebarOpen }),
     }
   )
 );
