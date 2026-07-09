@@ -8,13 +8,13 @@ import { useChatStore } from '../../store/chatStore';
 export default function RightSidebar() {
   const location = useLocation();
   const isOpen = useChatStore((s) => s.isRightSidebarOpen);
+  const setRightSidebarOpen = useChatStore((s) => s.setRightSidebarOpen);
   const activeSessionId = useChatStore((s) => s.activeSessionId);
   const sessionDetail = useChatStore((s) => activeSessionId ? s.sessionDetailsById[activeSessionId] : undefined);
   const deleteSession = useChatStore((s) => s.deleteSession);
   const updateSessionTitle = useChatStore((s) => s.updateSessionTitle);
   const messages = sessionDetail?.messages ?? [];
 
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -26,7 +26,9 @@ export default function RightSidebar() {
   useEffect(() => {
     const check = () => {
       setIsMobile(window.innerWidth < 1024);
-      if (window.innerWidth < 1024) setIsMobileOpen(false);
+      if (window.innerWidth < 1024) {
+        setRightSidebarOpen(false);
+      }
     };
     check();
     window.addEventListener('resize', check);
@@ -47,8 +49,8 @@ export default function RightSidebar() {
     const id = messageId || `msg-user-${index}`;
     setActiveId(id);
     document.querySelector(`[data-message-id="${id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    if (isMobile) setIsMobileOpen(false);
-  }, [isMobile]);
+    if (isMobile) setRightSidebarOpen(false);
+  }, [isMobile, setRightSidebarOpen]);
 
   const handleTitleSubmit = () => {
     setIsEditingTitle(false);
@@ -66,13 +68,13 @@ export default function RightSidebar() {
 
   if (!isChatRoute) return null;
 
-  const isVisible = isOpen || isMobileOpen;
+  const isVisible = isOpen;
 
   return (
     <>
-      {isMobile && !isMobileOpen && (
+      {isMobile && !isOpen && (
         <button
-          onClick={() => setIsMobileOpen(true)}
+          onClick={() => setRightSidebarOpen(true)}
           className="fixed bottom-4 right-4 z-50 w-12 h-12 bg-primary text-white rounded-full shadow-lg flex items-center justify-center"
           aria-label="Show questions"
         >
@@ -105,7 +107,7 @@ export default function RightSidebar() {
               </div>
 
               {isMobile && (
-                <button onClick={() => setIsMobileOpen(false)} className="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant">
+                <button onClick={() => setRightSidebarOpen(false)} className="p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant">
                   <X className="h-5 w-5" />
                 </button>
               )}
@@ -243,13 +245,13 @@ export default function RightSidebar() {
 
       {/* Mobile backdrop */}
       <AnimatePresence>
-        {isMobile && isMobileOpen && (
+        {isMobile && isOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/20 z-30 backdrop-blur-sm"
-            onClick={() => setIsMobileOpen(false)}
+            onClick={() => setRightSidebarOpen(false)}
           />
         )}
       </AnimatePresence>

@@ -25,6 +25,7 @@ interface ChatState {
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
   toggleRightSidebar: () => void;
+  setRightSidebarOpen: (open: boolean) => void;
   openDetailModal: (id: string) => void;
   closeDetailModal: () => void;
 }
@@ -43,6 +44,7 @@ export const useChatStore = create<ChatState>()(
       toggleSidebar: () => set((state) => ({ isSidebarCollapsed: !state.isSidebarCollapsed })),
       setSidebarCollapsed: (collapsed: boolean) => set({ isSidebarCollapsed: collapsed }),
       toggleRightSidebar: () => set((state) => ({ isRightSidebarOpen: !state.isRightSidebarOpen })),
+      setRightSidebarOpen: (open: boolean) => set({ isRightSidebarOpen: open }),
       
       openDetailModal: (id: string) => set({ detailModalSessionId: id }),
       closeDetailModal: () => set({ detailModalSessionId: null }),
