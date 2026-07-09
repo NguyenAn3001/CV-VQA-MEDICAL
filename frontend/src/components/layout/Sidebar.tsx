@@ -75,15 +75,21 @@ export default function Sidebar() {
       <motion.nav 
         initial={false}
         animate={{ 
-          width: isCollapsed ? (isMobile ? 0 : 72) : 280,
+          width: isCollapsed ? (isMobile ? 0 : 72) : (isMobile ? '100vw' : 280),
           opacity: isCollapsed && isMobile ? 0 : 1,
         }}
         transition={{ duration: 0.25, ease: 'easeInOut' }}
         className={cn(
-          "bg-sidebar-bg border-r border-border-subtle h-screen flex flex-col p-4 gap-2 z-20 shrink-0 overflow-hidden",
-          isMobile && "fixed left-0 top-0 bottom-0 shadow-2xl"
+          "bg-sidebar-bg border-r border-border-subtle h-screen shrink-0 overflow-hidden",
+          isMobile 
+            ? "fixed inset-0 z-50 flex" 
+            : "flex flex-col p-4 gap-2 z-20"
         )}
+        style={isMobile && isCollapsed ? ({ pointerEvents: 'none' } as React.CSSProperties) : undefined}
       >
+        <div className={cn(
+          !isMobile ? "flex-1 flex flex-col p-4 gap-2 overflow-hidden" : "w-[280px] flex flex-col p-4 gap-2 shrink-0 overflow-hidden border-r border-border-subtle shadow-2xl"
+        )}>
         {/* Header */}
         <div className={cn("flex items-center mb-6 px-1", isCollapsed ? "justify-center flex-col gap-4" : "justify-between")}>
           <div 
@@ -305,20 +311,12 @@ export default function Sidebar() {
             {isCollapsed && <TooltipContent side="right">Profile</TooltipContent>}
           </Tooltip>
         </div>
-      </motion.nav>
+      </div>
       
-      {/* Mobile Backdrop */}
-      <AnimatePresence>
-        {isMobile && !isCollapsed && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/20 z-10 md:hidden backdrop-blur-sm" 
-            onClick={() => setSidebarCollapsed(true)} 
-          />
-        )}
-      </AnimatePresence>
+      {isMobile && !isCollapsed && (
+        <div className="flex-1 bg-black/20 backdrop-blur-sm" onClick={() => setSidebarCollapsed(true)} />
+      )}
+      </motion.nav>
     </TooltipProvider>
   );
 }
