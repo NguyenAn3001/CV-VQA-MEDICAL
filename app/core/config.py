@@ -40,6 +40,7 @@ class Settings(BaseSettings):
 
     # MinIO Object Storage
     MINIO_ENDPOINT: str = "localhost:9000"
+    MINIO_EXTERNAL_ENDPOINT: str = "localhost:9000" # Add this for external presigned URLs
     MINIO_ACCESS_KEY: str = "minioadmin"
     MINIO_SECRET_KEY: str = "minioadmin"
     MINIO_BUCKET_NAME: str = "medical-images"
