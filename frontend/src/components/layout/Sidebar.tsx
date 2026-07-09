@@ -89,8 +89,7 @@ export default function Sidebar() {
         {/* Header */}
         <div className={cn("flex items-center mb-6 px-1", isCollapsed ? "justify-center flex-col gap-4" : "justify-between")}>
           <div 
-            className={cn("flex items-center gap-3 cursor-pointer overflow-hidden", isCollapsed && "justify-center")} 
-            onClick={() => navigate('/chat')}
+            className={cn("flex items-center gap-3 overflow-hidden", isCollapsed && "justify-center")}
           >
             <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold shrink-0">
               <span className="material-symbols-outlined icon-fill">medical_services</span>
