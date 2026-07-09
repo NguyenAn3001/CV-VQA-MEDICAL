@@ -24,7 +24,8 @@
 agents/
 ├── AGENTS.md           # Kiến trúc project (backend + frontend)
 ├── workflow.md         # File này
-├── tasks.md            # Task sắp làm + ✅ đã hoàn thành
+├── tasks.md            # Task sắp làm (pending)
+├── tasks-done.md       # Task đã hoàn thành (done)
 ├── changelog.md        # Lịch sử thay đổi
 └── plans/              # Plan chi tiết cho từng feature
 
@@ -223,9 +224,22 @@ Nếu thêm API endpoint mới hoặc thay đổi kiến trúc, cập nhật `ag
 
 ## Bước 7 — Đánh dấu hoàn thành
 
-Chuyển task từ `## Danh sách task` xuống `## ✅ Đã hoàn thành` trong `agents/tasks.md`.
+Xoá task khỏi `agents/tasks.md`, sau đó **append** vào cuối `agents/tasks-done.md` theo format:
 
-- Không xoá task — giữ lại để trace lịch sử
+```markdown
+### N. Tên Task
+
+Mô tả: Mục đích của task
+
+- `path/to/file` — Mô tả thay đổi
+- Branch: feat/xxx
+- Plan: agents/plans/xxx.md
+- Status: Done
+- Created: YYYY-MM-DD
+- Completed: YYYY-MM-DD
+```
+
+- Task mới hoàn thành luôn **append** vào **cuối file**, không chèn giữa
 - Thêm link tới file plan nếu có
 
 ---
@@ -240,7 +254,7 @@ Một task chỉ được coi là hoàn thành khi **tất cả** điều kiện
 - [ ] Build pass (frontend: `npm run build`)
 - [ ] Lint pass (frontend: `npx tsc --noEmit`)
 - [ ] Changelog đã cập nhật
-- [ ] tasks.md đã cập nhật (chuyển xuống ✅)
+- [ ] tasks.md và tasks-done.md đã cập nhật (xoá khỏi tasks.md, append vào tasks-done.md)
 - [ ] Không còn TODO/FIXME liên quan trong code mới
 - [ ] Không còn import hoặc biến không dùng
 
@@ -259,7 +273,7 @@ Khi user nói "đọc workflow và làm việc", agent phải **tự động**:
 5. Thực hiện (Bước 4)
 6. Chạy test (Bước 5)
 7. Cập nhật changelog (Bước 6)
-8. Cập nhật tasks.md (Bước 7)
+8. Cập nhật tasks.md + tasks-done.md (Bước 7)
 9. Báo cáo kết quả
 
 Không cần user nhắc lại từng bước.
