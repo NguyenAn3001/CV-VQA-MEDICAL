@@ -224,6 +224,20 @@
 
 ---
 
+## 2026-07-09 23:34 — Tự động đặt tên cuộc trò chuyện dựa trên tin nhắn đầu tiên
+
+### Sửa đổi
+- `app/services/chat_service.py` — `prepare_message_and_context` returns `new_title`; `get_sse_stream` yields `title_changed` SSE event; fallback extract 8 words from message if LLM fails
+- `app/api/chat.py` — Pipe `new_title` từ prepare_message_and_context sang get_sse_stream
+- `frontend/src/store/chatStore.ts` — Thêm action `updateSessionTitleLocally(id, title)`
+- `frontend/src/hooks/useSSEChat.ts` — Parse event `title_changed`, gọi `updateSessionTitleLocally`
+
+### Kết quả kiểm thử
+- `npx tsc --noEmit` — 0 errors ✅
+- `npm run build` — success ✅
+
+---
+
 ## 2026-07-09 22:44 — Fix RightSidebar mobile — không đóng được
 
 ### Sửa đổi

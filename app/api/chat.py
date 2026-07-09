@@ -61,7 +61,7 @@ async def send_message(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    pil_image, history = await chat_service.prepare_message_and_context(
+    pil_image, history, new_title = await chat_service.prepare_message_and_context(
         db, session_id, str(current_user.id), message, image
     )
-    return chat_service.get_sse_stream(session_id, history, message, pil_image)
+    return chat_service.get_sse_stream(session_id, history, message, pil_image, new_title)

@@ -11,46 +11,6 @@
 
 ## Danh sách task
 
-### 10. Tự động đặt tên cuộc trò chuyện dựa trên tin nhắn đầu tiên
-
-### Mô tả
-
-**Business**: Hiện tại session mới luôn có title "New Session"/"New Chat", gây khó khăn khi tìm lại cuộc trò chuyện cũ.
-
-**Approach**: Backend đã có title generation khi gửi message đầu tiên (`chat_service.py:193-197` gọi `llm_orchestrator.generate_title()`). Việc cần làm:
-
-1. **BE**: Đưa title mới vào SSE stream dưới dạng event riêng (`event: title_changed`) để FE cập nhật real-time
-2. **FE**: Parse event `title_changed` trong `useSSEChat.ts`, update session title trong `chatStore`
-3. **Tối ưu**: Nếu LLM fail, fallback về extract N từ đầu message (không để title "New Session" mãi)
-
-### File cần sửa
-
-- `app/services/chat_service.py` — Sau khi `generate_title()` thành công, yield SSE event `title_changed` với data = `{session_id, title}`
-- `frontend/src/hooks/useSSEChat.ts` — Parse event `title_changed`, gọi `updateSessionTitleLocally(sessionId, title)` 
-- `frontend/src/store/chatStore.ts` — Thêm action `updateSessionTitleLocally(id, title)` chỉ update store không gọi API
-
-### File cần tạo mới
-
-- *(không có)*
-
-### Yêu cầu kiểm thử
-
-- [ ] Gửi tin nhắn đầu tiên → title trong sidebar cập nhật ngay (không cần reload)
-- [ ] Title là tiếng Việt có dấu, ≤ 5 từ
-- [ ] Nếu LLM fail → fallback extract 8 từ đầu message
-- [ ] Session đã rename thủ công → không bị ghi đè
-
-### Ghi chú
-- LLM generate_title đã có sẵn ở `llm_orchestrator.py:50-62`
-- Trigger hiện tại: `chat_service.py:193-197` (sau save_message đầu tiên)
-- Cần trả title về FE real-time vì fetchSessions() chỉ gọi khi mount hoặc gửi tin nhắn mới
-- Pre-requisite: task này phải làm sau task 12 (Fix RightSidebar mobile) để tránh conflict
-
-- Branch:
-- Plan:
-- Status: Todo
-- Created: 2026-07-08
-
 ### 11. Tìm kiếm chat sessions trong Sidebar
 
 ### Mô tả
@@ -78,6 +38,13 @@
 - Created: 2026-07-08 10:58
 
 ## ✅ Đã hoàn thành
+
+### 10. Tự động đặt tên cuộc trò chuyện dựa trên tin nhắn đầu tiên
+- Branch: feat/auto-chat-title
+- Plan: agents/plans/2026-07-09_2334-auto-chat-title.md
+- Status: Done
+- Created: 2026-07-08
+- Completed: 2026-07-09 23:34
 
 ### 12. Fix RightSidebar mobile — không đóng được
 
