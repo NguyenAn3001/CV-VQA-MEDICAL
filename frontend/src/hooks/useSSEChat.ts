@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import type { ChatMessage, ChatToolCall } from '../types/models';
+import { useChatStore } from '../store/chatStore';
 import { API_URL } from '../lib/axios';
 
 interface StreamResult {
@@ -99,6 +100,11 @@ export const useSSEChat = () => {
             } else if (currentEvent === 'tool_call' && Array.isArray(parsed.tools)) {
               toolsCalled = [...toolsCalled, ...(parsed.tools as ChatToolCall[])];
               setActiveTools(toolsCalled);
+            } else if (currentEvent === 'title_changed') {
+              const { session_id, title } = parsed as { session_id: string; title: string };
+              if (session_id && title) {
+                useChatStore.getState().updateSessionTitleLocally(session_id, title);
+              }
             } else if (currentEvent === 'error') {
               throw new Error(String(parsed.detail ?? 'Generation failed'));
             }

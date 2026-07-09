@@ -142,7 +142,7 @@ class ChatService:
 
     async def prepare_message_and_context(
         self, db: AsyncSession, session_id: str, user_id: str, message: str, image: Optional[UploadFile] = None
-    ) -> Tuple[Optional[Image.Image], List[ChatMessage]]:
+    ) -> Tuple[Optional[Image.Image], List[ChatMessage], Optional[str]]:
         session = await self.get_session(db, session_id, user_id)
         
         if session.message_count >= settings.MAX_MESSAGES_PER_SESSION:
@@ -191,6 +191,7 @@ class ChatService:
         )
 
         # Auto-generate title if this is the first message
+        new_title = None
         if session.message_count == 1 and (not session.title or session.title == "New Session"):
             new_title = await llm_orchestrator.generate_title(message)
             session.title = new_title
@@ -198,11 +199,17 @@ class ChatService:
 
         # Capture history context before streaming
         history = list(session.messages[-settings.MAX_CONVERSATION_HISTORY:]) if session.messages else []
-        return pil_image, history
+        return pil_image, history, new_title
 
-    def get_sse_stream(self, session_id: str, history: List[ChatMessage], message: str, pil_image: Optional[Image.Image]) -> EventSourceResponse:
+    def get_sse_stream(self, session_id: str, history: List[ChatMessage], message: str, pil_image: Optional[Image.Image], new_title: Optional[str] = None) -> EventSourceResponse:
         async def sse_generator():
             try:
+                if new_title:
+                    yield {
+                        "event": "title_changed",
+                        "data": json.dumps({"session_id": session_id, "title": new_title})
+                    }
+
                 full_response = ""
                 tool_calls_record = []
                 

@@ -22,6 +22,7 @@ interface ChatState {
   setSessionMessages: (id: string, messages: ChatMessage[]) => void;
   upsertSession: (session: ChatSession) => void;
   updateSessionTitle: (id: string, title: string) => Promise<void>;
+  updateSessionTitleLocally: (id: string, title: string) => void;
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
   toggleRightSidebar: () => void;
@@ -146,6 +147,18 @@ export const useChatStore = create<ChatState>()(
           // Revert optimistic update here if necessary
         }
       },
+
+      updateSessionTitleLocally: (id, title) =>
+        set((state) => {
+          const sessions = state.sessions.map((s) =>
+            s.id === id ? { ...s, title } : s
+          );
+          const details = { ...state.sessionDetailsById };
+          if (details[id]) {
+            details[id] = { ...details[id], title };
+          }
+          return { sessions, sessionDetailsById: details };
+        }),
 
       setActiveSession: (id) => set({ activeSessionId: id }),
 

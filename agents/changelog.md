@@ -221,3 +221,19 @@
 ### Kết quả kiểm thử
 - `npx tsc --noEmit` — 0 errors ✅
 - `npm run build` — success ✅
+
+---
+
+## 2026-07-08 17:32 — Auto-title chat sessions via SSE
+
+### Sửa đổi
+- `app/services/llm_orchestrator.py` — Fallback `generate_title` extract 8 words from message instead of "New Chat Session"
+- `app/services/chat_service.py` — `prepare_message_and_context` returns `new_title`; `get_sse_stream` yields `title_changed` SSE event
+- `app/api/chat.py` — Unpack `new_title`, pass to `get_sse_stream`
+- `frontend/src/store/chatStore.ts` — Add `updateSessionTitleLocally(id, title)` action (store-only, no API)
+- `frontend/src/hooks/useSSEChat.ts` — Parse `title_changed` event, call `updateSessionTitleLocally`
+
+### Kết quả kiểm thử
+- Backend: 10/12 passed (2 pre-existing failures unrelated)
+- Frontend: `npx tsc --noEmit` — 0 errors ✅
+- Frontend: `npm run build` — success ✅

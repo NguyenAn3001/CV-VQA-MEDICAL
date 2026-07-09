@@ -59,7 +59,8 @@ class LLMOrchestrator:
             return response.content.strip('"\' ')
         except Exception as e:
             logger.error(f"Failed to generate title: {e}")
-            return "New Chat Session"
+            words = first_user_message.split()[:8]
+            return " ".join(words) if words else "New Chat"
 
     def _get_image_hash(self, image: Image.Image) -> str:
         """Generate a stable hash for PIL Image bytes"""
