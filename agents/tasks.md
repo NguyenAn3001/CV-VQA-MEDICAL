@@ -11,33 +11,19 @@
 
 ## Danh sách task
 
-### 11. Tìm kiếm chat sessions trong Sidebar
 
-### Mô tả
-
-**Business**: Khi người dùng có nhiều phiên trò chuyện, cần thanh tìm kiếm để filter sessions theo title giúp tìm nhanh cuộc trò chuyện cũ.
-
-**Approach**: Frontend-only. Thêm `searchQuery` state vào store, render input Search ở đầu danh sách session trong Sidebar. Filter cục bộ bằng `String.includes()`. Debounce 300ms.
-
-### File cần sửa
-
-- `frontend/src/store/chatStore.ts` — Thêm `searchQuery: string` + `setSearchQuery(query: string)`
-- `frontend/src/components/layout/Sidebar.tsx` — Thêm input search, filters session list, clear button
-
-### Yêu cầu kiểm thử
-
-- [ ] Input search hiển thị ở đầu danh sách session
-
-- [ ] Gõ text -&gt; danh sách filter theo title (case-insensitive)
-
-- [ ] Clear button xoá searchQuery và hiện lại full list
-
-- Branch:
-- Plan:
-- Status: Todo
-- Created: 2026-07-08 10:58
 
 ## ✅ Đã hoàn thành
+
+### 11. Tìm kiếm chat sessions trong Sidebar
+
+- `frontend/src/store/chatStore.ts` — Thêm `searchQuery: string` + `setSearchQuery(query: string)`
+- `frontend/src/components/layout/Sidebar.tsx` — Search input debounce 300ms, filter sessions, clear button; msg count + pin button `hidden` thay `opacity-0`; redesign theo design-taste-frontend
+- Branch: feat/search-chat-sessions
+- Plan: agents/plans/2026-07-10_1126-search-chat-sessions.md
+- Status: Done
+- Created: 2026-07-08 10:58
+- Completed: 2026-07-10
 
 ### 10. Tự động đặt tên cuộc trò chuyện dựa trên tin nhắn đầu tiên
 - Branch: feat/auto-chat-title
