@@ -5,6 +5,18 @@
 
 ---
 
+## 2026-07-10 11:26 — Tìm kiếm chat sessions trong Sidebar
+
+### Sửa đổi
+- `frontend/src/store/chatStore.ts` — Thêm `searchQuery: string` state + `setSearchQuery(query)` action
+- `frontend/src/components/layout/Sidebar.tsx` — Thêm search input với debounce 300ms, filter sessions theo title (case-insensitive), clear button; msg count + pin button dùng `hidden` thay `opacity-0` để ko chiếm space; redesign search input: rounded-lg, border, focus ring, edge-to-edge → inset padding đồng bộ
+
+### Kết quả kiểm thử
+- `npx tsc --noEmit` — 0 errors ✅
+- `npm run build` — success ✅
+
+---
+
 ## 2026-07-08 00:59 — Triển khai Profile API
 
 ### Thêm mới
