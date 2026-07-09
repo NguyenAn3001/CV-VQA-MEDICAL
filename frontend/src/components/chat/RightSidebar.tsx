@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { MessageSquare, List, X, Pen, Trash2, Download } from 'lucide-react';
+import { MessageSquare, X, Pen, Trash2, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useChatStore } from '../../store/chatStore';
 
@@ -72,16 +72,6 @@ export default function RightSidebar() {
 
   return (
     <>
-      {isMobile && !isOpen && (
-        <button
-          onClick={() => setRightSidebarOpen(true)}
-          className="fixed bottom-4 right-4 z-50 w-12 h-12 bg-primary text-white rounded-full shadow-lg flex items-center justify-center"
-          aria-label="Show questions"
-        >
-          <List className="h-5 w-5" />
-        </button>
-      )}
-
       <AnimatePresence>
         {isVisible && (
           <motion.aside
