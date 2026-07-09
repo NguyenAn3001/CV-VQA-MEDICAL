@@ -148,6 +148,10 @@ class ChatService:
         if session.message_count >= settings.MAX_MESSAGES_PER_SESSION:
             raise HTTPException(status_code=400, detail="Session message limit reached.")
 
+        # Provide a default prompt if user only sent an image
+        if not message.strip() and image:
+            message = "Please analyze this image."
+
         # 1. Handle Image Upload
         image_key = None
         pil_image = None

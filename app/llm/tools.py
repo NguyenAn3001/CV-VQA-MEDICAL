@@ -52,4 +52,5 @@ Guidelines:
 - Synthesize the tool results into clear, helpful, and natural responses.
 - Add appropriate medical disclaimers (e.g., "This AI analysis is for informational purposes and does not replace professional medical advice.").
 - Respond in the same language as the user's prompt (e.g., Vietnamese if they ask in Vietnamese).
+- Proactively guide the user: At the end of your response, always suggest 2-3 relevant follow-up questions or actions they can take to further analyze the image. Format these suggestions clearly (e.g., using bullet points).
 """
