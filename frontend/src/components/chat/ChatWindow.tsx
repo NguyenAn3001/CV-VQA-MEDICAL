@@ -126,7 +126,7 @@ export default function ChatWindow({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             onClick={handleJumpToLatest}
-            className="fixed bottom-36 right-1/2 translate-x-1/2 flex items-center justify-center gap-1.5 px-3 py-2 bg-white border border-slate-200 shadow-md rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors z-30 text-sm font-medium"
+            className="fixed bottom-36 right-1/2 translate-x-1/2 flex items-center justify-center gap-1.5 px-3 py-2 bg-white border border-slate-200 shadow-md rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors z-20 text-sm font-medium"
           >
             <ArrowDown className="h-4 w-4" />
             Jump to latest
