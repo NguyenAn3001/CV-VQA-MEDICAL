@@ -115,14 +115,27 @@
 - Chỉ có `toggleRightSidebar` hiện tại → cần thêm `setRightSidebarOpen` để imperative close
 - Không ảnh hưởng đến desktop flow (Navbar toggle vẫn dùng `toggleRightSidebar`)
 
-- Branch:
-- Plan:
-- Status: Todo
+- Branch: fix/rightsidebar-mobile-close
+- Plan: agents/plans/2026-07-09_2244-fix-rightsidebar-mobile-close.md
+- Status: Done
 - Created: 2026-07-08
+- Completed: 2026-07-09 22:44
 
 ---
 
 ## ✅ Đã hoàn thành
+
+### 12. Fix RightSidebar mobile — không đóng được
+
+- `frontend/src/store/chatStore.ts` — Thêm action `setRightSidebarOpen(open: boolean)`
+- `frontend/src/components/chat/RightSidebar.tsx` — `isVisible = isOpen` (bỏ `|| isMobileOpen`); resize < 1024px gọi `setRightSidebarOpen(false)`; nút X + backdrop + floating button dùng `setRightSidebarOpen`
+- Branch: fix/rightsidebar-mobile-close
+- Plan: agents/plans/2026-07-09_2244-fix-rightsidebar-mobile-close.md
+- Status: Done
+- Created: 2026-07-08
+- Completed: 2026-07-09 22:44
+
+---
 
 ### 1. Kết nối ProfilePage với Profile API
 
