@@ -2,10 +2,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '../../store/authStore';
 import { useChatStore } from '../../store/chatStore';
-import { ChevronLeft, ChevronRight, Plus, MessageSquare, Pin, PinOff, Verified, LogOut } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, MessageSquare, Pin, PinOff, Verified, LogOut, Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const sidebarLinkClass = ({ isActive, isCollapsed }: { isActive: boolean; isCollapsed: boolean }) =>
   cn(
@@ -26,7 +26,22 @@ export default function Sidebar() {
   const isCollapsed = useChatStore((state) => state.isSidebarCollapsed);
   const toggleSidebar = useChatStore((state) => state.toggleSidebar);
   const setSidebarCollapsed = useChatStore((state) => state.setSidebarCollapsed);
+  const searchQuery = useChatStore((state) => state.searchQuery);
+  const setSearchQuery = useChatStore((state) => state.setSearchQuery);
   
+  // Search state
+  const [localQuery, setLocalQuery] = useState(searchQuery);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const handleSearchChange = (value: string) => {
+    setLocalQuery(value);
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setSearchQuery(value), 300);
+  };
+  const clearSearch = () => {
+    setLocalQuery('');
+    setSearchQuery('');
+  };
+
   // Manage responsive collapse
   const [isMobile, setIsMobile] = useState(false);
 
@@ -62,8 +77,10 @@ export default function Sidebar() {
     }
   };
 
-  const pinnedSessions = sessions.filter((s) => s.is_pinned);
-  const otherSessions = sessions.filter((s) => !s.is_pinned);
+  const queryLower = searchQuery.toLowerCase();
+  const matchesQuery = (title?: string) => !queryLower || (title || '').toLowerCase().includes(queryLower);
+  const pinnedSessions = sessions.filter((s) => s.is_pinned && matchesQuery(s.title));
+  const otherSessions = sessions.filter((s) => !s.is_pinned && matchesQuery(s.title));
 
   const handlePinClick = (e: React.MouseEvent, id: string, isPinned: boolean) => {
     e.stopPropagation();
@@ -140,6 +157,28 @@ export default function Sidebar() {
           {isCollapsed && <TooltipContent side="right">New Chat</TooltipContent>}
         </Tooltip>
 
+        {/* Search */}
+          {!isCollapsed && (
+            <div className="relative mb-3">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-on-surface-variant/60" />
+              <input
+                type="text"
+                value={localQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                placeholder="Search conversations..."
+                className="w-full pl-9 pr-8 py-2.5 bg-surface-container-high border border-border-subtle rounded-lg text-sm text-on-surface placeholder:text-on-surface-variant/50 outline-none transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-low"
+              />
+              {localQuery && (
+                <button
+                  onClick={clearSearch}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-md text-on-surface-variant/60 hover:text-on-surface hover:bg-surface-container transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          )}
+
         {/* History Lists */}
         <AnimatePresence>
           {!isCollapsed && (
@@ -148,7 +187,7 @@ export default function Sidebar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col gap-6 scrollbar-hide"
+              className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col gap-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
             >
               <div>
                 {pinnedSessions.length > 0 && (
@@ -171,8 +210,8 @@ export default function Sidebar() {
                                 {session.title || 'New Chat'}
                               </span>
                               <span className={cn(
-                                "text-label-xs font-label-xs transition-opacity whitespace-nowrap",
-                                isActive ? "opacity-70" : "opacity-0 group-hover:opacity-70"
+                                "text-label-xs font-label-xs whitespace-nowrap",
+                                isActive ? "opacity-70" : "hidden group-hover:inline"
                               )}>
                                 {session.message_count} msg
                               </span>
@@ -219,8 +258,8 @@ export default function Sidebar() {
                             {session.title || 'New Chat'}
                           </span>
                           <span className={cn(
-                            "text-label-xs font-label-xs transition-opacity whitespace-nowrap",
-                            isActive ? "opacity-70" : "opacity-0 group-hover:opacity-70"
+                            "text-label-xs font-label-xs whitespace-nowrap",
+                            isActive ? "opacity-70" : "hidden group-hover:inline"
                           )}>
                             {session.message_count} msg
                           </span>
@@ -228,7 +267,7 @@ export default function Sidebar() {
                         <button
                           type="button"
                           onClick={(e) => handlePinClick(e, session.id, session.is_pinned)}
-                          className="p-2 hover:bg-surface-container-high rounded text-on-surface-variant opacity-0 group-hover:opacity-100 transition-all shrink-0 ml-1"
+                          className="p-2 hover:bg-surface-container-high rounded text-on-surface-variant hidden group-hover:flex shrink-0 ml-1"
                           aria-label="Pin session"
                         >
                           <Pin className="h-4 w-4" />

@@ -12,8 +12,10 @@ interface ChatState {
   isSidebarCollapsed: boolean;
   isRightSidebarOpen: boolean;
   detailModalSessionId: string | null;
+  searchQuery: string;
   
   fetchSessions: () => Promise<void>;
+  setSearchQuery: (query: string) => void;
   fetchSessionDetail: (id: string) => Promise<ChatSessionDetail | null>;
   createSession: () => Promise<string | null>;
   deleteSession: (id: string) => Promise<void>;
@@ -41,6 +43,7 @@ export const useChatStore = create<ChatState>()(
       isSidebarCollapsed: false,
       isRightSidebarOpen: true,
       detailModalSessionId: null,
+      searchQuery: '',
 
       toggleSidebar: () => set((state) => ({ isSidebarCollapsed: !state.isSidebarCollapsed })),
       setSidebarCollapsed: (collapsed: boolean) => set({ isSidebarCollapsed: collapsed }),
@@ -49,6 +52,7 @@ export const useChatStore = create<ChatState>()(
       
       openDetailModal: (id: string) => set({ detailModalSessionId: id }),
       closeDetailModal: () => set({ detailModalSessionId: null }),
+      setSearchQuery: (query) => set({ searchQuery: query }),
 
       fetchSessions: async () => {
         set({ isLoading: true });
