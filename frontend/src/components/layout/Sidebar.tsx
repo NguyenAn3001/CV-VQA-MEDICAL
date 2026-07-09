@@ -80,15 +80,16 @@ export default function Sidebar() {
         }}
         transition={{ duration: 0.25, ease: 'easeInOut' }}
         className={cn(
-          "bg-sidebar-bg border-r border-border-subtle h-screen flex flex-col p-4 gap-2 z-20 shrink-0 overflow-hidden",
-          isMobile && "fixed left-0 top-0 bottom-0 shadow-2xl"
+          "bg-sidebar-bg border-r border-border-subtle h-screen flex flex-col p-4 gap-2 shrink-0 overflow-hidden",
+          isMobile 
+            ? "fixed left-0 top-0 bottom-0 z-40 shadow-2xl" 
+            : "z-20"
         )}
       >
         {/* Header */}
         <div className={cn("flex items-center mb-6 px-1", isCollapsed ? "justify-center flex-col gap-4" : "justify-between")}>
           <div 
-            className={cn("flex items-center gap-3 cursor-pointer overflow-hidden", isCollapsed && "justify-center")} 
-            onClick={() => navigate('/chat')}
+            className={cn("flex items-center gap-3 overflow-hidden", isCollapsed && "justify-center")}
           >
             <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold shrink-0">
               <span className="material-symbols-outlined icon-fill">medical_services</span>
@@ -306,16 +307,15 @@ export default function Sidebar() {
           </Tooltip>
         </div>
       </motion.nav>
-      
-      {/* Mobile Backdrop */}
+
       <AnimatePresence>
         {isMobile && !isCollapsed && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/20 z-10 md:hidden backdrop-blur-sm" 
-            onClick={() => setSidebarCollapsed(true)} 
+            className="fixed inset-0 bg-black/20 z-30 backdrop-blur-sm"
+            onClick={() => setSidebarCollapsed(true)}
           />
         )}
       </AnimatePresence>

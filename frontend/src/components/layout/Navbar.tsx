@@ -12,6 +12,7 @@ interface NavbarProps {
 export default function Navbar({ title, model }: NavbarProps) {
   const toggleSidebar = useChatStore((state) => state.toggleSidebar);
   const isSidebarCollapsed = useChatStore((state) => state.isSidebarCollapsed);
+  const activeSessionId = useChatStore((state) => state.activeSessionId);
   const isRightSidebarOpen = useChatStore((state) => state.isRightSidebarOpen);
   const toggleRightSidebar = useChatStore((state) => state.toggleRightSidebar);
 
@@ -36,16 +37,18 @@ export default function Navbar({ title, model }: NavbarProps) {
           <span className="material-symbols-outlined text-[16px] text-primary">magic_button</span>
           {model ?? 'GPT-4o + ViT-PubMedBERT'}
         </div>
-        <button
-          onClick={toggleRightSidebar}
-          className={cn(
-            'p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors',
-            isRightSidebarOpen && 'bg-surface-container-high text-primary'
-          )}
-          aria-label={isRightSidebarOpen ? 'Hide session panel' : 'Show session panel'}
-        >
-          {isRightSidebarOpen ? <PanelRightClose className="h-5 w-5" /> : <PanelRightOpen className="h-5 w-5" />}
-        </button>
+        {activeSessionId && (
+          <button
+            onClick={toggleRightSidebar}
+            className={cn(
+              'p-1.5 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors',
+              isRightSidebarOpen && 'bg-surface-container-high text-primary'
+            )}
+            aria-label={isRightSidebarOpen ? 'Hide session panel' : 'Show session panel'}
+          >
+            {isRightSidebarOpen ? <PanelRightClose className="h-5 w-5" /> : <PanelRightOpen className="h-5 w-5" />}
+          </button>
+        )}
       </div>
     </header>
   );

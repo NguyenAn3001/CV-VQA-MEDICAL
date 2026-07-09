@@ -77,52 +77,19 @@
 - Status: Todo
 - Created: 2026-07-08 10:58
 
+## ✅ Đã hoàn thành
+
 ### 12. Fix RightSidebar mobile — không đóng được
 
-### Mô tả
-
-**Business**: RightSidebar trên mobile không thể đóng vì `isRightSidebarOpen` (store, persisted) default `true` và nút X/backdrop chỉ set local `isMobileOpen = false`, không reset store → `isVisible = isOpen || isMobileOpen` luôn `true`.
-
-**Approach**: Frontend-only.
-
-- **Root cause**: `isVisible` (RightSidebar.tsx:69) = `isOpen || isMobileOpen`. `isOpen` (`isRightSidebarOpen`) persist trong localStorage, default `true`. Nút X + backdrop chỉ `setIsMobileOpen(false)` → `isVisible` vẫn `true`.
-- Thiếu action `setRightSidebarOpen(value)` trong store (chỉ có `toggleRightSidebar`)
-- Khi resize desktop→mobile, không reset `isRightSidebarOpen`
-
-### File cần sửa
-
-- `frontend/src/store/chatStore.ts` — Thêm action `setRightSidebarOpen: (open: boolean) => void`
-- `frontend/src/components/chat/RightSidebar.tsx`
-  - Nút X (mobile): gọi `setRightSidebarOpen(false)` + `setIsMobileOpen(false)`
-  - Backdrop click: gọi `setRightSidebarOpen(false)` + `setIsMobileOpen(false)`
-  - Resize handler (line 29): khi `window.innerWidth < 1024`, gọi `setRightSidebarOpen(false)`
-  - Đơn giản hoá: `isVisible` = `isOpen` (không cần `|| isMobileOpen` nữa)
-
-### File cần tạo mới
-
-- *(không có)*
-
-### Yêu cầu kiểm thử
-
-- [ ] Mở sidebar trên desktop → resize xuống mobile → sidebar tự đóng, `isRightSidebarOpen = false`
-- [ ] Mở sidebar trên mobile (qua floating button) → nhấn X → sidebar đóng, `isRightSidebarOpen = false`
-- [ ] Mở sidebar trên mobile → tap backdrop → sidebar đóng, `isRightSidebarOpen = false`
-- [ ] Refresh trang ở mobile → sidebar không tự mở lại
-- [ ] Desktop: toggle Navbar button vẫn hoạt động bình thường
-
-### Ghi chú
-- `isRightSidebarOpen` persist cùng với `isSidebarCollapsed` (chatStore.ts:187)
-- Chỉ có `toggleRightSidebar` hiện tại → cần thêm `setRightSidebarOpen` để imperative close
-- Không ảnh hưởng đến desktop flow (Navbar toggle vẫn dùng `toggleRightSidebar`)
-
-- Branch:
-- Plan:
-- Status: Todo
+- `frontend/src/store/chatStore.ts` — Thêm action `setRightSidebarOpen(open: boolean)`
+- `frontend/src/components/chat/RightSidebar.tsx` — `isVisible = isOpen` (bỏ `|| isMobileOpen`); resize < 1024px gọi `setRightSidebarOpen(false)`; nút X + backdrop + floating button dùng `setRightSidebarOpen`
+- Branch: fix/rightsidebar-mobile-close
+- Plan: agents/plans/2026-07-09_2244-fix-rightsidebar-mobile-close.md
+- Status: Done
 - Created: 2026-07-08
+- Completed: 2026-07-09 22:44
 
 ---
-
-## ✅ Đã hoàn thành
 
 ### 1. Kết nối ProfilePage với Profile API
 

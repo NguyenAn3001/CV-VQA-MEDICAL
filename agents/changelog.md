@@ -221,3 +221,15 @@
 ### Kết quả kiểm thử
 - `npx tsc --noEmit` — 0 errors ✅
 - `npm run build` — success ✅
+
+---
+
+## 2026-07-09 22:44 — Fix RightSidebar mobile — không đóng được
+
+### Sửa đổi
+- `frontend/src/store/chatStore.ts` — Thêm action `setRightSidebarOpen(open: boolean)`
+- `frontend/src/components/chat/RightSidebar.tsx` — Sửa root cause: `isVisible = isOpen` (bỏ `|| isMobileOpen`); resize < 1024px gọi `setRightSidebarOpen(false)`; nút X + backdrop + floating button dùng `setRightSidebarOpen` thay `setIsMobileOpen`
+
+### Kết quả kiểm thử
+- `npx tsc --noEmit` — 0 errors ✅
+- `npm run build` — success ✅
