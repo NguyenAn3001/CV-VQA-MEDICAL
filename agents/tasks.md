@@ -11,118 +11,38 @@
 
 ## Danh sách task
 
-### 10. Tự động đặt tên cuộc trò chuyện dựa trên tin nhắn đầu tiên
 
-### Mô tả
 
-**Business**: Hiện tại session mới luôn có title "New Session"/"New Chat", gây khó khăn khi tìm lại cuộc trò chuyện cũ.
-
-**Approach**: Backend đã có title generation khi gửi message đầu tiên (`chat_service.py:193-197` gọi `llm_orchestrator.generate_title()`). Việc cần làm:
-
-1. **BE**: Đưa title mới vào SSE stream dưới dạng event riêng (`event: title_changed`) để FE cập nhật real-time
-2. **FE**: Parse event `title_changed` trong `useSSEChat.ts`, update session title trong `chatStore`
-3. **Tối ưu**: Nếu LLM fail, fallback về extract N từ đầu message (không để title "New Session" mãi)
-
-### File cần sửa
-
-- `app/services/chat_service.py` — Sau khi `generate_title()` thành công, yield SSE event `title_changed` với data = `{session_id, title}`
-- `frontend/src/hooks/useSSEChat.ts` — Parse event `title_changed`, gọi `updateSessionTitleLocally(sessionId, title)` 
-- `frontend/src/store/chatStore.ts` — Thêm action `updateSessionTitleLocally(id, title)` chỉ update store không gọi API
-
-### File cần tạo mới
-
-- *(không có)*
-
-### Yêu cầu kiểm thử
-
-- [ ] Gửi tin nhắn đầu tiên → title trong sidebar cập nhật ngay (không cần reload)
-- [ ] Title là tiếng Việt có dấu, ≤ 5 từ
-- [ ] Nếu LLM fail → fallback extract 8 từ đầu message
-- [ ] Session đã rename thủ công → không bị ghi đè
-
-### Ghi chú
-- LLM generate_title đã có sẵn ở `llm_orchestrator.py:50-62`
-- Trigger hiện tại: `chat_service.py:193-197` (sau save_message đầu tiên)
-- Cần trả title về FE real-time vì fetchSessions() chỉ gọi khi mount hoặc gửi tin nhắn mới
-- Pre-requisite: task này phải làm sau task 12 (Fix RightSidebar mobile) để tránh conflict
-
-- Branch:
-- Plan:
-- Status: Todo
-- Created: 2026-07-08
+## ✅ Đã hoàn thành
 
 ### 11. Tìm kiếm chat sessions trong Sidebar
 
-### Mô tả
-
-**Business**: Khi người dùng có nhiều phiên trò chuyện, cần thanh tìm kiếm để filter sessions theo title giúp tìm nhanh cuộc trò chuyện cũ.
-
-**Approach**: Frontend-only. Thêm `searchQuery` state vào store, render input Search ở đầu danh sách session trong Sidebar. Filter cục bộ bằng `String.includes()`. Debounce 300ms.
-
-### File cần sửa
-
 - `frontend/src/store/chatStore.ts` — Thêm `searchQuery: string` + `setSearchQuery(query: string)`
-- `frontend/src/components/layout/Sidebar.tsx` — Thêm input search, filters session list, clear button
-
-### Yêu cầu kiểm thử
-
-- [ ] Input search hiển thị ở đầu danh sách session
-
-- [ ] Gõ text -&gt; danh sách filter theo title (case-insensitive)
-
-- [ ] Clear button xoá searchQuery và hiện lại full list
-
-- Branch:
-- Plan:
-- Status: Todo
+- `frontend/src/components/layout/Sidebar.tsx` — Search input debounce 300ms, filter sessions, clear button; msg count + pin button `hidden` thay `opacity-0`; redesign theo design-taste-frontend
+- Branch: feat/search-chat-sessions
+- Plan: agents/plans/2026-07-10_1126-search-chat-sessions.md
+- Status: Done
 - Created: 2026-07-08 10:58
+- Completed: 2026-07-10
+
+### 10. Tự động đặt tên cuộc trò chuyện dựa trên tin nhắn đầu tiên
+- Branch: feat/auto-chat-title
+- Plan: agents/plans/2026-07-09_2334-auto-chat-title.md
+- Status: Done
+- Created: 2026-07-08
+- Completed: 2026-07-09 23:34
 
 ### 12. Fix RightSidebar mobile — không đóng được
 
-### Mô tả
-
-**Business**: RightSidebar trên mobile không thể đóng vì `isRightSidebarOpen` (store, persisted) default `true` và nút X/backdrop chỉ set local `isMobileOpen = false`, không reset store → `isVisible = isOpen || isMobileOpen` luôn `true`.
-
-**Approach**: Frontend-only.
-
-- **Root cause**: `isVisible` (RightSidebar.tsx:69) = `isOpen || isMobileOpen`. `isOpen` (`isRightSidebarOpen`) persist trong localStorage, default `true`. Nút X + backdrop chỉ `setIsMobileOpen(false)` → `isVisible` vẫn `true`.
-- Thiếu action `setRightSidebarOpen(value)` trong store (chỉ có `toggleRightSidebar`)
-- Khi resize desktop→mobile, không reset `isRightSidebarOpen`
-
-### File cần sửa
-
-- `frontend/src/store/chatStore.ts` — Thêm action `setRightSidebarOpen: (open: boolean) => void`
-- `frontend/src/components/chat/RightSidebar.tsx`
-  - Nút X (mobile): gọi `setRightSidebarOpen(false)` + `setIsMobileOpen(false)`
-  - Backdrop click: gọi `setRightSidebarOpen(false)` + `setIsMobileOpen(false)`
-  - Resize handler (line 29): khi `window.innerWidth < 1024`, gọi `setRightSidebarOpen(false)`
-  - Đơn giản hoá: `isVisible` = `isOpen` (không cần `|| isMobileOpen` nữa)
-
-### File cần tạo mới
-
-- *(không có)*
-
-### Yêu cầu kiểm thử
-
-- [ ] Mở sidebar trên desktop → resize xuống mobile → sidebar tự đóng, `isRightSidebarOpen = false`
-- [ ] Mở sidebar trên mobile (qua floating button) → nhấn X → sidebar đóng, `isRightSidebarOpen = false`
-- [ ] Mở sidebar trên mobile → tap backdrop → sidebar đóng, `isRightSidebarOpen = false`
-- [ ] Refresh trang ở mobile → sidebar không tự mở lại
-- [ ] Desktop: toggle Navbar button vẫn hoạt động bình thường
-
-### Ghi chú
-- `isRightSidebarOpen` persist cùng với `isSidebarCollapsed` (chatStore.ts:187)
-- Chỉ có `toggleRightSidebar` hiện tại → cần thêm `setRightSidebarOpen` để imperative close
-- Không ảnh hưởng đến desktop flow (Navbar toggle vẫn dùng `toggleRightSidebar`)
-
-- Branch:
-- Plan:
-- Status: Todo
+- `frontend/src/store/chatStore.ts` — Thêm action `setRightSidebarOpen(open: boolean)`
+- `frontend/src/components/chat/RightSidebar.tsx` — `isVisible = isOpen` (bỏ `|| isMobileOpen`); resize < 1024px gọi `setRightSidebarOpen(false)`; nút X + backdrop + floating button dùng `setRightSidebarOpen`
+- Branch: fix/rightsidebar-mobile-close
+- Plan: agents/plans/2026-07-09_2244-fix-rightsidebar-mobile-close.md
+- Status: Done
 - Created: 2026-07-08
+- Completed: 2026-07-09 22:44
 
 ---
-
-## ✅ Đã hoàn thành
 
 ### 1. Kết nối ProfilePage với Profile API
 

@@ -5,6 +5,18 @@
 
 ---
 
+## 2026-07-10 11:26 — Tìm kiếm chat sessions trong Sidebar
+
+### Sửa đổi
+- `frontend/src/store/chatStore.ts` — Thêm `searchQuery: string` state + `setSearchQuery(query)` action
+- `frontend/src/components/layout/Sidebar.tsx` — Thêm search input với debounce 300ms, filter sessions theo title (case-insensitive), clear button; msg count + pin button dùng `hidden` thay `opacity-0` để ko chiếm space; redesign search input: rounded-lg, border, focus ring, edge-to-edge → inset padding đồng bộ
+
+### Kết quả kiểm thử
+- `npx tsc --noEmit` — 0 errors ✅
+- `npm run build` — success ✅
+
+---
+
 ## 2026-07-08 00:59 — Triển khai Profile API
 
 ### Thêm mới
@@ -217,6 +229,32 @@
 
 ### Sửa đổi
 - `frontend/src/components/chat/message/AssistantMessage.tsx` — Thêm Copy button dùng `navigator.clipboard.writeText(cleanText)`, hiển thị Check icon 2s
+
+### Kết quả kiểm thử
+- `npx tsc --noEmit` — 0 errors ✅
+- `npm run build` — success ✅
+
+---
+
+## 2026-07-09 23:34 — Tự động đặt tên cuộc trò chuyện dựa trên tin nhắn đầu tiên
+
+### Sửa đổi
+- `app/services/chat_service.py` — `prepare_message_and_context` returns `new_title`; `get_sse_stream` yields `title_changed` SSE event; fallback extract 8 words from message if LLM fails
+- `app/api/chat.py` — Pipe `new_title` từ prepare_message_and_context sang get_sse_stream
+- `frontend/src/store/chatStore.ts` — Thêm action `updateSessionTitleLocally(id, title)`
+- `frontend/src/hooks/useSSEChat.ts` — Parse event `title_changed`, gọi `updateSessionTitleLocally`
+
+### Kết quả kiểm thử
+- `npx tsc --noEmit` — 0 errors ✅
+- `npm run build` — success ✅
+
+---
+
+## 2026-07-09 22:44 — Fix RightSidebar mobile — không đóng được
+
+### Sửa đổi
+- `frontend/src/store/chatStore.ts` — Thêm action `setRightSidebarOpen(open: boolean)`
+- `frontend/src/components/chat/RightSidebar.tsx` — Sửa root cause: `isVisible = isOpen` (bỏ `|| isMobileOpen`); resize < 1024px gọi `setRightSidebarOpen(false)`; nút X + backdrop + floating button dùng `setRightSidebarOpen` thay `setIsMobileOpen`
 
 ### Kết quả kiểm thử
 - `npx tsc --noEmit` — 0 errors ✅

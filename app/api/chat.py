@@ -56,12 +56,15 @@ async def toggle_pin_session(
 @router.post("/sessions/{session_id}/messages")
 async def send_message(
     session_id: str,
-    message: str = Form(..., description="User's text message"),
+    message: str = Form("", description="User's text message"),
     image: Optional[UploadFile] = File(None, description="Optional medical image"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    pil_image, history = await chat_service.prepare_message_and_context(
+    if not message.strip() and not image:
+        raise HTTPException(status_code=400, detail="Must provide either a message or an image.")
+        
+    pil_image, history, new_title = await chat_service.prepare_message_and_context(
         db, session_id, str(current_user.id), message, image
     )
-    return chat_service.get_sse_stream(session_id, history, message, pil_image)
+    return chat_service.get_sse_stream(session_id, history, message, pil_image, new_title)

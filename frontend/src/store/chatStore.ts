@@ -12,8 +12,10 @@ interface ChatState {
   isSidebarCollapsed: boolean;
   isRightSidebarOpen: boolean;
   detailModalSessionId: string | null;
+  searchQuery: string;
   
   fetchSessions: () => Promise<void>;
+  setSearchQuery: (query: string) => void;
   fetchSessionDetail: (id: string) => Promise<ChatSessionDetail | null>;
   createSession: () => Promise<string | null>;
   deleteSession: (id: string) => Promise<void>;
@@ -22,9 +24,11 @@ interface ChatState {
   setSessionMessages: (id: string, messages: ChatMessage[]) => void;
   upsertSession: (session: ChatSession) => void;
   updateSessionTitle: (id: string, title: string) => Promise<void>;
+  updateSessionTitleLocally: (id: string, title: string) => void;
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
   toggleRightSidebar: () => void;
+  setRightSidebarOpen: (open: boolean) => void;
   openDetailModal: (id: string) => void;
   closeDetailModal: () => void;
 }
@@ -39,13 +43,16 @@ export const useChatStore = create<ChatState>()(
       isSidebarCollapsed: false,
       isRightSidebarOpen: true,
       detailModalSessionId: null,
+      searchQuery: '',
 
       toggleSidebar: () => set((state) => ({ isSidebarCollapsed: !state.isSidebarCollapsed })),
       setSidebarCollapsed: (collapsed: boolean) => set({ isSidebarCollapsed: collapsed }),
       toggleRightSidebar: () => set((state) => ({ isRightSidebarOpen: !state.isRightSidebarOpen })),
+      setRightSidebarOpen: (open: boolean) => set({ isRightSidebarOpen: open }),
       
       openDetailModal: (id: string) => set({ detailModalSessionId: id }),
       closeDetailModal: () => set({ detailModalSessionId: null }),
+      setSearchQuery: (query) => set({ searchQuery: query }),
 
       fetchSessions: async () => {
         set({ isLoading: true });
@@ -168,6 +175,16 @@ export const useChatStore = create<ChatState>()(
                   },
             },
           };
+        }),
+
+      updateSessionTitleLocally: (id, title) =>
+        set((state) => {
+          const newSessions = state.sessions.map(s => s.id === id ? { ...s, title } : s);
+          const newDetails = { ...state.sessionDetailsById };
+          if (newDetails[id]) {
+            newDetails[id] = { ...newDetails[id], title };
+          }
+          return { sessions: newSessions, sessionDetailsById: newDetails };
         }),
 
       upsertSession: (session) =>

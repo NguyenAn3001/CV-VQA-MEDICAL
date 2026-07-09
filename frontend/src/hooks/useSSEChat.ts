@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
+import { useChatStore } from '../store/chatStore';
 import type { ChatMessage, ChatToolCall } from '../types/models';
 import { API_URL } from '../lib/axios';
 
@@ -96,6 +97,9 @@ export const useSSEChat = () => {
             if (currentEvent === 'message') {
               currentResponseText += String(parsed.content ?? '');
               setStreamingContent(currentResponseText);
+            } else if (currentEvent === 'title_changed') {
+              const { session_id, title } = parsed as { session_id: string; title: string };
+              useChatStore.getState().updateSessionTitleLocally(session_id, title);
             } else if (currentEvent === 'tool_call' && Array.isArray(parsed.tools)) {
               toolsCalled = [...toolsCalled, ...(parsed.tools as ChatToolCall[])];
               setActiveTools(toolsCalled);
