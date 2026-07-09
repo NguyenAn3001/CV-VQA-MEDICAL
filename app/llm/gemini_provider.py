@@ -40,8 +40,10 @@ class GeminiProvider(BaseLLMProvider):
                 else:
                     gemini_messages.append(types.Content(role="model", parts=[types.Part.from_text(text=content)]))
             elif role == "tool":
-                parts = [types.Part.from_function_response(name=msg["name"], response={"result": msg["content"]})]
-                gemini_messages.append(types.Content(role="function", parts=parts))
+                # Convert the 'content' back to what Gemini expects.
+                func_name = msg.get("name", "unknown_function")
+                parts = [types.Part.from_function_response(name=func_name, response={"result": msg["content"]})]
+                gemini_messages.append(types.Content(role="user", parts=parts)) # The google-genai SDK handles tool responses as 'user' or 'function' natively.
                 
         return gemini_messages, system_instruction
 
