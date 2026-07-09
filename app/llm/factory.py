@@ -33,6 +33,11 @@ async def get_llm_provider() -> BaseLLMProvider:
         model_name = (setting_model.value if setting_model and setting_model.value else None) or provider.chatModel or "gpt-4o-mini"
 
         api_key = provider.apiKey or ""
+        if api_key and api_key != "not-needed":
+            try:
+                api_key = decrypt_secret(api_key)
+            except Exception as e:
+                logger.error(f"Failed to decrypt API key: {e}")
                 
         provider_type = provider.type
         base_url = provider.baseUrl
