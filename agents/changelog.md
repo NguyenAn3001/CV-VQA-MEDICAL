@@ -259,3 +259,20 @@
 ### Kết quả kiểm thử
 - `npx tsc --noEmit` — 0 errors ✅
 - `npm run build` — success ✅
+
+---
+
+## 2026-07-10 16:20 — Hiển thị thời gian tin nhắn
+
+### Thêm mới
+- `frontend/src/lib/format.ts` — Thêm `formatTimestamp(iso)` (HH:mm) và `formatTimestampFull(iso)` (tooltip full datetime) dùng date-fns
+
+### Sửa đổi
+- `frontend/src/hooks/useSSEChat.ts` — Gán `created_at: new Date().toISOString()` vào userMessage và assistantMessage
+- `frontend/src/components/chat/message/ChatMessage.tsx` — Truyền `message.created_at` xuống UserMessage và AssistantMessage
+- `frontend/src/components/chat/message/UserMessage.tsx` — Hiển thị timestamp HH:mm dưới bubble, căn phải, text-xs text-slate-400, tooltip full datetime
+- `frontend/src/components/chat/message/AssistantMessage.tsx` — Hiển thị timestamp HH:mm dưới content, căn trái, text-xs text-slate-400, tooltip full datetime
+
+### Kết quả kiểm thử
+- `npx tsc --noEmit` — 0 errors ✅
+- `npm run build` — success ✅

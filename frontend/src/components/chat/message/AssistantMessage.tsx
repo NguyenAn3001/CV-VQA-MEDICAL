@@ -5,16 +5,18 @@ import ReasoningSection from '../tools/ReasoningSection';
 import { ToolExecutionData } from '../tools/ToolExecutionCard';
 import TypingIndicator from './TypingIndicator';
 import { Bot, Copy, Check } from 'lucide-react';
+import { formatTimestamp, formatTimestampFull } from '../../../lib/format';
 
 interface AssistantMessageProps {
   content: string;
   isStreaming?: boolean;
+  createdAt?: string;
 }
 
 // Regex to extract standard backend tool return format: *[Tool name returned: result]*
 const TOOL_RETURN_REGEX = /\*\[Tool (.*?) returned: ([\s\S]*?)\]\*/g;
 
-export default function AssistantMessage({ content, isStreaming }: AssistantMessageProps) {
+export default function AssistantMessage({ content, isStreaming, createdAt }: AssistantMessageProps) {
   const { cleanText, tools } = useMemo(() => {
     let cleanText = content;
     const tools: ToolExecutionData[] = [];
@@ -117,18 +119,28 @@ export default function AssistantMessage({ content, isStreaming }: AssistantMess
               </ReactMarkdown>
             </div>
           )}
-          {!isStreaming && cleanText && (
-            <button
-              onClick={handleCopy}
-              className="mt-2 flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 transition-colors"
-            >
-              {copied ? (
-                <><Check className="h-3.5 w-3.5 text-green-500" /> Copied!</>
-              ) : (
-                <><Copy className="h-3.5 w-3.5" /> Copy</>
-              )}
-            </button>
-          )}
+          <div className="mt-2 flex items-center gap-3">
+            {createdAt && (
+              <span
+                className="text-xs text-slate-400"
+                title={formatTimestampFull(createdAt)}
+              >
+                {formatTimestamp(createdAt)}
+              </span>
+            )}
+            {!isStreaming && cleanText && (
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                {copied ? (
+                  <><Check className="h-3.5 w-3.5 text-green-500" /> Copied!</>
+                ) : (
+                  <><Copy className="h-3.5 w-3.5" /> Copy</>
+                )}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
