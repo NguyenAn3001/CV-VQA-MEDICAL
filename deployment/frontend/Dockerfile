@@ -3,10 +3,10 @@ FROM node:20-alpine as build
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY frontend/package*.json ./
 RUN npm ci
 
-COPY . .
+COPY frontend/ .
 
 # Argument to pass the API URL at build time (so React can bake it into the static files)
 ARG VITE_API_URL
@@ -18,7 +18,7 @@ RUN npm run build
 FROM nginx:alpine
 
 # Copy custom nginx config
-COPY ../deployment/frontend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY deployment/frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy built static files from the build stage
 COPY --from=build /app/dist /usr/share/nginx/html
