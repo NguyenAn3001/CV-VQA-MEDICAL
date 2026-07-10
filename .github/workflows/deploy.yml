@@ -44,8 +44,7 @@ jobs:
           # Pass the backend API URL dynamically so Vite can build it
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
         run: |
-          cd frontend
-          docker build -f ../deployment/frontend/Dockerfile --build-arg VITE_API_URL=$VITE_API_URL -t $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG .
+          docker build -f deployment/frontend/Dockerfile --build-arg VITE_API_URL=$VITE_API_URL -t $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG
 
       - name: Get ECR login token

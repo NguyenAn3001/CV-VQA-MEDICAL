@@ -70,8 +70,8 @@ services:
 
   frontend:
     build:
-      context: ../frontend
-      dockerfile: ../deployment/frontend/Dockerfile
+      context: ../
+      dockerfile: deployment/frontend/Dockerfile
       args:
         - VITE_API_URL=http://localhost:8080
     image: ${ECR_REGISTRY:-localhost}/${ECR_REPOSITORY_FRONTEND:-vqa-system-frontend}:${IMAGE_TAG:-latest}
