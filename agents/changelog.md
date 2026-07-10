@@ -276,3 +276,14 @@
 ### Kết quả kiểm thử
 - `npx tsc --noEmit` — 0 errors ✅
 - `npm run build` — success ✅
+
+---
+
+## 2026-07-10 13:12 — Cải thiện Images section trong RightSidebar
+
+### Sửa đổi
+- `frontend/src/components/chat/RightSidebar.tsx` — Sửa `attachedImages` thành mảng `{ image_url, messageId }`, thêm modal xem ảnh fullscreen (giống MessageImage.tsx), thêm eye icon scroll tới message chứa ảnh, giữ nguyên download button
+
+### Kết quả kiểm thử
+- `npx tsc --noEmit` — 0 errors ✅
+- `npm run build` — success ✅

@@ -27,12 +27,4 @@
 
 ## Danh sách task
 
-### 14. Cải thiện Images section trong RightSidebar
 
-Mô tả: Click ảnh trong RightSidebar mở modal xem ảnh (giống MessageImage.tsx), thêm eye icon để scroll tới message chứa ảnh đó, giữ nguyên download button
-
-- `frontend/src/components/chat/RightSidebar.tsx` — Sửa `attachedImages` thành mảng `{ image_url, messageId }` để biết message gốc; thêm modal xem ảnh (reuse pattern từ MessageImage.tsx); thêm eye icon gọi scrollIntoView cho message chứa ảnh
-- Branch: feat/rightsidebar-images
-- Plan: agents/plans/2026-07-10_<time>-rightsidebar-images.md
-- Status: Pending
-- Created: 2026-07-10
