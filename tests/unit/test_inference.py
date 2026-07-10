@@ -4,10 +4,14 @@ import io
 
 from app.ml.inference import ai_pipeline
 
-def test_ai_pipeline_singleton():
+def test_ai_pipeline_singleton(mocker):
     """Test that MedicalAIPipeline is a singleton."""
-    pipeline1 = ai_pipeline
     from app.ml.inference import MedicalAIPipeline
+    # Reset singleton state if tests are run in random order
+    if hasattr(MedicalAIPipeline, '_instance'):
+        MedicalAIPipeline._instance = None
+    
+    pipeline1 = MedicalAIPipeline()
     pipeline2 = MedicalAIPipeline()
     assert pipeline1 is pipeline2
 

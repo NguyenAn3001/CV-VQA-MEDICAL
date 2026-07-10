@@ -17,6 +17,13 @@ class MinIOService:
             secret_key=settings.MINIO_SECRET_KEY,
             secure=settings.MINIO_USE_SSL
         )
+        
+        self.presign_client = Minio(
+            settings.MINIO_EXTERNAL_ENDPOINT,
+            access_key=settings.MINIO_ACCESS_KEY,
+            secret_key=settings.MINIO_SECRET_KEY,
+            secure=settings.MINIO_USE_SSL
+        )
         self.bucket_name = settings.MINIO_BUCKET_NAME
         
     def ensure_bucket_exists(self):
@@ -60,20 +67,13 @@ class MinIOService:
             # We want the endpoint to be externally accessible.
             # MinIO often returns the presigned URL with the internal endpoint if MINIO_ENDPOINT is used internally
             # For this fix, we replace the internal hostname with a public or externally defined hostname if needed.
-            url = self.client.get_presigned_url(
+            url = self.presign_client.get_presigned_url(
                 "GET",
                 self.bucket_name,
                 object_name,
                 expires=timedelta(hours=settings.MINIO_PRESIGNED_URL_EXPIRE_HOURS)
             )
             
-            # Replace internal minio host with external MINIO_EXTERNAL_ENDPOINT if configured,
-            # or default to localhost if the issue is accessing it from browser.
-            external_endpoint = getattr(settings, 'MINIO_EXTERNAL_ENDPOINT', 'localhost:9000')
-            if external_endpoint and external_endpoint != settings.MINIO_ENDPOINT:
-                # Basic string replacement: replace internal endpoint with external
-                url = url.replace(settings.MINIO_ENDPOINT, external_endpoint)
-                
             return url
         except S3Error as e:
             logger.error(f"Failed to generate presigned URL: {e}")
