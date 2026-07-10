@@ -108,7 +108,7 @@ class LLMOrchestrator:
             messages.append({"role": "user", "content": current_message})
         
         iteration = 0
-        max_iterations = 3
+        max_iterations = 4
         
         while iteration < max_iterations:
             iteration += 1
@@ -156,13 +156,22 @@ class LLMOrchestrator:
                     "content": accumulated_content if use_fallback else ""
                 }
                 if not use_fallback:
-                    ast_msg["tool_calls"] = [
-                        {
+                    formatted_tool_calls = []
+                    for tc in tool_calls:
+                        # Ensure arguments are serialized to JSON string only once
+                        args = tc.arguments
+                        if isinstance(args, dict):
+                            args_str = json.dumps(args)
+                        else:
+                            args_str = str(args) # Already string from delta chunks
+                            
+                        formatted_tool_calls.append({
                             "id": tc.id,
                             "type": "function",
-                            "function": {"name": tc.name, "arguments": json.dumps(tc.arguments)}
-                        } for tc in tool_calls
-                    ]
+                            "function": {"name": tc.name, "arguments": args_str}
+                        })
+                    ast_msg["tool_calls"] = formatted_tool_calls
+                    
                 messages.append(ast_msg)
                 
                 for tc in tool_calls:
