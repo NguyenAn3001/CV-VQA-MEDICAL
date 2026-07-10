@@ -184,3 +184,18 @@ Mô tả: Fix lỗi RightSidebar không đóng được trên mobile, sửa logi
 - Status: Done
 - Created: 2026-07-08
 - Completed: 2026-07-09 22:44
+
+### 13. Hiển thị thời gian tin nhắn
+
+Mô tả: Hiển thị thời gian gửi (created_at) cho mỗi tin nhắn user và assistant trong chat, format HH:mm, tooltip full datetime
+
+- `frontend/src/lib/format.ts` — Thêm `formatTimestamp(iso: string): string` dùng `date-fns` format "HH:mm" (tooltip full datetime)
+- `frontend/src/hooks/useSSEChat.ts` — Gán `created_at: new Date().toISOString()` vào userMessage và assistantMessage
+- `frontend/src/components/chat/message/ChatMessage.tsx` — Truyền `message.created_at` xuống `UserMessage` / `AssistantMessage`
+- `frontend/src/components/chat/message/UserMessage.tsx` — Hiển thị timestamp dưới bubble, căn phải, text-xs text-slate-400
+- `frontend/src/components/chat/message/AssistantMessage.tsx` — Hiển thị timestamp dưới content, căn trái, text-xs text-slate-400
+- Branch: feat/message-timestamp
+- Plan: agents/plans/2026-07-10_1259-message-timestamp.md
+- Status: Done
+- Created: 2026-07-10
+- Completed: 2026-07-10

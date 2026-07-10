@@ -16,9 +16,9 @@ export default function ChatMessage({ message, isStreaming = false }: ChatMessag
       transition={{ duration: 0.3 }}
     >
       {message.role === 'user' ? (
-        <UserMessage content={message.content} imageUrl={message.image_url} />
+        <UserMessage content={message.content} imageUrl={message.image_url} createdAt={message.created_at} />
       ) : (
-        <AssistantMessage content={message.content} isStreaming={isStreaming} />
+        <AssistantMessage content={message.content} isStreaming={isStreaming} createdAt={message.created_at} />
       )}
     </motion.div>
   );

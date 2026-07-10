@@ -27,20 +27,6 @@
 
 ## Danh sách task
 
-### 13. Hiển thị thời gian tin nhắn
-
-Mô tả: Hiển thị thời gian gửi (created_at) cho mỗi tin nhắn user và assistant trong chat, format HH:mm, tooltip full datetime
-
-- `frontend/src/lib/format.ts` — Thêm `formatTimestamp(iso: string): string` dùng `date-fns` format "HH:mm" (tooltip full datetime)
-- `frontend/src/hooks/useSSEChat.ts` — Gán `created_at: new Date().toISOString()` vào `assistantMessage` khi stream hoàn tất
-- `frontend/src/components/chat/message/ChatMessage.tsx` — Truyền `message.created_at` xuống `UserMessage` / `AssistantMessage`
-- `frontend/src/components/chat/message/UserMessage.tsx` — Hiển thị timestamp dưới bubble, căn phải, text-xs text-muted
-- `frontend/src/components/chat/message/AssistantMessage.tsx` — Hiển thị timestamp dưới content, căn trái, text-xs text-muted
-- Branch: feat/message-timestamp
-- Plan: agents/plans/2026-07-10_<time>-message-timestamp.md
-- Status: Pending
-- Created: 2026-07-10
-
 ### 14. Cải thiện Images section trong RightSidebar
 
 Mô tả: Click ảnh trong RightSidebar mở modal xem ảnh (giống MessageImage.tsx), thêm eye icon để scroll tới message chứa ảnh đó, giữ nguyên download button

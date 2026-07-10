@@ -21,10 +21,12 @@ export const useSSEChat = () => {
       setStreamingContent('');
       setActiveTools([]);
 
+      const now = new Date().toISOString();
       const userMessage: ChatMessage = {
         role: 'user',
         content: text,
         image_url: imageFile ? URL.createObjectURL(imageFile) : null,
+        created_at: now,
       };
 
       const formData = new FormData();
@@ -113,6 +115,7 @@ export const useSSEChat = () => {
           role: 'assistant',
           content: currentResponseText,
           toolsUsed: toolsCalled.length > 0 ? toolsCalled : undefined,
+          created_at: now,
         };
 
         setStreamingContent('');

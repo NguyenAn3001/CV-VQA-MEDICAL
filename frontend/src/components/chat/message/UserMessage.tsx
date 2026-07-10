@@ -1,11 +1,13 @@
 import MessageImage from './MessageImage';
+import { formatTimestamp, formatTimestampFull } from '../../../lib/format';
 
 interface UserMessageProps {
   content: string;
   imageUrl?: string | null;
+  createdAt?: string;
 }
 
-export default function UserMessage({ content, imageUrl }: UserMessageProps) {
+export default function UserMessage({ content, imageUrl, createdAt }: UserMessageProps) {
   return (
     <div className="flex w-full justify-end mb-6">
       <div className="flex max-w-[65%] flex-col items-end gap-2">
@@ -19,6 +21,15 @@ export default function UserMessage({ content, imageUrl }: UserMessageProps) {
           <div className="bg-[#2563eb] text-white rounded-2xl rounded-tr-sm px-4 py-3 shadow-sm text-[15px] leading-relaxed break-words text-left w-fit">
             <div className="whitespace-pre-wrap">{content}</div>
           </div>
+        ) : null}
+
+        {createdAt ? (
+          <span
+            className="text-xs text-slate-400"
+            title={formatTimestampFull(createdAt)}
+          >
+            {formatTimestamp(createdAt)}
+          </span>
         ) : null}
       </div>
     </div>
