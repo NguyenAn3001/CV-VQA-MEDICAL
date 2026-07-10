@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { MessageSquare, X, Pen, Trash2, Download } from 'lucide-react';
+import { MessageSquare, X, Pen, Trash2, Download, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useChatStore } from '../../store/chatStore';
 
@@ -20,6 +20,7 @@ export default function RightSidebar() {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [expandedImageUrl, setExpandedImageUrl] = useState<string | null>(null);
 
   const isChatRoute = location.pathname.startsWith('/chat') || location.pathname.startsWith('/sessions');
 
@@ -41,9 +42,9 @@ export default function RightSidebar() {
 
   const userQuestions = messages.filter(m => m.role === 'user');
 
-  const attachedImages = messages
+  const attachedImages: { image_url: string; messageId?: string }[] = messages
     ?.filter((msg) => msg.role === 'user' && msg.image_url)
-    .map((msg) => msg.image_url as string) || [];
+    .map((msg) => ({ image_url: msg.image_url as string, messageId: msg.id })) || [];
 
   const handleClick = useCallback((messageId?: string, index?: number) => {
     const id = messageId || `msg-user-${index}`;
@@ -148,13 +149,28 @@ export default function RightSidebar() {
                         Images ({attachedImages.length})
                       </label>
                       <div className="flex flex-col gap-1">
-                        {attachedImages.map((url, idx) => (
+                        {attachedImages.map((item, idx) => (
                           <div key={idx} className="flex items-center gap-2 p-1.5 border border-border-subtle rounded-lg hover:bg-surface-container-low transition-colors group">
-                            <div className="h-8 w-8 rounded bg-black shrink-0 overflow-hidden border border-border-subtle">
-                              <img alt="" className="h-full w-full object-cover opacity-80" src={url} />
-                            </div>
+                            <button
+                              onClick={() => setExpandedImageUrl(item.image_url)}
+                              className="h-8 w-8 rounded bg-black shrink-0 overflow-hidden border border-border-subtle cursor-zoom-in"
+                            >
+                              <img alt="" className="h-full w-full object-cover opacity-80" src={item.image_url} />
+                            </button>
                             <span className="flex-1 truncate text-label-xs font-label-xs text-on-surface-variant">image_{idx + 1}</span>
-                            <a href={url} download={`image_${idx + 1}.png`} target="_blank" rel="noreferrer" className="p-1 text-on-surface-variant hover:text-primary rounded shrink-0 transition-colors">
+                            <button
+                              onClick={() => {
+                                const id = item.messageId || `msg-user-${messages.findIndex(m => m.image_url === item.image_url)}`;
+                                document.querySelector(`[data-message-id="${id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                setActiveId(id);
+                                if (isMobile) setRightSidebarOpen(false);
+                              }}
+                              className="p-1 text-on-surface-variant hover:text-primary rounded shrink-0 transition-colors"
+                              title="Scroll to message"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                            </button>
+                            <a href={item.image_url} download={`image_${idx + 1}.png`} target="_blank" rel="noreferrer" className="p-1 text-on-surface-variant hover:text-primary rounded shrink-0 transition-colors">
                               <Download className="h-3.5 w-3.5" />
                             </a>
                           </div>
@@ -230,6 +246,38 @@ export default function RightSidebar() {
               </div>
             )}
           </motion.aside>
+        )}
+      </AnimatePresence>
+
+      {/* Image expand modal */}
+      <AnimatePresence>
+        {expandedImageUrl && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setExpandedImageUrl(null)}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-8"
+          >
+            <button
+              className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors"
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation();
+                setExpandedImageUrl(null);
+              }}
+            >
+              <X className="h-6 w-6" />
+            </button>
+            <motion.img
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              src={expandedImageUrl}
+              alt="Enlarged attachment"
+              className="max-w-full max-h-full rounded-lg object-contain shadow-2xl"
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            />
+          </motion.div>
         )}
       </AnimatePresence>
 

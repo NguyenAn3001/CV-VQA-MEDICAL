@@ -199,3 +199,14 @@ Mô tả: Hiển thị thời gian gửi (created_at) cho mỗi tin nhắn user 
 - Status: Done
 - Created: 2026-07-10
 - Completed: 2026-07-10
+
+### 14. Cải thiện Images section trong RightSidebar
+
+Mô tả: Click ảnh trong RightSidebar mở modal xem ảnh (giống MessageImage.tsx), thêm eye icon để scroll tới message chứa ảnh đó, giữ nguyên download button
+
+- `frontend/src/components/chat/RightSidebar.tsx` — Sửa `attachedImages` thành mảng `{ image_url, messageId }`, thêm modal xem ảnh fullscreen, thêm eye icon scroll tới message
+- Branch: feat/rightsidebar-images
+- Plan: agents/plans/2026-07-10_1259-rightsidebar-images.md
+- Status: Done
+- Created: 2026-07-10
+- Completed: 2026-07-10
