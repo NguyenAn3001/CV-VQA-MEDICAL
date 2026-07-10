@@ -34,7 +34,7 @@ ml_inference_mock.ai_pipeline.predict = MagicMock(return_value={
 ml_inference_mock.ai_pipeline.generate_caption = MagicMock(return_value={
     "caption": "test caption", "inference_time_ms": 150.0
 })
-ml_inference_mock.MedicalAIPipeline = MagicMock()
+ml_inference_mock.MedicalAIPipeline = MagicMock(return_value=ml_inference_mock.ai_pipeline)
 sys.modules["app.ml.inference"] = ml_inference_mock
 
 # Fix relative imports for pytest
