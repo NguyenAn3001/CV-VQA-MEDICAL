@@ -31,3 +31,8 @@ class SettingsUpdateRequest(BaseModel):
 class SettingsResponse(BaseModel):
     general: GeneralSettings
     models: ModelSettingsResponse
+
+class TestConnectionRequest(BaseModel):
+    llmProvider: str
+    baseUrl: str
+    apiKey: str
