@@ -1,0 +1,260 @@
+{
+  "info": {
+    "_postman_id": "b1a5e9d2-4c6f-4a3b-8d1e-2f5c7a9b8c0d",
+    "name": "Medical VQA Production API",
+    "description": "Collection for testing and benchmarking Inference Latency for the Medical VQA & Captioning System.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Login (Get Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Auto-set the token into environment variables for subsequent requests",
+                  "var jsonData = pm.response.json();",
+                  "if(jsonData.access_token) {",
+                  "    pm.environment.set(\"access_token\", jsonData.access_token);",
+                  "    console.log(\"Access token saved to environment.\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"{{admin_username}}\",\n    \"password\": \"{{admin_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Log in to get the JWT access token. Run this first. The script will automatically save the token to your environment variables."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Model Inference (Latency Testing)",
+      "item": [
+        {
+          "name": "Predict (VQA)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "// Test that response contains inference time",
+                  "pm.test(\"Has inference_time_ms\", function () {",
+                  "    pm.expect(jsonData).to.have.property(\"inference_time_ms\");",
+                  "});",
+                  "",
+                  "// Warn if cached (Latency = 0)",
+                  "if (jsonData.inference_time_ms === 0) {",
+                  "    console.warn(\"WARNING: This response was served from Cache! Change the question or image to measure true inference latency.\");",
+                  "}",
+                  "",
+                  "// Calculate Network Overhead",
+                  "var total_time = pm.response.responseTime;",
+                  "var inference_time = jsonData.inference_time_ms || 0;",
+                  "var network_overhead = total_time - inference_time;",
+                  "",
+                  "console.log(\"--- Latency Breakdown ---\");",
+                  "console.log(\"Total Postman Time: \" + total_time + \" ms\");",
+                  "console.log(\"Pure Model Inference: \" + inference_time + \" ms\");",
+                  "console.log(\"Network & DB Overhead: \" + network_overhead + \" ms\");"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "description": "Upload a Medical Image here"
+                },
+                {
+                  "key": "question",
+                  "value": "What is the organ in this image? {{$randomInt}}",
+                  "type": "text",
+                  "description": "The random int prevents Redis Cache hits, ensuring true inference latency is measured every time."
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/predict",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "predict"
+              ]
+            },
+            "description": "Test the Medical Visual Question Answering model. Note: The `{{$randomInt}}` variable is appended to the question to bypass Redis Caching during latency testing."
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Caption",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"Has inference_time_ms\", function () {",
+                  "    pm.expect(jsonData).to.have.property(\"inference_time_ms\");",
+                  "});",
+                  "",
+                  "if (jsonData.inference_time_ms === 0) {",
+                  "    console.warn(\"WARNING: This response was served from Cache! Upload a different image to measure true inference latency.\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/caption",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "caption"
+              ]
+            },
+            "description": "Test the Medical Image Captioning model. To test latency properly without cache hits, you must upload different images."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Health Checks",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/../health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "..",
+                "health"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "admin_username",
+      "value": "admin",
+      "type": "string"
+    },
+    {
+      "key": "admin_password",
+      "value": "Admin@123",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
