@@ -110,6 +110,7 @@ CV-VQA-MEDICAL is a FastAPI-based backend and React frontend for a dual-purpose 
 * Node.js 20+ and npm for the React frontend.
 * Docker and Docker Compose.
 * GPU with CUDA is recommended for model inference, but CPU fallback is supported through `DEVICE="cpu"`.
+* https://drive.google.com/drive/folders/1nAnHR0L3cFgoIREKYhLlkndpVoup99iX?usp=drive_link (models link).
 
 ### Clone The Repository
 
